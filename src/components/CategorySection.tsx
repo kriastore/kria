@@ -60,10 +60,10 @@ const CategorySection = forwardRef<
             return (
               <div
                 key={id}
-                className="border-2 rounded-xl p-6 text-center font-bold"
+                className="border-2 p-6 text-center font-bold"
               >
                 {/* Product Placeholder */}
-                <div className="bg-gray-200 h-32 rounded mb-4 flex items-center justify-center">
+                <div className="bg-gray-200 h-32 mb-4 flex items-center justify-center">
                   {id}
                 </div>
 
@@ -74,7 +74,7 @@ const CategorySection = forwardRef<
                       startAutoSlide();
                       addItem(id);
                     }}
-                    className="px-3 py-1 bg-black text-white rounded"
+                    className="px-3 py-1 bg-black text-white"
                   >
                     +
                   </button>
@@ -91,7 +91,7 @@ const CategorySection = forwardRef<
                       }
                     }}
                     disabled={quantity === 0}
-                    className="px-3 py-1 border-2 rounded disabled:opacity-40"
+                    className="px-3 py-1 border-2 disabled:opacity-40"
                   >
                     −
                   </button>

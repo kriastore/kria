@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 
@@ -6,8 +6,8 @@ export default function TermsAndConditionsPage() {
   const router = useRouter();
 
   return (
-    <div className="px-4 py-10 md:px-10 md:py-14 text-black flex justify-center">
-      <div className="w-full max-w-4xl bg-white/95 border border-pink-100 rounded-2xl shadow-sm p-6 md:p-10 space-y-8">
+    <div className="px-4 py-10 md:px-10 md:py-14 text-[#2D2D2D] flex justify-center">
+      <div className="w-full max-w-4xl bg-white border border-[#E8E0D8] shadow-sm p-6 md:p-10 space-y-8">
 
         {/* Header */}
         <header className="space-y-3">
@@ -24,7 +24,7 @@ export default function TermsAndConditionsPage() {
               Terms &amp; Conditions
             </h1>
             <p className="mt-2 text-sm md:text-base text-gray-700 max-w-2xl">
-              These terms outline the rules and regulations for using the Blush
+              These terms outline the rules and regulations for using Kria
               Boutique website and services.
             </p>
           </div>
@@ -34,7 +34,7 @@ export default function TermsAndConditionsPage() {
         <section className="space-y-2">
           <h2 className="text-xl md:text-2xl font-semibold">General Usage</h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
-            By accessing and using the Blush Boutique website, you agree to comply
+            By accessing and using the Kria website, you agree to comply
             with and be bound by these Terms &amp; Conditions. If you do not agree
             with any part of these terms, you should discontinue use of the site.
           </p>
@@ -55,7 +55,7 @@ export default function TermsAndConditionsPage() {
           <h2 className="text-xl md:text-2xl font-semibold">Pricing</h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
             All prices listed on the website are subject to change without prior
-            notice. Blush Boutique reserves the right to modify prices, offers,
+            notice. Kria reserves the right to modify prices, offers,
             or discounts at any time.
           </p>
         </section>
@@ -64,7 +64,7 @@ export default function TermsAndConditionsPage() {
         <section className="space-y-2">
           <h2 className="text-xl md:text-2xl font-semibold">Order Cancellation</h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
-            Blush Boutique reserves the right to cancel or refuse any order in rare
+            Kria reserves the right to cancel or refuse any order in rare
             circumstances such as product unavailability, pricing errors, or
             suspected fraudulent activity. Any payments made will be refunded as
             per our refund policy.
@@ -78,7 +78,7 @@ export default function TermsAndConditionsPage() {
           </h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
             All content on this website, including logos, images, text, graphics,
-            and designs, is the exclusive property of Blush Boutique. Unauthorized
+            and designs, is the exclusive property of Kria. Unauthorized
             use, reproduction, or distribution of any content is strictly prohibited.
           </p>
         </section>
@@ -94,7 +94,7 @@ export default function TermsAndConditionsPage() {
         </section>
 
         {/* Footer CTA */}
-        <section className="pt-2 border-t border-pink-100 text-sm md:text-base text-gray-800">
+        <section className="pt-2 border-t border-[#E8E0D8] text-sm md:text-base text-gray-800">
           <p>
             If you have any questions regarding these Terms &amp; Conditions,
             please contact our support team.
@@ -103,7 +103,7 @@ export default function TermsAndConditionsPage() {
 
         <button
     onClick={() => router.push("/faq")}
-    className="px-4 py-2 rounded-md border border-pink-300 bg-pink-50 text-pink-900 text-sm font-medium hover:bg-pink-100 cursor-pointer transition-colors"
+    className="px-4 py-2 border border-[#E8E0D8] bg-[#F9F6F0] text-[#D2693F] text-sm font-medium hover:bg-[#F9F6F0] cursor-pointer transition-colors"
   >
     Contact &amp; Support
   </button>

@@ -41,4 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 # ignore local firebase config
-/src/firebase.ts
+# /src/firebase.ts   ← now uses env vars, safe to track

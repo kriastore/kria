@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: check if requester is the store owner
+    function isOwner() {
+      return request.auth != null &&
+             request.auth.token.email == "admin@gmail.com";
+    }
+
+    // Helper: check if requester is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ── Products (public read, owner write) ──
+    match /inventory/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isOwner();
+    }
+
+    // ── Cart (users manage their own cart) ──
+    match /Cart/{docId} {
+      allow read: if isSignedIn() && resource.data.UserMail == request.auth.token.email;
+      allow create: if isSignedIn() && request.resource.data.UserMail == request.auth.token.email;
+      allow update: if isSignedIn() && resource.data.UserMail == request.auth.token.email;
+      allow delete: if isSignedIn() && resource.data.UserMail == request.auth.token.email;
+    }
+
+    // ── Orders (owner manages all; users read their own) ──
+    match /Orders/{docId} {
+      allow read: if isSignedIn() &&
+                    (resource.data.userEmail == request.auth.token.email || isOwner());
+      allow create: if isSignedIn() && request.resource.data.userEmail == request.auth.token.email;
+      allow update: if isOwner();
+      allow delete: if isOwner();
+    }
+
+    // ── Categories (public read, owner write) ──
+    match /categories/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isOwner();
+    }
+
+    // ── Reviews (public read, signed-in users write their own) ──
+    match /reviews/{docId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // ── Users (users can read/write their own profile) ──
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isOwner());
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isOwner());
+    }
+
+    // ── Contact messages (owner only) ──
+    match /contactMessages/{docId} {
+      allow read: if isOwner();
+      allow create: if true;
+      allow update, delete: if isOwner();
+    }
+
+    // Deny everything else by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

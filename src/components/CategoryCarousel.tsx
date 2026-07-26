@@ -1,13 +1,20 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import ProductImage from "@/components/ProductImage";
+import PriceText from "@/components/PriceText";
+import { resolvePricing } from "@/utils/pricing";
 
 type Product = {
   ID: number;
   Description: string;
   ImageUrl1: string;
-  Price: number;
+  ImageUrl1Medium?: string;
+  ImageUrl1Thumb?: string;
+  Price?: number;
+  OriginalPrice?: number;
+  DiscountPercent?: number;
 };
 
 export default function CategoryCarousel({
@@ -47,13 +54,13 @@ export default function CategoryCarousel({
 
   return (
     <section className="space-y-6">
-      <h2 className="text-3xl font-extrabold text-white">{title}</h2>
+      <h2 className="text-3xl font-extrabold text-[#2D2D2D]">{title}</h2>
 
       <div className="relative flex items-center">
         {canSlide && (
           <button 
             onClick={() => move(-4)} 
-            className="text-3xl px-2 text-white hover:text-gray-300 transition-colors"
+            className="text-3xl px-2 text-[#2D2D2D] hover:text-[#D2693F] transition-colors"
           >
             ‹
           </button>
@@ -64,17 +71,20 @@ export default function CategoryCarousel({
             <Link
               key={p.ID}
               href={`/product/${encodeURIComponent((p as any).ProductName || p.Description)}`}
-              className="border-2 border-gray-700 bg-gray-900 rounded-xl p-4 font-bold hover:shadow-lg hover:border-gray-500 hover:bg-gray-800 transition text-white"
+              className="border border-[#E8E0D8] bg-white p-4 font-bold hover:shadow-lg hover:border-[#C5A059] transition text-[#2D2D2D]"
             >
-              <div className="aspect-square border border-gray-600 rounded mb-3 overflow-hidden">
-                <img
+              <div className="aspect-square border border-[#E8E0D8] mb-3 overflow-hidden">
+                <ProductImage
                   src={p.ImageUrl1}
+                  srcMedium={(p as any).ImageUrl1Medium}
+                  srcThumb={(p as any).ImageUrl1Thumb}
+                  size="thumb"
                   alt={p.Description}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
                 />
               </div>
-              <div className="truncate text-white">{p.Description}</div>
-              <div className="mt-1 text-yellow-400 font-semibold">₹{p.Price}</div>
+              <div className="truncate text-[#2D2D2D]">{p.Description}</div>
+              <PriceText amount={resolvePricing({ Price: p.Price, OriginalPrice: p.OriginalPrice, DiscountPercent: p.DiscountPercent }).selling} className="mt-1 text-[#D2693F] font-semibold" />
             </Link>
           ))}
         </div>
@@ -82,7 +92,7 @@ export default function CategoryCarousel({
         {canSlide && (
           <button 
             onClick={() => move(4)} 
-            className="text-3xl px-2 text-white hover:text-gray-300 transition-colors"
+            className="text-3xl px-2 text-[#2D2D2D] hover:text-[#D2693F] transition-colors"
           >
             ›
           </button>

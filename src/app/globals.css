@@ -1,13 +1,23 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
-  --primary-pink: #ffd1dc;
-  --baby-pink: #ffb6c1;
+  --background: #F9F6F0;
+  --foreground: #2D2D2D;
+  --primary: #D2693F;
+  --primary-dark: #B85A34;
+  --primary-light: #E8875E;
+  --secondary: #F9F6F0;
+  --secondary-dark: #F3EDE4;
+  --secondary-light: #FDFCFA;
+  --tertiary: #C5A059;
+  --tertiary-dark: #A88640;
+  --tertiary-light: #D9BC7E;
+  --neutral: #2D2D2D;
+  --neutral-light: #5A5A5A;
+  --neutral-lighter: #9A9A9A;
+  --border: #E0D8CC;
+  --border-light: #EDE7DD;
 }
 
 * {
@@ -15,28 +25,35 @@
 }
 
 body {
-  background: #ffffff;   /* White background */
-  color: #000000;       /* Black text */
-  font-family: 'Montserrat', var(--font-montserrat), sans-serif;
+  background: #F9F6F0;
+  color: #2D2D2D;
+  font-family: 'Tenor Sans', var(--font-tenor-sans), sans-serif;
   font-weight: 400;
 }
 
-/* Hide scrollbar for swipe functionality */
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
-}
-.scrollbar-hide::-webkit-scrollbar { 
-  display: none;  /* Safari and Chrome */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Tenor Sans', var(--font-tenor-sans), sans-serif;
 }
 
-/* Marquee Animation */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;
+}
+
 @keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .animate-marquee {
-  animation: marquee 20s linear infinite;
-  display: inline-block;
+  animation: marquee 25s linear infinite;
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+html {
+  scroll-behavior: smooth;
 }

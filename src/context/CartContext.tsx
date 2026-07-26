@@ -11,6 +11,7 @@ type CartContextType = {
   totalItems: number;
   pulse: boolean;
   triggerPulse: () => void;
+  syncTotal: (count: number) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -18,6 +19,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart>({});
   const [pulse, setPulse] = useState(false);
+  const [syncedTotal, setSyncedTotal] = useState<number | null>(null);
   const pulseTimer = useRef<number | null>(null);
 
   const addItem = (id: string) => {
@@ -44,7 +46,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+  const totalItems = syncedTotal !== null ? syncedTotal : Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+
+  const syncTotal = (count: number) => {
+    setSyncedTotal(count);
+  };
 
   // triggerPulse: start a short-lived pulse state for UI feedback
   const triggerPulse = () => {
@@ -73,7 +79,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ cart, addItem, removeItem, totalItems, pulse, triggerPulse }}
+      value={{ cart, addItem, removeItem, totalItems, pulse, triggerPulse, syncTotal }}
     >
       {children}
     </CartContext.Provider>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 
@@ -6,8 +6,8 @@ export default function RefundPolicyPage() {
   const router = useRouter();
 
   return (
-    <div className="px-4 py-10 md:px-10 md:py-14 text-black flex justify-center">
-      <div className="w-full max-w-4xl bg-white/95 border border-pink-100 rounded-2xl shadow-sm p-6 md:p-10 space-y-8">
+    <div className="px-4 py-10 md:px-10 md:py-14 text-[#2D2D2D] flex justify-center">
+      <div className="w-full max-w-4xl bg-white border border-[#E8E0D8] shadow-sm p-6 md:p-10 space-y-8">
         {/* Header */}
         <header className="space-y-3">
           <button
@@ -20,7 +20,7 @@ export default function RefundPolicyPage() {
           <div>
             <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Return &amp; Refund Policy</h1>
             <p className="mt-2 text-sm md:text-base text-gray-700 max-w-2xl">
-              We want you to love your Blush purchase. If something isn&apos;t quite right,
+              We want you to love your Kria purchase. If something isn&apos;t quite right,
               our simple return and refund guidelines below will help you.
             </p>
           </div>
@@ -63,7 +63,7 @@ export default function RefundPolicyPage() {
           <ul className="list-decimal pl-5 text-sm md:text-base text-gray-800 space-y-1">
             <li>
               Email our support team at
-              &nbsp;<a href="mailto:prachikamble.blush@gmail.com" className="font-semibold underline">prachikamble.blush@gmail.com</a>.
+               &nbsp;<a href="mailto:hello@kria.in" className="font-semibold underline">hello@kria.in</a>.
             </li>
             <li>
               Mention your <span className="font-semibold">Order ID</span> and provide a brief
@@ -116,11 +116,11 @@ export default function RefundPolicyPage() {
         </section>
 
         {/* Help */}
-        <section className="pt-2 border-t border-pink-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm md:text-base text-gray-800">
+        <section className="pt-2 border-t border-[#E8E0D8] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm md:text-base text-gray-800">
           <p>If you have any questions about returns or refunds, we&apos;re here to help.</p>
           <button
             onClick={() => router.push("/faq")}
-            className="px-4 py-2 rounded-md border border-pink-300 bg-pink-50 text-pink-900 text-sm font-medium hover:bg-pink-100 cursor-pointer transition-colors"
+            className="px-4 py-2 border border-[#E8E0D8] bg-[#F9F6F0] text-[#D2693F] text-sm font-medium hover:bg-[#F9F6F0] cursor-pointer transition-colors"
           >
             Contact &amp; Support
           </button>

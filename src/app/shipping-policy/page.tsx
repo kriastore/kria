@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 
@@ -6,8 +6,8 @@ export default function ShippingPolicyPage() {
   const router = useRouter();
 
   return (
-    <div className="px-4 py-10 md:px-10 md:py-14 text-black flex justify-center">
-      <div className="w-full max-w-4xl bg-white/95 border border-pink-100 rounded-2xl shadow-sm p-6 md:p-10 space-y-8">
+    <div className="px-4 py-10 md:px-10 md:py-14 text-[#2D2D2D] flex justify-center">
+      <div className="w-full max-w-4xl bg-white border border-[#E8E0D8] shadow-sm p-6 md:p-10 space-y-8">
         {/* Header */}
         <header className="space-y-3">
           <button
@@ -20,7 +20,7 @@ export default function ShippingPolicyPage() {
           <div>
             <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Shipping Policy</h1>
             <p className="mt-2 text-sm md:text-base text-gray-700 max-w-2xl">
-              We aim to deliver your Blush orders quickly and safely across India,
+              We aim to deliver your Kria orders quickly and safely across India,
               while keeping the experience smooth and transparent.
             </p>
           </div>
@@ -101,10 +101,10 @@ export default function ShippingPolicyPage() {
             </ul>
           </div>
 
-          <div className="rounded-xl border border-pink-200 bg-pink-50 px-4 py-3 flex items-start gap-3">
+          <div className="border border-[#E0D0B8] bg-[#F9F6F0] px-4 py-3 flex items-start gap-3">
             <span className="mt-0.5 text-lg" aria-hidden="true">📌</span>
             <p className="text-xs md:text-sm text-gray-900 leading-relaxed">
-              <span className="font-semibold">Note:</span> Blush is not responsible for delays caused by
+              <span className="font-semibold">Note:</span> Kria is not responsible for delays caused by
               courier partners. However, our team is always here to help you with
               any shipment-related queries and support.
             </p>
@@ -112,11 +112,11 @@ export default function ShippingPolicyPage() {
         </section>
 
         {/* Help */}
-        <section className="pt-2 border-t border-pink-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm md:text-base text-gray-800">
+        <section className="pt-2 border-t border-[#E8E0D8] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm md:text-base text-gray-800">
           <p>If you have any questions about shipping, feel free to reach out to us.</p>
           <button
             onClick={() => router.push("/faq")}
-            className="px-4 py-2 rounded-md border border-pink-300 bg-pink-50 text-pink-900 text-sm font-medium hover:bg-pink-100 cursor-pointer transition-colors"
+            className="px-4 py-2 border border-[#E8E0D8] bg-[#F9F6F0] text-[#D2693F] text-sm font-medium hover:bg-[#F9F6F0] cursor-pointer transition-colors"
           >
             Contact &amp; Support
           </button>

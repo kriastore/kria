@@ -3,24 +3,43 @@ import { NextResponse } from "next/server";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+function resolveSellingPrice(item: any): number {
+  const price = item.product?.Price || 0;
+  const originalPrice = item.product?.OriginalPrice;
+  const discountPercent = item.product?.DiscountPercent;
+
+  if (discountPercent && discountPercent > 0 && originalPrice) {
+    return Math.round(originalPrice * (1 - discountPercent / 100));
+  }
+  if (originalPrice && originalPrice < price) {
+    return originalPrice;
+  }
+  return price;
+}
+
 async function generatePdfBuffer(order: any): Promise<Buffer> {
   const doc = new jsPDF();
 
-  // Match the existing client-side invoice layout (generateInvoice.ts)
-  const generatedAt = new Date();
+  // Brand colors
+  const darkBrown: [number, number, number] = [45, 45, 45];
+  const accent: [number, number, number] = [210, 105, 63];
+  const lightBg: [number, number, number] = [243, 237, 228];
 
   // ===== HEADER / BRAND =====
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("BLUSH BOUTIQUE", 14, 18);
+  doc.setTextColor(...darkBrown);
+  doc.text("KRIA", 14, 18);
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
-  doc.text("Luxury Women's Wear", 14, 25);
+  doc.setTextColor(...darkBrown);
+  doc.text("Handcrafted Artisanal Jewellery & Home Decor", 14, 25);
   doc.text("Pune, Maharashtra, India", 14, 31);
-  doc.text("Email: support@blushboutique.in", 14, 37);
+  doc.text("Email: hello@kria.in", 14, 37);
   doc.text("Phone: +91 XXXXXXXXXX", 14, 43);
 
+  doc.setDrawColor(...accent);
   doc.setLineWidth(0.5);
   doc.line(14, 48, 196, 48);
 
@@ -30,11 +49,12 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   const createdAtDate =
     order.createdAt?.toDate?.() ??
-    (order.createdAt ? new Date(order.createdAt) : generatedAt);
+    (order.createdAt ? new Date(order.createdAt) : new Date());
 
   doc.setFontSize(11);
-  doc.text(`Invoice No: BLUSH-INV-${invoiceNo}`, 14, 56);
-  doc.text(`Order ID: BLUSH-ORD-${orderId}`, 14, 62);
+  doc.setTextColor(...darkBrown);
+  doc.text(`Invoice No: KRIA-INV-${invoiceNo}`, 14, 56);
+  doc.text(`Order ID: KRIA-ORD-${orderId}`, 14, 62);
   doc.text(
     `Order Date: ${createdAtDate.toLocaleDateString()}`,
     14,
@@ -46,22 +66,23 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   // ===== BILLING DETAILS =====
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
+  doc.setTextColor(...darkBrown);
   doc.text("Billed To", 14, 92);
 
   const customer = order.customer || {};
-  const city = customer.city ?? customer.stateCity ?? "";
-  const state = customer.state ?? "";
-  const pincode = customer.pincode ?? customer.pinCode ?? "";
+  const stateCity = customer.stateCity ?? "";
+  const pinCode = customer.pinCode ?? "";
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
+  doc.setTextColor(...darkBrown);
   doc.text(`Name: ${customer.name ?? ""}`, 14, 98);
   doc.text(`Email: ${customer.email ?? ""}`, 14, 104);
   doc.text(`Phone: ${customer.phone ?? ""}`, 14, 110);
 
   doc.text("Shipping Address:", 14, 118);
   doc.text(
-    `${customer.address ?? ""}, ${city}, ${state} - ${pincode}, India`,
+    `${customer.address ?? ""}, ${stateCity} - ${pinCode}, India`,
     14,
     124,
   );
@@ -69,7 +90,7 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   // ===== CALCULATIONS =====
   const items = order.items || [];
   const subtotal = items.reduce((sum: number, item: any) => {
-    const basePrice = item.product?.Price || 0;
+    const basePrice = resolveSellingPrice(item);
     const customPrice =
       item.isCustomized && item.customPrice ? item.customPrice : 0;
     return sum + (basePrice + customPrice) * (item.Quantity || 0);
@@ -85,7 +106,7 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
     startY: 136,
     head: [["Item Name", "Qty", "Price", "Total"]],
     body: items.map((item: any) => {
-      const basePrice = item.product?.Price || 0;
+      const basePrice = resolveSellingPrice(item);
       const customPrice =
         item.isCustomized && item.customPrice ? item.customPrice : 0;
       const itemPrice = basePrice + customPrice;
@@ -99,17 +120,19 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
         `Rs. ${itemTotal}`,
       ];
     }),
-    styles: { fontSize: 10 },
+    styles: { fontSize: 10, textColor: darkBrown },
     headStyles: {
-      fillColor: [220, 220, 220],
-      textColor: [0, 0, 0],
+      fillColor: lightBg,
+      textColor: darkBrown,
     },
+    alternateRowStyles: { fillColor: [249, 246, 240] },
   });
 
   const finalY = (doc as any).lastAutoTable?.finalY || 150;
 
   // ===== PRICE BREAKDOWN =====
   doc.setFontSize(11);
+  doc.setTextColor(...darkBrown);
   doc.text(`Subtotal: Rs. ${subtotal}`, 14, finalY + 10);
   doc.text(
     `Shipping: Rs. ${shipping} ${shipping === 0 ? "(Free)" : ""}`,
@@ -127,15 +150,17 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   // ===== DELIVERY INFO =====
   doc.setFont("helvetica", "normal");
+  doc.setTextColor(...darkBrown);
   doc.text("Estimated Delivery: 2-4 working days", 14, finalY + 48);
   doc.text(
-    `Courier Partner: ${order.courierPartner ?? "Delhivery"}`,
+    `Courier Partner: ${order.courierPartner ?? "DTDC"}`,
     14,
     finalY + 54,
   );
 
   // ===== RETURN POLICY =====
   doc.setFontSize(10);
+  doc.setTextColor(...darkBrown);
   doc.text(
     "Easy returns within 7 days of delivery. Product must be unused and in original packaging.",
     14,
@@ -144,7 +169,7 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   // ===== FOOTER =====
   doc.text(
-    "Thank you for shopping with Blush Boutique. For support, WhatsApp us at +91 XXXXXXXXXX.",
+    "Thank you for shopping with Kria. For support, WhatsApp us at +91 XXXXXXXXXX.",
     14,
     finalY + 74,
   );
@@ -179,11 +204,11 @@ export async function POST(req: Request) {
     const data = { ...order, orderId };
     const pdfBuffer = await generatePdfBuffer(data);
 
-    const senderName = process.env.SENDER_NAME || "Blush Boutique";
+    const senderName = process.env.SENDER_NAME || "Kria";
 
     const items = order?.items || [];
     const subtotal = items.reduce((sum: number, it: any) => {
-      const basePrice = it.product?.Price || 0;
+      const basePrice = resolveSellingPrice(it);
       const customPrice = it.isCustomized && it.customPrice ? it.customPrice : 0;
       return sum + (basePrice + customPrice) * (it.Quantity || 0);
     }, 0);
@@ -195,7 +220,7 @@ export async function POST(req: Request) {
     const plainItems = items
       .map((it: any) => {
         const name = it.product?.ProductName || it.product?.Description || it.product?.Product || "Product";
-        const basePrice = it.product?.Price || 0;
+        const basePrice = resolveSellingPrice(it);
         const customPrice = it.isCustomized && it.customPrice ? it.customPrice : 0;
         const itemPrice = basePrice + customPrice;
         const qty = it.Quantity || 0;
@@ -207,9 +232,9 @@ export async function POST(req: Request) {
     await transporter.sendMail({
       from: `${senderName} <${user}>`,
       to: recipient,
-      subject: `Your Blush Boutique Order ${orderId || order?.id}`,
+      subject: `Your Kria Order ${orderId || order?.id}`,
       text:
-        `Thank you for shopping with Blush Boutique.\n\n` +
+        `Thank you for shopping with Kria.\n\n` +
         `Order: ${orderId || order?.id}\n\n` +
         `Items (Name | Qty | Price | Total):\n${plainItems}\n\n` +
         `Subtotal: Rs. ${subtotal}\n` +
@@ -219,21 +244,21 @@ export async function POST(req: Request) {
         `Grand Total: Rs. ${grandTotal}\n\n` +
         `Your invoice is attached as a PDF.`,
       html:
-        `<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #333;">` +
-        `<div style="background:#ffe6f0;padding:16px;border-radius:12px 12px 0 0;border:1px solid #f8c1da;border-bottom:0;">` +
-        `<h2 style="margin:0;color:#d81b60;">Thank you for your order</h2>` +
-        `<p style="margin:4px 0 0 0;color:#5a0830;">Blush Boutique</p>` +
+        `<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #2D2D2D;">` +
+        `<div style="background:#F3EDE4;padding:16px;border-radius:0;border:1px solid #E0D0B8;border-bottom:0;">` +
+        `<h2 style="margin:0;color:#2D2D2D;font-family:'Tenor Sans',serif;">Thank you for your order</h2>` +
+        `<p style="margin:4px 0 0 0;color:#9A6E50;">Kria</p>` +
         `</div>` +
-        `<div style="border:1px solid #f8c1da;border-top:0;padding:16px;border-radius:0 0 12px 12px;background:#fffafa;">` +
+        `<div style="border:1px solid #E0D0B8;border-top:0;padding:16px;border-radius:0;background:#F9F6F0;">` +
         `<p style="margin-top:0;">Order <strong>#${orderId || order?.id}</strong> has been received.</p>` +
         `<p style="margin-bottom:8px;"><strong>Order summary</strong></p>` +
-        `<table style="border-collapse:collapse;width:100%;font-size:13px;background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #f8c1da;">` +
+        `<table style="border-collapse:collapse;width:100%;font-size:13px;background:#ffffff;border:1px solid #E0D0B8;">` +
         `<thead>` +
-        `<tr style="background:#ffe6f0;color:#5a0830;">` +
-        `<th style="padding:8px 6px;text-align:left;border-bottom:1px solid #f8c1da;">Item</th>` +
-        `<th style="padding:8px 6px;text-align:center;border-bottom:1px solid #f8c1da;">Qty</th>` +
-        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #f8c1da;">Price</th>` +
-        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #f8c1da;">Total</th>` +
+        `<tr style="background:#F3EDE4;color:#2D2D2D;">` +
+        `<th style="padding:8px 6px;text-align:left;border-bottom:1px solid #E0D0B8;">Item</th>` +
+        `<th style="padding:8px 6px;text-align:center;border-bottom:1px solid #E0D0B8;">Qty</th>` +
+        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Price</th>` +
+        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Total</th>` +
         `</tr>` +
         `</thead>` +
         `<tbody>` +
@@ -242,23 +267,23 @@ export async function POST(req: Request) {
             ? items
                 .map((it: any, index: number) => {
                   const name = it.product?.ProductName || it.product?.Description || it.product?.Product || "Product";
-                  const basePrice = it.product?.Price || 0;
+                  const basePrice = resolveSellingPrice(it);
                   const customPrice = it.isCustomized && it.customPrice ? it.customPrice : 0;
                   const itemPrice = basePrice + customPrice;
                   const qty = it.Quantity || 0;
                   const lineTotal = itemPrice * qty;
-                  const rowBg = index % 2 === 0 ? "#fffafa" : "#ffffff";
+                  const rowBg = index % 2 === 0 ? "#F9F6F0" : "#ffffff";
                   return (
                     `<tr style="background:${rowBg};">` +
-                    `<td style="padding:8px 6px;border-bottom:1px solid #f8c1da;">${name}</td>` +
-                    `<td style="padding:8px 6px;text-align:center;border-bottom:1px solid #f8c1da;">${qty}</td>` +
-                    `<td style="padding:8px 6px;text-align:right;border-bottom:1px solid #f8c1da;">Rs. ${itemPrice}</td>` +
-                    `<td style="padding:8px 6px;text-align:right;border-bottom:1px solid #f8c1da;">Rs. ${lineTotal}</td>` +
+                    `<td style="padding:8px 6px;border-bottom:1px solid #E0D0B8;">${name}</td>` +
+                    `<td style="padding:8px 6px;text-align:center;border-bottom:1px solid #E0D0B8;">${qty}</td>` +
+                    `<td style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Rs. ${itemPrice}</td>` +
+                    `<td style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Rs. ${lineTotal}</td>` +
                     `</tr>`
                   );
                 })
                 .join("")
-            : `<tr><td colspan="4" style="padding:8px 6px;text-align:center;color:#777;">(No items found)</td></tr>`
+            : `<tr><td colspan="4" style="padding:8px 6px;text-align:center;color:#9A6E50;">(No items found)</td></tr>`
         }` +
         `</tbody>` +
         `</table>` +
@@ -272,11 +297,11 @@ export async function POST(req: Request) {
         `Grand Total: <strong>Rs. ${grandTotal}</strong>` +
         `</p>` +
         `<p style="margin-top:12px;">Your invoice PDF is attached to this email.</p>` +
-        `<p style="margin-top:12px;font-size:12px;color:#777;">If you have any questions, just reply to this email.</p>` +
+        `<p style="margin-top:12px;font-size:12px;color:#9A6E50;">If you have any questions, just reply to this email.</p>` +
         `</div>` +
         `</div>`,
       attachments: [
-        { filename: `BLUSH_INVOICE_${orderId || order?.id}.pdf`, content: pdfBuffer },
+        { filename: `KRIA_INVOICE_${orderId || order?.id}.pdf`, content: pdfBuffer },
       ],
     });
 

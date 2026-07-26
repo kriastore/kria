@@ -1,0 +1,44 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper
+    function isOwner() {
+      return request.auth != null &&
+             request.auth.token.email == "admin@gmail.com";
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ── Product images (public read, owner write) ──
+    match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if isOwner()
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ── Category images (public read, owner write) ──
+    match /categories/{allPaths=**} {
+      allow read: if true;
+      allow write: if isOwner()
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ── User uploads / avatars ──
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == userId
+                   && request.resource.size < 2 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Deny everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

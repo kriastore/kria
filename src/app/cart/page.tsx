@@ -1,7 +1,10 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import ProductImage from "@/components/ProductImage";
+import PriceText from "@/components/PriceText";
+import { resolvePricing } from "@/utils/pricing";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -40,9 +43,17 @@ type InventoryItem = {
   Product?: string;
   ProductName?: string;
   ImageUrl1?: string;
+  ImageUrl1Medium?: string;
+  ImageUrl1Thumb?: string;
   ImageUrl2?: string;
+  ImageUrl2Medium?: string;
+  ImageUrl2Thumb?: string;
   ImageUrl3?: string;
+  ImageUrl3Medium?: string;
+  ImageUrl3Thumb?: string;
   Price?: number | string;
+  OriginalPrice?: number | string;
+  DiscountPercent?: number | string;
    Stock?: number;
    StockS?: number;
    StockM?: number;
@@ -54,15 +65,7 @@ type InventoryItem = {
 function formatCurrency(n: number | string | undefined) {
   const num = Number(n || 0);
   if (!isFinite(num)) return "";
-  try {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(num);
-  } catch {
-    return `₹${num}`;
-  }
+  return num.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
 export default function CartPage() {
@@ -203,7 +206,7 @@ export default function CartPage() {
   const grandTotal = useMemo(() => {
     return items.reduce((sum, it) => {
       const prod = inventoryMap[String(it.ID)];
-      const base = prod?.Price != null ? Number(prod.Price) : 0;
+      const base = resolvePricing({ Price: prod?.Price, OriginalPrice: prod?.OriginalPrice, DiscountPercent: prod?.DiscountPercent }).selling;
       const custom =
         it.isCustomized && it.customPrice ? Number(it.customPrice) : 0;
       const qty = Number(it.Quantity || 0);
@@ -353,7 +356,7 @@ export default function CartPage() {
 
   return (
     <div className="px-4 py-10 md:px-10 md:py-14 text-black flex justify-center">
-      <div className="w-full max-w-md bg-white/90 border border-gray-200 rounded-xl shadow-sm px-4 py-6">
+      <div className="w-full max-w-md bg-white/90 border border-gray-200 shadow-sm px-4 py-6">
         <header className="border-b pb-3 mb-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Cart</h1>
           <span className="text-xs text-gray-500">
@@ -376,14 +379,14 @@ export default function CartPage() {
             </p>
             <Link
               href="/shop"
-              className="inline-flex items-center justify-center bg-black text-white px-5 py-2.5 rounded-md text-sm font-semibold hover:opacity-90"
+              className="inline-flex items-center justify-center bg-[#D2693F] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[#8B4513]"
             >
               Continue Shopping
             </Link>
           </div>
         ) : (
           <>
-            <section className="border rounded-lg overflow-hidden mb-4">
+            <section className="border overflow-hidden mb-4">
               <div className="px-4 py-3 border-b flex items-center gap-2 text-sm font-semibold tracking-wide uppercase text-gray-700">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -409,7 +412,7 @@ export default function CartPage() {
                     prod?.ImageUrl2 ||
                     prod?.ImageUrl3 ||
                     "/favicon.ico";
-                  const base = prod?.Price != null ? Number(prod.Price) : 0;
+                  const base = resolvePricing({ Price: prod?.Price, OriginalPrice: prod?.OriginalPrice, DiscountPercent: prod?.DiscountPercent }).selling;
                   const custom =
                     it.isCustomized && it.customPrice
                       ? Number(it.customPrice)
@@ -423,7 +426,7 @@ export default function CartPage() {
                       key={String(it.docId ?? it.ID)}
                       className="px-4 py-4 border-b last:border-b-0 flex gap-3"
                     >
-                      <div className="w-16 h-16 border border-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
+                      <div className="w-16 h-16 border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
                         <Link
                           href={`/product/${encodeURIComponent(
                             String(
@@ -432,12 +435,13 @@ export default function CartPage() {
                           )}`}
                           className="block w-full h-full relative"
                         >
-                          <Image
+                          <ProductImage
                             src={img}
+                            srcMedium={prod?.ImageUrl1Medium || prod?.ImageUrl2Medium || prod?.ImageUrl3Medium}
+                            srcThumb={prod?.ImageUrl1Thumb || prod?.ImageUrl2Thumb || prod?.ImageUrl3Thumb}
+                            size="thumb"
                             alt={prod?.ProductName ?? prod?.Description ?? ""}
-                            fill
-                            className="object-contain"
-                            unoptimized
+                            className="w-full h-full"
                           />
                         </Link>
                       </div>
@@ -456,10 +460,10 @@ export default function CartPage() {
                           </div>
                           <div className="text-right">
                             <p className="text-sm font-semibold text-gray-900">
-                              {formatCurrency(lineTotal)}
+                              <PriceText amount={lineTotal} />
                             </p>
                             <p className="text-xs text-gray-500">
-                              {formatCurrency(totalPerItem)} each
+                              <PriceText amount={totalPerItem} /> each
                             </p>
                           </div>
                         </div>
@@ -468,12 +472,12 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() => removeItem(it)}
-                            className="inline-flex items-center px-3 py-1.5 rounded-full border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-400 transition-colors"
                           >
                             Remove
                           </button>
 
-                          <div className="inline-flex items-center border border-gray-300 rounded-md overflow-hidden text-sm">
+                          <div className="inline-flex items-center border border-gray-300 overflow-hidden text-sm">
                             <button
                               type="button"
                               onClick={() => changeQuantity(it, -1)}
@@ -529,7 +533,7 @@ export default function CartPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-medium">
-                    {formatCurrency(subtotal)}
+                    <PriceText amount={subtotal} />
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -537,14 +541,14 @@ export default function CartPage() {
                   <span className="font-medium">
                     {shippingAmount === 0
                       ? "Free"
-                      : formatCurrency(shippingAmount)}
+                      : <PriceText amount={shippingAmount} />}
                   </span>
                 </div>
                 <hr className="my-2" />
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Total</span>
                   <span className="font-semibold">
-                    {formatCurrency(total)}
+                    <PriceText amount={total} />
                   </span>
                 </div>
               </div>
@@ -556,7 +560,7 @@ export default function CartPage() {
                 if (!hasSufficientStock()) return;
                 router.push("/checkout");
               }}
-              className="w-full bg-black text-white py-3 rounded-md text-sm font-semibold tracking-wide hover:opacity-95"
+              className="w-full bg-[#D2693F] text-white py-3 text-sm font-semibold tracking-wide hover:bg-[#8B4513]"
             >
               Proceed to Checkout
             </button>

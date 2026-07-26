@@ -1,22 +1,35 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, Suspense } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useCategories } from "@/hooks/useCategories";
+import { resolvePricing } from "@/utils/pricing";
+import ProductImage from "@/components/ProductImage";
+import PriceText from "@/components/PriceText";
 
 type Product = {
   ID: number;
   Description: string;
   ImageUrl1: string;
-  Price: number;
+  Price?: number;
+  OriginalPrice?: number;
   ProductName: string;
   Category?: string;
   Stock?: number;
+  StockType?: string;
+  IsCustomizable?: boolean;
+  DiscountPercent?: number;
+  IsFeatured?: boolean;
+  ImageUrl1Medium?: string;
+  ImageUrl1Thumb?: string;
 };
 
 function ShopContent() {
+  const { categories: firestoreCategories } = useCategories();
+  const defaultCategories = firestoreCategories.map((c) => c.name);
   const [products, setProducts] = useState<Product[]>([]);
   const [filter, setFilter] = useState<string | null>(null);
   const [sort, setSort] = useState<string>("relevance");
@@ -25,16 +38,11 @@ function ShopContent() {
   const [showMobileSort, setShowMobileSort] = useState(false);
   const [showFilterPopover, setShowFilterPopover] = useState(false);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-  const [expandedMain, setExpandedMain] = useState<Record<string, boolean>>({});
   const params = useSearchParams();
   const search = params.get("search")?.toLowerCase() || "";
 
   const formatCurrency = (n: number) => {
-    try {
-      return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
-    } catch (e) {
-      return `₹${n}`;
-    }
+    return n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
   };
 
   useEffect(() => {
@@ -47,7 +55,6 @@ function ShopContent() {
   }, []);
 
   const filtered = products.filter(p => {
-    // match using the Firestore 'Category' field
     if (filter && (p.Category ?? null) !== filter) return false;
     if (search && !p.Description.toLowerCase().includes(search)) return false;
     return true;
@@ -55,27 +62,13 @@ function ShopContent() {
 
   const sorted = (() => {
     const s = [...filtered];
-    if (sort === "price-asc") return s.sort((a, b) => (a.Price ?? 0) - (b.Price ?? 0));
-    if (sort === "price-desc") return s.sort((a, b) => (b.Price ?? 0) - (a.Price ?? 0));
+    if (sort === "price-asc") return s.sort((a, b) => resolvePricing({ Price: a.Price, OriginalPrice: a.OriginalPrice, DiscountPercent: a.DiscountPercent }).selling - resolvePricing({ Price: b.Price, OriginalPrice: b.OriginalPrice, DiscountPercent: b.DiscountPercent }).selling);
+    if (sort === "price-desc") return s.sort((a, b) => resolvePricing({ Price: b.Price, OriginalPrice: b.OriginalPrice, DiscountPercent: b.DiscountPercent }).selling - resolvePricing({ Price: a.Price, OriginalPrice: a.OriginalPrice, DiscountPercent: a.DiscountPercent }).selling);
     return s;
   })();
 
-  // only include the explicit categories you asked for and categories from data
-  const defaultCategories = ["Party Wear Dresses", "Short Dresses", "Purses", "Earrings"];
   const categories = Array.from(new Set([...defaultCategories, ...products.map(p => p.Category ?? "")]));
 
-  const subcategoryMap: Record<string, { label: string; value: string }[]> = {
-    Dresses: [
-      { label: "Party", value: "Party Dresses" },
-      { label: "Short", value: "Short Dresses" }
-    ],
-    Accessories: [
-      { label: "Purses", value: "Purses" },
-      { label: "Earrings", value: "Earrings" }
-    ]
-  };
-
-  // when arriving with ?category=..., apply it
   useEffect(() => {
     try {
       const cat = params.get("category");
@@ -92,15 +85,15 @@ function ShopContent() {
     <div className="bg-white min-h-screen">
       <main className="px-4 py-8 max-w-6xl mx-auto">
         <div className="mb-4">
-          <div className="text-sm text-gray-400">Showing {sorted.length} products</div>
+          <div className="text-sm text-gray-500">Showing {sorted.length} products</div>
         </div>
 
         <div className="md:flex md:items-start md:gap-6">
           {/* Sidebar - desktop only */}
           <aside className="hidden md:block w-64 shrink-0 md:-ml-6">
-            <div className="bg-white border border-pink-50 rounded-md p-4 sticky top-20">
+            <div className="bg-[#F9F6F0] border border-[#E8E0D8] p-4 sticky top-20">
               <div className="flex items-center justify-between mb-3">
-                <div className="text-sm font-semibold">Filters</div>
+                <div className="text-sm font-semibold text-[#2D2D2D]">Filters</div>
                 <button
                   onClick={() => { setFilter(null); setSort('relevance'); setSelectedSubcategory(null); }}
                   className="text-xs text-gray-500 hover:underline"
@@ -110,75 +103,44 @@ function ShopContent() {
               </div>
 
               <div className="space-y-1">
-                {/* All option */}
                 <button
                   onClick={() => { setFilter(null); setSelectedSubcategory(null); }}
-                  className={`w-full text-left px-2 py-1 rounded-md text-sm ${filter === null ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
+                  className={`w-full text-left px-3 py-2 text-sm transition-colors ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
                 >
                   All
                 </button>
 
-                {/* Main dress categories */}
-                {/* <button
-                  onClick={() => { setFilter("Party Dresses"); setSelectedSubcategory("Party Dresses"); }}
-                  className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Party Dresses" ? 'bg-black text-white' : 'text-gray-800 hover:bg-gray-100'}`}
-                >
-                  Party Wear Dresses
-                </button> */}
+                {defaultCategories.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => { setFilter(cat); setSelectedSubcategory(cat); }}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${selectedSubcategory === cat ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
 
-                <button
-                  onClick={() => { setFilter("Party Wear Dresses"); setSelectedSubcategory("Party Wear Dresses"); }}
-                  className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Party Wear Dresses" ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
-                >
-                  Party Wear Dresses
-                </button>
-
-                <button
-                  onClick={() => { setFilter("Short Dresses"); setSelectedSubcategory("Short Dresses"); }}
-                  className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Short Dresses" ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
-                >
-                  Short Dresses
-                </button>
-
-                {/* Other categories from your existing data */}
-                  {categories.filter(c => c && !["Party Wear Dresses", "Short Dresses", "Purses", "Earrings"].includes(c)).map(c => (
+                {categories.filter(c => c && !defaultCategories.includes(c)).map(c => (
                   <button
                     key={c}
                     onClick={() => { setFilter(c); setSelectedSubcategory(c); }}
-                    className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === c ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${selectedSubcategory === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
                   >
                     {c}
                   </button>
                 ))}
-
-                {/* Accessories section */}
-                <div className="pt-2">
-                  <div className="px-2 py-1 text-sm font-medium text-gray-800">Accessories</div>
-                    <button
-                      onClick={() => { setFilter("Purses"); setSelectedSubcategory("Purses"); }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Purses" ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
-                    >
-                      • Purses
-                    </button>
-                    <button
-                      onClick={() => { setFilter("Earrings"); setSelectedSubcategory("Earrings"); }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Earrings" ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
-                    >
-                      • Earrings
-                    </button>
-                </div>
               </div>
             </div>
           </aside>
 
           {/* Main content area */}
           <div className="flex-1">
-            {/* Mobile bottom toolbar (only on mobile) */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-50">
+            {/* Mobile bottom toolbar */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E0D8] z-50">
               <div className="max-w-6xl mx-auto flex divide-x divide-white px-0 py-0">
                 <button
                   onClick={() => { setShowFilterPopover(false); setShowMobileSort(s => !s); }}
-                  className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#ffe4ec] text-black px-4 py-3 hover:bg-[#fff0f4]"
+                  className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
                     <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M10 6h6M6 12h10M8 18h8" />
@@ -190,7 +152,7 @@ function ShopContent() {
                   onClick={() => { setShowMobileSort(false); setShowFilterPopover(s => !s); }}
                   aria-expanded={showFilterPopover}
                   aria-controls="filter-popover"
-                  className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#ffe4ec] text-black px-4 py-3 hover:bg-[#fff0f4]"
+                  className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
                     <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M6 12h12M10 19h4" />
@@ -201,24 +163,24 @@ function ShopContent() {
 
               {/* Mobile sort popover */}
               {showMobileSort && (
-                <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-3 w-[90vw] sm:w-72 z-[9999]">
-                  <div className="text-sm font-semibold mb-2">Sort</div>
+                <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white shadow-lg p-3 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8]">
+                  <div className="text-sm font-semibold mb-2 text-[#2D2D2D]">Sort</div>
                   <div className="space-y-1">
                     <button
                       onClick={() => { setSort("relevance"); setShowMobileSort(false); }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${sort === "relevance" ? "bg-[#ffd1dc] text-black" : "text-gray-800 hover:bg-[#fff0f4]"}`}
+                      className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
                     >
                       Relevance
                     </button>
                     <button
                       onClick={() => { setSort("price-asc"); setShowMobileSort(false); }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${sort === "price-asc" ? "bg-[#ffd1dc] text-black" : "text-gray-800 hover:bg-[#fff0f4]"}`}
+                      className={`w-full text-left px-2 py-1 text-sm ${sort === "price-asc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
                     >
                       Price: Low to High
                     </button>
                     <button
                       onClick={() => { setSort("price-desc"); setShowMobileSort(false); }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${sort === "price-desc" ? "bg-[#ffd1dc] text-black" : "text-gray-800 hover:bg-[#fff0f4]"}`}
+                      className={`w-full text-left px-2 py-1 text-sm ${sort === "price-desc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
                     >
                       Price: High to Low
                     </button>
@@ -226,15 +188,15 @@ function ShopContent() {
                 </div>
               )}
 
-              {/* Mobile filter popover (positioned above toolbar) */}
+              {/* Mobile filter popover */}
               {showFilterPopover && (
-                <div id="filter-popover" className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-4 w-[90vw] sm:w-72 z-[9999]">
+                <div id="filter-popover" className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white shadow-lg p-4 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8]">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm font-semibold">Filters</div>
+                    <div className="text-sm font-semibold text-[#2D2D2D]">Filters</div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => { setFilter(null); setSort("relevance"); setSelectedSubcategory(null); }}
-                        className="text-sm bg-gray-100 text-gray-800 px-2 py-1 rounded cursor-pointer hover:bg-gray-200"
+                        className="text-sm bg-gray-100 text-gray-800 px-2 py-1 cursor-pointer hover:bg-gray-200"
                       >
                         Reset
                       </button>
@@ -243,64 +205,43 @@ function ShopContent() {
                   </div>
 
                   <div className="space-y-1 mb-4">
-                    {/* All option */}
                     <button
                       onClick={() => { setFilter(null); setSelectedSubcategory(null); setShowFilterPopover(false); }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${filter === null ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
+                      className={`w-full text-left px-3 py-2 text-sm ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
                     >
                       All
                     </button>
 
-                    <button
-                      onClick={() => { setFilter("Party Wear Dresses"); setSelectedSubcategory("Party Wear Dresses"); setShowFilterPopover(false); }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Party Wear Dresses" ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
-                    >
-                      Party Wear Dresses
-                    </button>
+                    {defaultCategories.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => { setFilter(cat); setSelectedSubcategory(cat); setShowFilterPopover(false); }}
+                        className={`w-full text-left px-3 py-2 text-sm ${selectedSubcategory === cat ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
 
-                    <button
-                      onClick={() => { setFilter("Short Dresses"); setSelectedSubcategory("Short Dresses"); setShowFilterPopover(false); }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Short Dresses" ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
-                    >
-                      Short Dresses
-                    </button>
-
-                    {categories.filter(c => c && !["Party Wear Dresses", "Short Dresses", "Purses", "Earrings"].includes(c)).map(c => (
+                    {categories.filter(c => c && !defaultCategories.includes(c)).map(c => (
                       <button
                         key={c}
                         onClick={() => { setFilter(c); setSelectedSubcategory(c); setShowFilterPopover(false); }}
-                        className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === c ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
+                        className={`w-full text-left px-3 py-2 text-sm ${selectedSubcategory === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
                       >
                         {c}
                       </button>
                     ))}
-
-                    <div className="pt-2">
-                      <div className="px-2 py-1 text-sm font-medium text-gray-800">Accessories</div>
-                      <button
-                        onClick={() => { setFilter("Purses"); setSelectedSubcategory("Purses"); setShowFilterPopover(false); }}
-                        className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Purses" ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
-                      >
-                        • Purses
-                      </button>
-                      <button
-                        onClick={() => { setFilter("Earrings"); setSelectedSubcategory("Earrings"); setShowFilterPopover(false); }}
-                        className={`w-full text-left px-2 py-1 rounded-md text-sm ${selectedSubcategory === "Earrings" ? 'bg-[#ffd1dc] text-black' : 'text-gray-800 hover:bg-[#fff0f4]'}`}
-                      >
-                        • Earrings
-                      </button>
-                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Desktop filter toolbar (top-left) */}
+            {/* Desktop sort toolbar */}
             <div className="hidden md:flex items-center gap-4 mb-6 justify-end">
               <div className="relative">
                 <button
                   onClick={() => setSortOpen((s) => !s)}
-                  className="flex items-center gap-2 text-sm bg-gray-100 text-gray-800 px-3 py-2 rounded-full hover:bg-gray-200 cursor-pointer"
+                  className="flex items-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-3 py-2 hover:bg-[#F9F6F0] cursor-pointer border border-[#E8E0D8]"
                   aria-expanded={sortOpen}
                 >
                   <span>Sort</span>
@@ -318,119 +259,77 @@ function ShopContent() {
                     fill="none"
                     stroke="currentColor"
                   >
-                    <path
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 9l6 6 6-6"
-                    />
+                    <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
                   </svg>
                 </button>
 
                 {sortOpen && (
-                  <div className="absolute mt-2 left-0 bg-white border border-pink-50 rounded-md shadow-lg p-2 w-56 z-30">
+                  <div className="absolute mt-2 left-0 bg-white border border-[#E8E0D8] shadow-lg p-2 w-56 z-30">
                     <button
-                      onClick={() => {
-                        setSort("relevance");
-                        setSortOpen(false);
-                      }}
-                      className={`w-full text-left px-2 py-1 rounded-md text-sm ${
-                        sort === "relevance"
-                          ? "bg-[#ffd1dc] text-black"
-                          : "text-gray-800 hover:bg-[#fff0f4]"
-                      }`}
+                      onClick={() => { setSort("relevance"); setSortOpen(false); }}
+                      className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
                     >
                       Relevance
                     </button>
                     <button
-                      onClick={() => {
-                        setSort("price-asc");
-                        setSortOpen(false);
-                      }}
-                      className={`w-full text-left px-2 py-1 mt-1 rounded-md text-sm ${
-                        sort === "price-asc"
-                          ? "bg-[#ffd1dc] text-black"
-                          : "text-gray-800 hover:bg-[#fff0f4]"
-                      }`}
+                      onClick={() => { setSort("price-asc"); setSortOpen(false); }}
+                      className={`w-full text-left px-2 py-1 mt-1 text-sm ${sort === "price-asc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
                     >
                       Price: Low to High
                     </button>
                     <button
-                      onClick={() => {
-                        setSort("price-desc");
-                        setSortOpen(false);
-                      }}
-                      className={`w-full text-left px-2 py-1 mt-1 rounded-md text-sm ${
-                        sort === "price-desc"
-                          ? "bg-[#ffd1dc] text-black"
-                          : "text-gray-800 hover:bg-[#fff0f4]"
-                      }`}
+                      onClick={() => { setSort("price-desc"); setSortOpen(false); }}
+                      className={`w-full text-left px-2 py-1 mt-1 text-sm ${sort === "price-desc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
                     >
                       Price: High to Low
                     </button>
                   </div>
                 )}
               </div>
-
-
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
                 {sorted.map(p => {
-                const oldPrice = (p as any).OldPrice ?? (p as any).MSRP ?? null;
+                const pr = resolvePricing({ Price: (p as any).Price, OriginalPrice: (p as any).OriginalPrice, DiscountPercent: p.DiscountPercent });
                 
-                // Check if product is out of stock
-                // For general stock products (Purses, Earrings), check Stock field
-                // For size-based products (Dresses), check if all sizes are out of stock
                 const generalStock = (p as any).Stock;
-                const isGeneralStockProduct = p.Category === "Purses" || p.Category === "Earrings";
-                const hasNoSizeStock = !isGeneralStockProduct && 
-                                       ((p as any).StockS || 0) === 0 && 
-                                       ((p as any).StockM || 0) === 0 && 
-                                       ((p as any).StockL || 0) === 0 && 
-                                       ((p as any).StockXL || 0) === 0;
-                
-                const outOfStock = (isGeneralStockProduct && generalStock !== undefined && Number(generalStock) === 0) || 
-                                   (!isGeneralStockProduct && hasNoSizeStock);
+                const outOfStock = (p as any).StockType === "ready_stock" && generalStock !== undefined && Number(generalStock) === 0;
                 const soldOut = !!(p as any).SoldOut || outOfStock;
-                const savePct = oldPrice && oldPrice > p.Price ? Math.round(((oldPrice - p.Price) / oldPrice) * 100) : null;
+                const savePct = pr.discount > 0 ? pr.discount : null;
                 return (
-                <Link key={p.ID} href={`/product/${encodeURIComponent(p.ProductName)}`} className="block relative p-0 font-light hover:shadow-sm transition-colors hover:-translate-y-0.5 cursor-pointer overflow-hidden">
+                <Link key={p.ID} href={`/product/${encodeURIComponent(p.ProductName)}`} className="block relative p-0 font-light hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer overflow-hidden group">
                   {outOfStock && (
-                    <span
-                      className="absolute top-5 left-[-10px] bg-red-200 text-red-800 text-base font-bold px-4 py-1.5 rounded-full shadow-lg"
-                      style={{
-                        transform: 'rotate(-20deg) scale(1.05)',
-                        zIndex: 10,
-                        border: '2px solid #f87171',
-                        letterSpacing: '1.5px',
-                      }}
-                    >
+                    <span className="absolute top-3 left-3 bg-red-200 text-red-800 text-xs font-bold px-3 py-1 z-10">
                       Out of Stock
                     </span>
                   )}
                   {!outOfStock && soldOut && (
-                    <span className="absolute top-3 left-3 bg-[#fff5f7] text-gray-800 text-xs font-semibold px-3 py-1 rounded-full">Sold out</span>
+                    <span className="absolute top-3 left-3 bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-1 z-10">Sold out</span>
                   )}
-                  {savePct && !soldOut && (
-                    <span className="absolute top-3 left-3 bg-[#ffd1dc] text-black text-xs font-semibold px-3 py-1 rounded-full">Save {savePct}%</span>
-                  )}
-                  <div className="w-full overflow-hidden aspect-[4/5]">
-                    <img
-                      src={p.ImageUrl1 ? p.ImageUrl1 : "/placeholder.png"}
+                  {savePct && !soldOut && (null)}
+                  {p.StockType === "made_to_order" && (null)}
+                  <div className="w-full overflow-hidden aspect-[4/5] bg-[#F9F6F0]">
+                    <ProductImage
+                      src={p.ImageUrl1}
+                      srcMedium={(p as any).ImageUrl1Medium}
+                      srcThumb={(p as any).ImageUrl1Thumb}
+                      size="thumb"
                       alt={p.ProductName}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
-                  <div className="py-2 px-1">
-                    <h3 className="text-sm md:text-lg lg:text-xl font-normal text-gray-900 leading-tight">{p.ProductName}</h3>
+                  <div className="py-3 px-2">
+                    <h3 className="text-sm md:text-base font-medium text-[#2D2D2D] leading-tight">{p.ProductName}</h3>
                     <div className="mt-2 flex items-baseline gap-3">
-                      <div className="text-sm md:text-lg font-bold text-gray-900">{formatCurrency(p.Price)}</div>
-                      {oldPrice && oldPrice > p.Price && (
-                        <div className="text-sm text-gray-500 line-through">{formatCurrency(oldPrice)}</div>
+                      <PriceText amount={pr.selling} className="text-sm md:text-base font-bold text-[#D2693F]" />
+                      {pr.discount > 0 && (
+                        <PriceText amount={pr.original} strikeThrough className="text-sm text-gray-400 line-through" />
                       )}
                     </div>
+                    {p.IsCustomizable && (
+                      <p className="text-xs text-[#9A6E50] mt-1">Customisable</p>
+                    )}
                   </div>
                 </Link>
               )})}
@@ -444,7 +343,7 @@ function ShopContent() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-100 flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-[#2D2D2D]">Loading...</div>}>
       <ShopContent />
     </Suspense>
   );

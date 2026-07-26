@@ -1,36 +1,39 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { useAdmin } from "@/hooks/useAdmin";
-import CategoryCarousel from "@/components/CategoryCarousel";
+import { useCategories } from "@/hooks/useCategories";
 import ReviewCarousel from "@/components/ReviewCarousel";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
+import { resolvePricing } from "@/utils/pricing";
+import ProductImage from "@/components/ProductImage";
+import PriceText from "@/components/PriceText";
 
 type Product = {
   ID: number;
   Description: string;
   ProductName?: string;
   ImageUrl1: string;
-  Price: number;
+  Price?: number;
   OriginalPrice?: number;
   Product: string;
+  StockType?: string;
+  IsCustomizable?: boolean;
+  DiscountPercent?: number;
+  IsFeatured?: boolean;
+  ImageUrl1Medium?: string;
+  ImageUrl1Thumb?: string;
 };
 
 export default function Home() {
-  const router = useRouter();
   const { totalItems, pulse } = useCart();
   const { user, loading } = useAuth();
-  const { isAdmin, loading: adminLoading } = useAdmin(user);
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [search, setSearch] = useState("");
 
-  // Fetch inventory
   useEffect(() => {
     const fetchProducts = async () => {
       if (!db) return;
@@ -40,81 +43,76 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  // Local search filtering
-  const filtered = search
-    ? products.filter(p =>
-        p.Description.toLowerCase().includes(search.toLowerCase())
-      )
-    : products;
-
-  // Group by category
-  const grouped = filtered.reduce<Record<string, Product[]>>((acc, p) => {
-    acc[p.Product] = acc[p.Product] || [];
-    acc[p.Product].push(p);
-    return acc;
-  }, {});
-
-  // Show four main categories once
-  const categories = ["Party Wear Dresses", "Short Dresses", "Stockings", "Leather Skirts"];
+  const { categories: firestoreCategories } = useCategories();
+  const categories = firestoreCategories.slice(0, 4).map((c) => c.name);
+  const categoryImages: Record<string, string> = Object.fromEntries(
+    firestoreCategories.slice(0, 4).filter((c) => c.image).map((c) => [c.name, c.image!])
+  );
 
   return (
     <>
- {/* Hero Logo Section */}
-<section className="w-full flex justify-center items-center py-10 md:py-14">
-  <div className="px-8">
-    <img
-      src="/Blush logo.jpg"
-      alt="Blush Logo"
-      className="w-48 sm:w-56 md:w-64 lg:w-72 object-contain mx-auto mix-blend-multiply"
-    />
-  </div>
-</section>
+      {/* Hero */}
+      <section className="w-full bg-[#F9F6F0]">
+        <div className="flex flex-col items-center justify-center py-12 sm:py-16 md:py-24 px-4">
+          <h1
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-[#211A12] tracking-wide"
+            style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600, letterSpacing: "0.06em" }}
+          >
+            KRIA
+          </h1>
+          <p className="mt-3 sm:mt-4 text-xs sm:text-sm md:text-base text-[#9A6E50] tracking-[0.25em] sm:tracking-[0.3em] uppercase">
+            Premium Handcrafted Artistry
+          </p>
+          <Link
+            href="/shop"
+            className="mt-7 sm:mt-8 px-9 py-3 border border-[#2D2D2D] text-[#2D2D2D] text-xs sm:text-sm tracking-[0.2em] uppercase font-medium hover:bg-[#2D2D2D] hover:text-[#F9F6F0] active:scale-[0.98] transition-all duration-300"
+          >
+            Shop Now
+          </Link>
+        </div>
+      </section>
 
+      {/* Marquee */}
+      <div className="w-full bg-[#F9F6F0] py-3 border-t border-b border-[#E0D0B8] overflow-hidden">
+        <div className="animate-marquee text-xs sm:text-sm text-[#9A6E50] tracking-widest font-medium">
+          {[...categories, "Handmade with Love", "Supporting Indian Artisans", "Eco-Friendly Craft",
+            ...categories, "Handmade with Love", "Supporting Indian Artisans", "Eco-Friendly Craft"
+          ].map((cat, i) => (
+            <span key={i} className="mx-6 sm:mx-8 inline-block whitespace-nowrap">✦ {cat}</span>
+          ))}
+        </div>
+      </div>
 
-
-
-      {/* Categories Panel (2x2 grid on mobile, 1x4 on desktop) */}
-      <section className="text-black px-6 md:px-10 pt-8 md:pt-16 rounded-xl">
-
+      {/* Categories */}
+      <section className="px-4 sm:px-6 md:px-10 pt-10 sm:pt-14 md:pt-20 bg-[#F9F6F0]">
         <div className="max-w-7xl mx-auto">
           <h2
-            className="text-3xl md:text-4xl text-center mb-10 md:mb-14"
-            style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontStyle: 'normal' }}
+            className="text-2xl sm:text-3xl md:text-4xl text-center mb-7 sm:mb-11 md:mb-16 text-[#211A12]"
+            style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
           >
             Browse By Category
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6 md:grid md:grid-cols-4">
             {categories.map(cat => {
-              const images: Record<string, string> = {
-  "Party Wear Dresses": "https://img4.dhresource.com/webp/m/0x0/f3/albu/jc/g/04/9244fe94-5e93-4600-9896-f0184a9d807d.jpg",
-  "Short Dresses": "https://assets.myntassets.com/dpr_1.5,q_30,w_400,c_limit,fl_progressive/assets/images/2025/APRIL/23/5UJGEshH_07246c064c1f4bf9b7c38cd0fb6a8a3b.jpg",
-  "Stockings": "https://assets.myntassets.com/dpr_1.5,q_30,w_400,c_limit,fl_progressive/assets/images/2025/MARCH/29/xu248Xou_cb078b7f8a8e4538910b46c46dff9d3b.jpg",
-  "Leather Skirts": "https://assets.myntassets.com/dpr_1.5,q_30,w_400,c_limit,fl_progressive/assets/images/15953978/2022/1/29/a43ec50c-861c-4771-8460-48cf1b0a9f821643433862933-Tokyo-Talkies-Women-Black-A-Line-Slim-Fit-Skirt-631164343386-1.jpg",
-};
-
-              const imgSrc = images[cat] || `https://picsum.photos/seed/${encodeURIComponent(cat)}/400/600`;
+              const imgSrc = categoryImages[cat] || `https://picsum.photos/seed/${encodeURIComponent(cat)}/400/600`;
               return (
                 <Link
                   key={cat}
                   href={`/shop?category=${encodeURIComponent(cat)}`}
-                  className="group block rounded-none overflow-hidden"
+                  className="w-[calc(50%-0.375rem)] sm:w-[calc(50%-0.5rem)] md:w-auto group block overflow-hidden border border-[#E8E0D8] shadow-[0_1px_10px_rgba(45,32,20,0.05)] hover:shadow-[0_10px_28px_rgba(45,32,20,0.16)] transition-shadow duration-300"
                 >
-                  {/* Mobile: show category name above image since hover isn't available */}
-                  <div className="block md:hidden text-center mb-2">
-                    <span className="text-lg font-semibold uppercase text-black">
-                      {cat === "Party Wear Dresses" ? "Party Dresses" : cat}
-                    </span>
-                  </div>
-
-                  <div className="relative h-44 md:h-80 lg:h-96 bg-gray-900 flex items-center justify-center transition">
+                  <div className="relative h-44 sm:h-56 md:h-80 lg:h-96 bg-[#F3EDE4] flex items-center justify-center overflow-hidden">
                     <img
                       src={imgSrc}
                       alt={cat}
-                      className="absolute inset-0 w-full h-full object-cover z-0"
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-auto z-0 group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
                     />
-                    {/* Hover overlay with subtle shadow and "Shop X" text */}
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-base md:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg uppercase tracking-wide text-center px-2">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent z-10 flex items-end justify-center pb-5 sm:pb-7">
+                      <span
+                        className="text-sm sm:text-lg md:text-2xl lg:text-3xl text-white drop-shadow-lg tracking-wide text-center px-2 relative after:content-[''] after:block after:w-8 after:h-[2px] after:bg-white/70 after:mx-auto after:mt-2 after:scale-x-0 group-hover:after:scale-x-100 after:transition-transform after:duration-300"
+                        style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
+                      >
                         Shop {cat}
                       </span>
                     </div>
@@ -126,112 +124,111 @@ export default function Home() {
         </div>
       </section>
 
-      {/* BEST SELLERS */}
-<section className="text-black px-6 md:px-10 pt-16 pb-12 md:pb-16 bg-transparent">
-  <div className="max-w-7xl mx-auto">
-    <h2
-      className="text-3xl md:text-4xl text-center mb-16"
-      style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontStyle: 'normal' }}
-    >
-      Best Sellers
-    </h2>
+      {/* Best Sellers */}
+      <section className="px-4 sm:px-6 md:px-10 pt-12 sm:pt-16 md:pt-20 pb-9 sm:pb-14 bg-[#F9F6F0]">
+        <div className="max-w-7xl mx-auto">
+          <h2
+            className="text-2xl sm:text-3xl md:text-4xl text-center mb-7 sm:mb-11 md:mb-16 text-[#211A12]"
+            style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
+          >
+            Most Loved Handcrafted Pieces
+          </h2>
 
-          <div className="overflow-hidden">
-      <div className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-7">
             {products.map((p) => (
-          <Link
-            key={p.ID}
-            href={`/product/${encodeURIComponent(p.ProductName || p.Description)}`}
-            className="flex-none w-[280px] md:w-[calc(50%-12px)] lg:w-[calc(33.333%-1rem)] flex flex-col items-center snap-center px-2"
-          >
-            <div className="aspect-square border border-gray-300 rounded-none mb-3 overflow-hidden w-full max-w-xs bg-white">
-              <img
-                src={p.ImageUrl1}
-                alt={p.Description}
-                className="w-full h-full object-cover"
-              />
+              <Link
+                key={p.ID}
+                href={`/product/${encodeURIComponent(p.ProductName || p.Description)}`}
+                className="flex flex-col items-center group"
+              >
+                <div className="aspect-square border border-[#E8E0D8] mb-2.5 sm:mb-3.5 overflow-hidden w-full bg-white relative shadow-[0_1px_6px_rgba(45,32,20,0.04)] group-hover:shadow-[0_8px_20px_rgba(45,32,20,0.14)] group-hover:border-[#D2693F]/40 transition-all duration-300">
+                  <ProductImage
+                    src={p.ImageUrl1}
+                    srcMedium={(p as any).ImageUrl1Medium}
+                    srcThumb={(p as any).ImageUrl1Thumb}
+                    size="thumb"
+                    alt={p.Description}
+                    className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+
+                <div
+                  className="truncate text-[#211A12] text-xs sm:text-sm md:text-base mb-1 w-full text-center px-1"
+                  style={{ fontFamily: "'Tenor Sans', sans-serif" }}
+                >
+                  {p.ProductName || p.Description}
+                </div>
+
+                <div className="text-center px-1">
+                  {(() => { const pr = resolvePricing({ Price: p.Price, OriginalPrice: p.OriginalPrice, DiscountPercent: p.DiscountPercent }); return (
+                    <>
+                      {pr.discount > 0 && (
+                        <PriceText amount={pr.original} strikeThrough className="line-through text-[#B0A38C] mr-1.5 text-xs" />
+                      )}
+                      <PriceText amount={pr.selling} className="text-[#D2693F] font-semibold text-xs sm:text-sm" />
+                    </>
+                  ); })()}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* New Arrivals */}
+      {products.length > 6 && (
+        <section className="px-4 sm:px-6 md:px-10 pt-5 sm:pt-9 md:pt-14 pb-9 sm:pb-14 bg-[#F9F6F0]">
+          <div className="max-w-7xl mx-auto">
+            <h2
+              className="text-2xl sm:text-3xl md:text-4xl text-center mb-7 sm:mb-11 md:mb-16 text-[#211A12]"
+              style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
+            >
+              New Arrivals
+            </h2>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-7">
+              {products.slice(6, 9).map((p) => (
+                <Link
+                  key={p.ID}
+                  href={`/product/${encodeURIComponent(p.ProductName || p.Description)}`}
+                  className="flex flex-col items-center group"
+                >
+                  <div className="aspect-square border border-[#E8E0D8] mb-2.5 sm:mb-3.5 overflow-hidden w-full bg-white relative shadow-[0_1px_6px_rgba(45,32,20,0.04)] group-hover:shadow-[0_8px_20px_rgba(45,32,20,0.14)] group-hover:border-[#D2693F]/40 transition-all duration-300">
+                    <ProductImage
+                      src={p.ImageUrl1}
+                      srcMedium={(p as any).ImageUrl1Medium}
+                      srcThumb={(p as any).ImageUrl1Thumb}
+                      size="thumb"
+                      alt={p.Description}
+                      className="w-full h-full group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+
+                  <div
+                    className="truncate text-[#211A12] text-xs sm:text-sm md:text-base mb-1 w-full text-center px-1"
+                    style={{ fontFamily: "'Tenor Sans', sans-serif" }}
+                  >
+                    {p.ProductName || p.Description}
+                  </div>
+
+                  <div className="text-center px-1">
+                    {(() => { const pr = resolvePricing({ Price: p.Price, OriginalPrice: p.OriginalPrice, DiscountPercent: p.DiscountPercent }); return (
+                      <>
+                        {pr.discount > 0 && (
+                          <PriceText amount={pr.original} strikeThrough className="line-through text-[#B0A38C] mr-1.5 text-xs" />
+                        )}
+                        <PriceText amount={pr.selling} className="text-[#D2693F] font-semibold text-xs sm:text-sm" />
+                      </>
+                    ); })()}
+                  </div>
+                </Link>
+              ))}
             </div>
-
-            <div className="truncate text-gray-900 text-base md:text-lg mb-1 w-full text-center">
-              {p.ProductName || p.Description}
-            </div>
-
-            <div className="mt-1 text-center">
-              {p.OriginalPrice && p.OriginalPrice !== p.Price && (
-                <span className="line-through text-gray-400 mr-2">
-                  ₹{p.OriginalPrice}
-                </span>
-              )}
-              <span className="text-black font-semibold">
-                ₹{p.Price}
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  </div>
-</section>
-
-{/* NEW ARRIVALS */}
-<section className="text-black px-6 md:px-10 pt-24">
-  <div className="max-w-7xl mx-auto">
-    <h2
-      className="text-3xl md:text-4xl text-center mb-16"
-      style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontStyle: 'normal' }}
-    >
-      New Arrivals
-    </h2>
-
-    <div className="overflow-hidden">
-      <div className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory lg:grid lg:grid-cols-3 lg:gap-8">
-        {products.slice(6, 9).map((p) => (
-          <Link
-            key={p.ID}
-            href={`/product/${encodeURIComponent(p.ProductName || p.Description)}`}
-            className="flex-none w-[280px] md:w-[calc(50%-12px)] lg:w-auto flex flex-col items-center snap-center px-2"
-          >
-            <div className="aspect-square border border-gray-300 rounded-none mb-3 overflow-hidden w-full max-w-xs bg-white">
-              <img
-                src={p.ImageUrl1}
-                alt={p.Description}
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            <div className="truncate text-gray-900 text-base md:text-lg mb-1 w-full text-center">
-              {p.ProductName || p.Description}
-            </div>
-
-            <div className="mt-1 text-center">
-              {p.OriginalPrice && p.OriginalPrice !== p.Price && (
-                <span className="line-through text-gray-400 mr-2">
-                  ₹{p.OriginalPrice}
-                </span>
-              )}
-              <span className="text-black font-semibold">
-                ₹{p.Price}
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  </div>
-</section>
-
+          </div>
+        </section>
+      )}
 
       <ReviewCarousel />
-
-      {/* Inventory Button - Only visible to admins */}
-      {!loading && !adminLoading && isAdmin && (
-        <Link
-          href="/inventory"
-          className="fixed right-6 bottom-6 z-40 rounded-none bg-white text-black px-6 py-3 shadow-2xl hover:bg-gray-200 font-semibold transition-colors"
-        >
-          Inventory
-        </Link>
-      )}
     </>
   );
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -12,8 +12,6 @@ export default function FAQPage() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState<string | null>(null);
   const COMMON_SUBJECT = "Website Inquiry (FAQ)";
-
-  
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +31,6 @@ export default function FAQPage() {
         setEmail("");
         setMessage("");
         setAskDirect(false);
-        // clear success message after a short delay
         setTimeout(() => setSent(null), 4000);
       } else {
         const json = await res.json();
@@ -49,13 +46,12 @@ export default function FAQPage() {
   return (
     <div className="bg-white min-h-screen flex flex-col">
       <main className="px-0 sm:px-4 pt-12 pb-0 max-w-6xl mx-auto flex-1">
-        {/* Contact Details Section */}
         <div>
           <div className="flex justify-between items-start mb-6">
-            <h1 className="text-3xl md:text-4xl font-semibold text-black">Contact Us</h1>
+            <h1 className="text-3xl md:text-4xl font-semibold text-[#2D2D2D]">Contact Us</h1>
             <button 
               onClick={() => router.push("/")} 
-              className="font-semibold text-black hover:text-pink-600 cursor-pointer transition"
+              className="font-semibold text-[#2D2D2D] hover:text-[#D2693F] cursor-pointer transition"
             >
               Back
             </button>
@@ -63,30 +59,30 @@ export default function FAQPage() {
 
           <div className="grid sm:grid-cols-3 gap-6 md:gap-8 items-start">
             {/* Contact Details */}
-            <div className="bg-[#fff0f6] border-2 border-pink-100 rounded-lg p-6 sm:col-span-1 shadow-sm">
-              <h2 className="text-xl font-semibold text-black mb-4">Get in Touch</h2>
-              <div className="space-y-3 text-black">
+            <div className="bg-[#F9F6F0] border border-[#E8E0D8] p-6 sm:col-span-1 shadow-sm">
+              <h2 className="text-xl font-semibold text-[#2D2D2D] mb-4">Get in Touch</h2>
+              <div className="space-y-3 text-[#2D2D2D]">
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5">📞</div>
-                  <span className="font-medium">+91 8087847122</span>
+                  <span className="font-medium">+91 98765 43210</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5">✉️</div>
-                  <span className="font-medium">prachikamble.blush@gmail.com</span>
+                  <span className="font-medium">hello@kria.in</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5">🕒</div>
-                  <span className="font-medium">9:30 AM – 7:30 PM IST</span>
+                  <span className="font-medium">10:00 AM – 7:00 PM IST</span>
                 </div>
               </div>
             </div>
 
             {/* Ask Directly Form */}
-            <div className="bg-pink-50 border-2 border-pink-100 rounded-lg p-6 sm:col-span-2 shadow-sm">
-              <h2 className="text-xl font-semibold text-black mb-4">Ask Directly</h2>
+            <div className="bg-[#F9F6F0] border border-[#E8E0D8] p-6 sm:col-span-2 shadow-sm">
+              <h2 className="text-xl font-semibold text-[#2D2D2D] mb-4">Ask Directly</h2>
               
               {sent && (
-                <div className="mb-4 px-4 py-2 bg-pink-100 text-black border-2 border-pink-300 rounded font-semibold">
+                <div className="mb-4 px-4 py-2 bg-[#F9F6F0] text-[#2D2D2D] border border-[#E0D0B8] font-semibold">
                   {sent}
                 </div>
               )}
@@ -96,7 +92,7 @@ export default function FAQPage() {
                   <p className="text-gray-600 mb-4">Have a specific question? Send us a message directly!</p>
                   <button
                     onClick={() => setAskDirect(true)}
-                    className="px-6 py-3 bg-[#ffd1dc] text-black font-semibold rounded-lg hover:bg-pink-300 transition shadow-md cursor-pointer border-2 border-pink-300"
+                    className="px-6 py-3 bg-[#D2693F] text-white font-semibold hover:bg-[#B85A34] transition shadow-md cursor-pointer"
                   >
                     Send Message
                   </button>
@@ -105,33 +101,33 @@ export default function FAQPage() {
                 <form onSubmit={submit} className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">Name</label>
+                      <label className="block text-sm font-semibold text-[#2D2D2D] mb-1">Name</label>
                       <input
                         value={name}
                         onChange={e => setName(e.target.value)}
-                        className="w-full border-2 border-pink-200 bg-white text-black px-3 py-2 rounded focus:border-pink-400 focus:outline-none transition"
+                        className="w-full border border-[#E8E0D8] bg-white text-[#2D2D2D] px-3 py-2 focus:border-[#C5A059] focus:outline-none transition"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">Email</label>
+                      <label className="block text-sm font-semibold text-[#2D2D2D] mb-1">Email</label>
                       <input
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         type="email"
-                        className="w-full border-2 border-pink-200 bg-white text-black px-3 py-2 rounded focus:border-pink-400 focus:outline-none transition"
+                        className="w-full border border-[#E8E0D8] bg-white text-[#2D2D2D] px-3 py-2 focus:border-[#C5A059] focus:outline-none transition"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">Message</label>
+                    <label className="block text-sm font-semibold text-[#2D2D2D] mb-1">Message</label>
                     <textarea 
                       value={message} 
                       onChange={e => setMessage(e.target.value)} 
-                      className="w-full border-2 border-pink-200 bg-white text-black px-3 py-2 rounded focus:border-pink-400 focus:outline-none transition" 
+                      className="w-full border border-[#E8E0D8] bg-white text-[#2D2D2D] px-3 py-2 focus:border-[#C5A059] focus:outline-none transition" 
                       rows={4} 
                       required 
                     />
@@ -141,14 +137,14 @@ export default function FAQPage() {
                     <button 
                       type="button" 
                       onClick={() => setAskDirect(false)} 
-                      className="px-4 py-2 border-2 border-pink-200 text-black rounded hover:bg-pink-50 cursor-pointer transition"
+                      className="px-4 py-2 border border-[#E8E0D8] text-[#2D2D2D] hover:bg-white cursor-pointer transition"
                     >
                       Cancel
                     </button>
                     <button 
                       type="submit" 
                       disabled={sending} 
-                      className="px-4 py-2 bg-[#ffd1dc] text-black font-semibold rounded-lg hover:bg-pink-300 shadow-md cursor-pointer border-2 border-pink-300 transition disabled:opacity-50"
+                      className="px-4 py-2 bg-[#D2693F] text-white font-semibold hover:bg-[#B85A34] shadow-md cursor-pointer transition disabled:opacity-50"
                     >
                       {sending ? 'Sending...' : 'Send Message'}
                     </button>
@@ -158,8 +154,6 @@ export default function FAQPage() {
             </div>
           </div>
         </div>
-
-        {/* FAQ removed — contact + message form only */}
       </main>
     </div>
   );

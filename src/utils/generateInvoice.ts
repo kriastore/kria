@@ -1,29 +1,39 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { resolvePricing } from "@/utils/pricing";
 
 export function generateInvoice(order: any) {
   const doc = new jsPDF();
   const generatedAt = new Date();
 
+  // Brand colors
+  const darkBrown: [number, number, number] = [45, 45, 45];
+  const accent: [number, number, number] = [210, 105, 63];
+  const lightBg: [number, number, number] = [243, 237, 228];
+
   // ===== HEADER / BRAND =====
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("BLUSH BOUTIQUE", 14, 18);
+  doc.setTextColor(...darkBrown);
+  doc.text("KRIA", 14, 18);
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
-  doc.text("Luxury Women’s Wear", 14, 25);
+  doc.setTextColor(...darkBrown);
+  doc.text("Handcrafted Artisanal Jewellery & Home Decor", 14, 25);
   doc.text("Pune, Maharashtra, India", 14, 31);
-  doc.text("Email: support@blushboutique.in", 14, 37);
+  doc.text("Email: hello@kria.in", 14, 37);
   doc.text("Phone: +91 XXXXXXXXXX", 14, 43);
 
+  doc.setDrawColor(...accent);
   doc.setLineWidth(0.5);
   doc.line(14, 48, 196, 48);
 
   // ===== INVOICE DETAILS =====
   doc.setFontSize(11);
-  doc.text(`Invoice No: BLUSH-INV-${order.invoiceNo ?? order.id}`, 14, 56);
-  doc.text(`Order ID: BLUSH-ORD-${order.id}`, 14, 62);
+  doc.setTextColor(...darkBrown);
+  doc.text(`Invoice No: KRIA-INV-${order.invoiceNo ?? order.id}`, 14, 56);
+  doc.text(`Order ID: KRIA-ORD-${order.id}`, 14, 62);
   doc.text(
     `Order Date: ${order.createdAt?.toDate?.().toLocaleDateString()}`,
     14,
@@ -35,24 +45,30 @@ export function generateInvoice(order: any) {
   // ===== BILLING DETAILS =====
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
+  doc.setTextColor(...darkBrown);
   doc.text("Billed To", 14, 92);
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
+  doc.setTextColor(...darkBrown);
   doc.text(`Name: ${order.customer?.name}`, 14, 98);
   doc.text(`Email: ${order.customer?.email}`, 14, 104);
   doc.text(`Phone: ${order.customer?.phone}`, 14, 110);
 
   doc.text("Shipping Address:", 14, 118);
   doc.text(
-    `${order.customer?.address}, ${order.customer?.city}, ${order.customer?.state} - ${order.customer?.pincode}, India`,
+    `${order.customer?.address}, ${order.customer?.stateCity ?? ""} - ${order.customer?.pinCode ?? ""}, India`,
     14,
     124
   );
 
   // ===== CALCULATIONS =====
   const subtotal = order.items.reduce((sum: number, item: any) => {
-    const basePrice = item.product?.Price || 0;
+    const basePrice = resolvePricing({
+      Price: item.product?.Price,
+      OriginalPrice: item.product?.OriginalPrice,
+      DiscountPercent: item.product?.DiscountPercent,
+    }).selling;
     const customPrice =
       item.isCustomized && item.customPrice ? item.customPrice : 0;
     return sum + (basePrice + customPrice) * item.Quantity;
@@ -63,12 +79,16 @@ export function generateInvoice(order: any) {
   const discount = order.discount ?? 0;
   const grandTotal = order.total;
 
-  // ===== ORDER TABLE (CATEGORY REMOVED) =====
+  // ===== ORDER TABLE =====
   autoTable(doc, {
     startY: 136,
     head: [["Item Name", "Qty", "Price", "Total"]],
     body: order.items.map((item: any) => {
-      const basePrice = item.product?.Price || 0;
+      const basePrice = resolvePricing({
+        Price: item.product?.Price,
+        OriginalPrice: item.product?.OriginalPrice,
+        DiscountPercent: item.product?.DiscountPercent,
+      }).selling;
       const customPrice =
         item.isCustomized && item.customPrice ? item.customPrice : 0;
       const itemPrice = basePrice + customPrice;
@@ -81,17 +101,19 @@ export function generateInvoice(order: any) {
         `Rs. ${itemTotal}`,
       ];
     }),
-    styles: { fontSize: 10 },
+    styles: { fontSize: 10, textColor: darkBrown },
     headStyles: {
-      fillColor: [220, 220, 220], // light gray
-      textColor: [0, 0, 0],       // black text
+      fillColor: lightBg,
+      textColor: darkBrown,
     },
+    alternateRowStyles: { fillColor: [249, 246, 240] },
   });
 
   const finalY = (doc as any).lastAutoTable.finalY || 150;
 
   // ===== PRICE BREAKDOWN =====
   doc.setFontSize(11);
+  doc.setTextColor(...darkBrown);
   doc.text(`Subtotal: Rs. ${subtotal}`, 14, finalY + 10);
   doc.text(
     `Shipping: Rs. ${shipping} ${shipping === 0 ? "(Free)" : ""}`,
@@ -109,15 +131,17 @@ export function generateInvoice(order: any) {
 
   // ===== DELIVERY INFO =====
   doc.setFont("helvetica", "normal");
+  doc.setTextColor(...darkBrown);
   doc.text("Estimated Delivery: 2–4 working days", 14, finalY + 48);
   doc.text(
-    `Courier Partner: ${order.courierPartner ?? "Delhivery"}`,
+    `Courier Partner: ${order.courierPartner ?? "DTDC"}`,
     14,
     finalY + 54
   );
 
   // ===== RETURN POLICY =====
   doc.setFontSize(10);
+  doc.setTextColor(...darkBrown);
   doc.text(
     "Easy returns within 7 days of delivery. Product must be unused and in original packaging.",
     14,
@@ -126,11 +150,11 @@ export function generateInvoice(order: any) {
 
   // ===== FOOTER =====
   doc.text(
-    "Thank you for shopping with Blush Boutique. For support, WhatsApp us at +91 XXXXXXXXXX.",
+    "Thank you for shopping with Kria. For support, WhatsApp us at +91 XXXXXXXXXX.",
     14,
     finalY + 74
   );
 
   // ===== SAVE =====
-  doc.save(`BLUSH_INVOICE_${order.id}.pdf`);
+  doc.save(`KRIA_INVOICE_${order.id}.pdf`);
 }
