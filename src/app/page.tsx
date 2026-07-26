@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -30,24 +30,47 @@ type Product = {
 
 export default function Home() {
   const { totalItems, pulse } = useCart();
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoaded, setProductsLoaded] = useState(false);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      if (!db) return;
-      const snap = await getDocs(collection(db!, "inventory"));
-      setProducts(snap.docs.map(d => d.data() as Product));
-    };
-    fetchProducts();
-  }, []);
-
-  const { categories: firestoreCategories } = useCategories();
+  const { categories: firestoreCategories, loading: categoriesLoading } = useCategories();
   const categories = firestoreCategories.slice(0, 4).map((c) => c.name);
   const categoryImages: Record<string, string> = Object.fromEntries(
     firestoreCategories.slice(0, 4).filter((c) => c.image).map((c) => [c.name, c.image!])
   );
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      if (!db) { setProductsLoaded(true); return; }
+      try {
+        const snap = await getDocs(collection(db!, "inventory"));
+        setProducts(snap.docs.map(d => d.data() as Product));
+      } catch (e) {
+        console.error("Failed to load products:", e);
+      } finally {
+        setProductsLoaded(true);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const isReady = !authLoading && !categoriesLoading && productsLoaded;
+
+  if (!isReady) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-[#F9F6F0]">
+        <div className="w-8 h-8 border-2 border-[#E0D0B8] border-t-[#D2693F] animate-spin" />
+        <p
+          className="text-[#6B5A47] tracking-wide"
+          style={{ fontFamily: "Tenor Sans", fontSize: "14px" }}
+        >
+          Loading Kria...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -102,11 +125,11 @@ export default function Home() {
                   className="w-[calc(50%-0.375rem)] sm:w-[calc(50%-0.5rem)] md:w-auto group block overflow-hidden border border-[#E8E0D8] shadow-[0_1px_10px_rgba(45,32,20,0.05)] hover:shadow-[0_10px_28px_rgba(45,32,20,0.16)] transition-shadow duration-300"
                 >
                   <div className="relative h-44 sm:h-56 md:h-80 lg:h-96 bg-[#F3EDE4] flex items-center justify-center overflow-hidden">
-                    <img
+                    <ProductImage
                       src={imgSrc}
+                      size="thumb"
                       alt={cat}
-                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-auto z-0 group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
+                      className="absolute inset-0 w-full h-full group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent z-10 flex items-end justify-center pb-5 sm:pb-7">
                       <span
