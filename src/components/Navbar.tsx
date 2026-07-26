@@ -180,7 +180,7 @@ function NavbarContent() {
       </div>
 
       {/* Header */}
-      <header className="static z-[80] backdrop-blur-md">
+      <header className="static z-[80] backdrop-blur-md bg-[#F5F5F5]">
         <div className="relative flex items-center justify-between px-4 sm:px-6 md:px-10 py-3 sm:py-4 text-white">
           <div className="flex w-full items-center justify-between relative min-h-[48px]">
             {/* Hamburger */}
@@ -302,7 +302,7 @@ function NavbarContent() {
 
 export default function Navbar() {
   return (
-    <Suspense fallback={<header className="bg-[#F9F6F0] h-16"></header>}>
+    <Suspense fallback={<header className="bg-[#F5F5F5] h-16"></header>}>
       <NavbarContent />
     </Suspense>
   );

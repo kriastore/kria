@@ -71,7 +71,7 @@ export default function ReviewCarousel() {
   }, []);
 
   return (
-    <section className="py-16 text-[#2D2D2D]">
+    <section className="pt-6 pb-16 text-[#2D2D2D]">
       <h2
         className="text-2xl sm:text-3xl md:text-4xl text-center mb-16"
         style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}

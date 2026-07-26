@@ -82,7 +82,7 @@ function ShopContent() {
   }, [params]);
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-[#F9F6F0] min-h-screen">
       <main className="px-4 py-8 max-w-6xl mx-auto">
         <div className="mb-4">
           <div className="text-sm text-gray-500">Showing {sorted.length} products</div>
@@ -136,7 +136,7 @@ function ShopContent() {
           {/* Main content area */}
           <div className="flex-1">
             {/* Mobile bottom toolbar */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E8E0D8] z-50">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#F9F6F0] border-t border-[#E8E0D8] z-50">
               <div className="max-w-6xl mx-auto flex divide-x divide-white px-0 py-0">
                 <button
                   onClick={() => { setShowFilterPopover(false); setShowMobileSort(s => !s); }}
@@ -163,7 +163,7 @@ function ShopContent() {
 
               {/* Mobile sort popover */}
               {showMobileSort && (
-                <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white shadow-lg p-3 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8]">
+                <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-3 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8]">
                   <div className="text-sm font-semibold mb-2 text-[#2D2D2D]">Sort</div>
                   <div className="space-y-1">
                     <button
@@ -190,13 +190,13 @@ function ShopContent() {
 
               {/* Mobile filter popover */}
               {showFilterPopover && (
-                <div id="filter-popover" className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-white shadow-lg p-4 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8]">
+                <div id="filter-popover" className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-4 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8]">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-sm font-semibold text-[#2D2D2D]">Filters</div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => { setFilter(null); setSort("relevance"); setSelectedSubcategory(null); }}
-                        className="text-sm bg-gray-100 text-gray-800 px-2 py-1 cursor-pointer hover:bg-gray-200"
+                        className="text-sm bg-[#F3EDE4] text-[#2D2D2D] px-2 py-1 cursor-pointer hover:bg-[#E0D0B8]"
                       >
                         Reset
                       </button>
@@ -264,7 +264,7 @@ function ShopContent() {
                 </button>
 
                 {sortOpen && (
-                  <div className="absolute mt-2 left-0 bg-white border border-[#E8E0D8] shadow-lg p-2 w-56 z-30">
+                  <div className="absolute mt-2 left-0 bg-[#F9F6F0] border border-[#E0D0B8] shadow-lg p-2 w-56 z-30">
                     <button
                       onClick={() => { setSort("relevance"); setSortOpen(false); }}
                       className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
@@ -343,7 +343,7 @@ function ShopContent() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-[#2D2D2D]">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F9F6F0] flex items-center justify-center text-[#2D2D2D]">Loading...</div>}>
       <ShopContent />
     </Suspense>
   );

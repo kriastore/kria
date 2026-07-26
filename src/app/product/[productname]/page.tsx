@@ -407,16 +407,6 @@ export default function ProductPage() {
     <>
       {/* MAIN PRODUCT SECTION */}
       <div className="min-h-screen bg-[#F9F6F0] text-black px-1 sm:px-8 lg:px-12 pt-1 sm:pt-6 pb-20">
-        <button
-          onClick={() => router.back()}
-          className="mb-6 inline-flex items-center gap-1.5 font-semibold text-[#2D2D2D] hover:text-[#D2693F] transition-colors duration-200 hidden sm:inline-flex"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
           {/* IMAGE SECTION */}
           <div>
