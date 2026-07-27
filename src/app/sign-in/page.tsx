@@ -59,14 +59,10 @@ export default function SignInPage() {
       if (methods.length > 0) {
         setStep("password");
       } else {
-        setStep("signup");
+        setStep("password");
       }
     } catch (err: any) {
-      if (err?.code === "auth/user-not-found" || err?.code === "auth/invalid-email") {
-        setStep("signup");
-      } else {
-        setError(err.message || "Something went wrong");
-      }
+      setStep("password");
     } finally {
       setLoading(false);
     }
@@ -227,6 +223,9 @@ export default function SignInPage() {
                 </button>
                 <button type="button" onClick={() => { setStep("email"); setPassword(""); setError(""); }} className="w-full text-xs font-medium transition-colors" style={{ color: "#9A6E50" }} onMouseOver={(e) => (e.currentTarget.style.color = "#2D2D2D")} onMouseOut={(e) => (e.currentTarget.style.color = "#9A6E50")}>
                   Use a different email
+                </button>
+                <button type="button" onClick={() => { setStep("signup"); setPassword(""); setError(""); }} className="w-full text-xs font-medium transition-colors" style={{ color: "#D2693F" }} onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")} onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}>
+                  Don&apos;t have an account? Create one
                 </button>
               </form>
             )}
