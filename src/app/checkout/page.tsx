@@ -219,14 +219,23 @@ function CheckoutContent() {
     if (pincode.length !== 6) return;
     try {
       const res = await fetch(`/api/lookup-pincode?pincode=${pincode}`);
+      if (!res.ok) {
+        console.error("Pincode lookup failed:", res.status, await res.text());
+        return;
+      }
       const info = await res.json();
-      if (info && info.state) {
+      console.log("Pincode lookup response:", info);
+      if (info?.state) {
         setCustomerDetails((prev) => ({
           ...prev,
-          stateCity: `${info.city}, ${info.state}`,
+          stateCity: `${info.city ?? ""}${info.city ? ", " : ""}${info.state}`,
         }));
+      } else {
+        console.warn("Pincode lookup returned no state:", info);
       }
-    } catch {}
+    } catch (err) {
+      console.error("Pincode lookup error:", err);
+    }
   };
 
   const handleInputChange = (field: keyof CustomerDetails, value: string) => {
