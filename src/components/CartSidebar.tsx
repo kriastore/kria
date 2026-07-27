@@ -255,9 +255,8 @@ export default function CartSidebar() {
     }, 0);
   }, [items, inventoryMap]);
 
-  const shippingAmount = 0;
   const subtotal = grandTotal;
-  const total = subtotal + shippingAmount;
+  const total = subtotal;
 
   function resolveItemStock(prod: InventoryItem, item: CartItem): number | undefined {
     // Try variant stock first (Color|Size key)
@@ -644,12 +643,8 @@ export default function CartSidebar() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#9A6E50]">Shipping</span>
-                <span className="text-[#2D2D2D] font-medium">
-                  {shippingAmount === 0 ? (
-                    "Free"
-                  ) : (
-                    <PriceText amount={shippingAmount} />
-                  )}
+                <span className="text-[#9A6E50] text-xs">
+                  Calculated at checkout
                 </span>
               </div>
               <div className="border-t border-[#E0D0B8] pt-2 flex items-center justify-between text-sm">

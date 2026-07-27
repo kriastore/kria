@@ -9,6 +9,7 @@ import {
   query,
   where,
   getDocs,
+  onSnapshot,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -103,21 +104,18 @@ export default function ProductPage() {
     fetchProduct();
   }, [productname]);
 
-  // Fetch cart quantity for this product and size
+  // Real-time cart quantity for this product (stays in sync with CartSidebar)
   useEffect(() => {
-    const fetchCartQuantity = async () => {
-      if (!user?.email || !db || !product) return;
+    if (!user?.email || !db || !product) return;
 
-      const cartRef = collection(db!, "Cart");
-      const q = query(
-        cartRef,
-        where("UserMail", "==", user.email),
-        where("ID", "==", product.ID)
-      );
+    const cartRef = collection(db!, "Cart");
+    const q = query(
+      cartRef,
+      where("UserMail", "==", user.email),
+      where("ID", "==", product.ID)
+    );
 
-      const snap = await getDocs(q);
-
-      // Build per-variant quantity map
+    const unsub = onSnapshot(q, (snap) => {
       const variantMap: Record<string, number> = {};
       let totalQty = 0;
       snap.docs.forEach((d) => {
@@ -130,14 +128,14 @@ export default function ProductPage() {
         variantMap[key] = (variantMap[key] || 0) + qty;
       });
 
-      // Also set size-specific quantity for the current selected size
+      setCartQuantityForVariant(variantMap);
+
       const sizeToUse = isGeneralStockProduct ? "One Size" : (hasSizes ? selectedSize : "One Size");
       const currentSizeKey = selectedColor ? `${selectedColor}|${sizeToUse}` : sizeToUse;
       setCartQuantity(variantMap[currentSizeKey] || 0);
-      setCartQuantityForVariant(variantMap);
-    };
+    });
 
-    fetchCartQuantity();
+    return () => unsub();
   }, [user?.email, product, selectedSize, selectedColor]);
 
   // Fetch cross-category recommendations (Style It With)
