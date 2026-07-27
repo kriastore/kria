@@ -174,9 +174,9 @@ function ProductForm({
         <section className="space-y-4">
           <h4 className={SECTION_TITLE_CLS}>Images</h4>
           <div className="grid grid-cols-3 gap-4">
-            <ImageUploadField label="Main" fieldName="ImageUrl1" value={form.ImageUrl1} isUploading={uploadingField === "ImageUrl1"} onUpload={onUpload} onRemove={(f) => updateForm(f, "")} onFileSelect={onFileSelect} />
-            <ImageUploadField label="Gallery 1" fieldName="ImageUrl2" value={form.ImageUrl2} isUploading={uploadingField === "ImageUrl2"} onUpload={onUpload} onRemove={(f) => updateForm(f, "")} onFileSelect={onFileSelect} />
-            <ImageUploadField label="Gallery 2" fieldName="ImageUrl3" value={form.ImageUrl3} isUploading={uploadingField === "ImageUrl3"} onUpload={onUpload} onRemove={(f) => updateForm(f, "")} onFileSelect={onFileSelect} />
+            <ImageUploadField label="Main" fieldName="ImageUrl1" value={form.ImageUrl1} isUploading={uploadingField === "ImageUrl1"} onUpload={onUpload} onRemove={(f) => { updateForm(f, ""); updateForm("ImageUrl1Medium" as any, ""); updateForm("ImageUrl1Thumb" as any, ""); }} onFileSelect={onFileSelect} />
+            <ImageUploadField label="Gallery 1" fieldName="ImageUrl2" value={form.ImageUrl2} isUploading={uploadingField === "ImageUrl2"} onUpload={onUpload} onRemove={(f) => { updateForm(f, ""); updateForm("ImageUrl2Medium" as any, ""); updateForm("ImageUrl2Thumb" as any, ""); }} onFileSelect={onFileSelect} />
+            <ImageUploadField label="Gallery 2" fieldName="ImageUrl3" value={form.ImageUrl3} isUploading={uploadingField === "ImageUrl3"} onUpload={onUpload} onRemove={(f) => { updateForm(f, ""); updateForm("ImageUrl3Medium" as any, ""); updateForm("ImageUrl3Thumb" as any, ""); }} onFileSelect={onFileSelect} />
           </div>
         </section>
 
@@ -639,7 +639,7 @@ export default function InventoryTable() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-amber-800">Inventory <span className="text-xs text-slate-500">({filteredItems.length})</span></h3>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => { setForm({ ...emptyForm, Category: CATEGORIES[0] || "" }); setShowAddModal(true); }}
               className="rounded-lg bg-[#D2693F] text-white px-4 py-2 text-sm font-medium hover:bg-[#B85A34] transition-colors"
             >
               + Add Product
