@@ -207,7 +207,7 @@ export default function AdminPage() {
           <p className="text-xs text-gray-400 mt-0.5">Dashboard</p>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -224,7 +224,7 @@ export default function AdminPage() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 pb-8 border-t border-gray-100 shrink-0">
           <button
             onClick={() => router.push("/")}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
