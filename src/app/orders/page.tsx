@@ -333,7 +333,7 @@ export default function OrdersPage() {
                       const total = (base + custom) * item.Quantity;
 
                       const imgSrc =
-                        (item as any).product?.ImageUrl1 || "/favicon.ico";
+                        (item as any).product?.ImageUrl1 || "/placeholder.png";
 
                       return (
                         <div key={idx} className="space-y-1">

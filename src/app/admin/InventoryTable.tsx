@@ -734,7 +734,7 @@ export default function InventoryTable() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-4">
             {filteredItems.map((it) => {
-              const img = it?.ImageUrl1 || it?.ImageUrl2 || it?.ImageUrl3 || "/favicon.ico";
+              const img = it?.ImageUrl1 || it?.ImageUrl2 || it?.ImageUrl3 || "/placeholder.png";
               return (
               <div key={it.id ?? it.ID ?? it.Product} className="group relative bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <div className="relative aspect-[4/3] bg-slate-100">

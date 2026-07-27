@@ -411,7 +411,7 @@ export default function CartPage() {
                     prod?.ImageUrl1 ||
                     prod?.ImageUrl2 ||
                     prod?.ImageUrl3 ||
-                    "/favicon.ico";
+                    "/placeholder.png";
                   const base = resolvePricing({ Price: prod?.Price, OriginalPrice: prod?.OriginalPrice, DiscountPercent: prod?.DiscountPercent }).selling;
                   const custom =
                     it.isCustomized && it.customPrice
