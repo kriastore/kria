@@ -9,8 +9,9 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
   const isAuth = pathname === "/sign-in" || pathname === "/sign-up";
+  const isCheckout = pathname === "/checkout";
 
-  if (isAdmin || isAuth) return <>{children}</>;
+  if (isAdmin || isAuth || isCheckout) return <>{children}</>;
 
   return (
     <>

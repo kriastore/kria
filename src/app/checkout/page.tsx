@@ -479,23 +479,10 @@ function CheckoutContent() {
 
   if (loading || loadingItems) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4"
-        style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-      >
-        <div className="text-center px-8 py-10 max-w-md w-full" style={{ border: "1px solid #E0D0B8" }}>
-          <div className="relative">
-            <div
-              className="animate-spin h-14 w-14 mx-auto mb-5"
-              style={{ border: "3px solid #E0D0B8", borderTopColor: "#D2693F" }}
-            />
-          </div>
-          <h2 className="text-xl font-semibold mb-2" style={{ fontFamily: "'Tenor Sans', serif", color: "#2D2D2D" }}>
-            Loading Checkout
-          </h2>
-          <p className="text-sm" style={{ color: "#9A6E50" }}>
-            Please wait while we prepare your order...
-          </p>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F9F6F0" }}>
+        <div className="text-center">
+          <div className="animate-spin h-10 w-10 mx-auto mb-4" style={{ border: "3px solid #E0D0B8", borderTopColor: "#D2693F", borderRadius: "50%" }} />
+          <p className="text-sm" style={{ color: "#9A6E50" }}>Loading checkout...</p>
         </div>
       </div>
     );
@@ -503,87 +490,38 @@ function CheckoutContent() {
 
   if (orderStatus === "success") {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4 py-12"
-        style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-      >
-        <div
-          className="max-w-md w-full px-8 py-10 text-center"
-          style={{ border: "1px solid #E0D0B8" }}
-        >
-          <div
-            className="w-20 h-20 mx-auto mb-6 flex items-center justify-center"
-            style={{ backgroundColor: "#F3EDE4", border: "2px solid #D2693F" }}
-          >
-            <svg className="w-10 h-10" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#F9F6F0" }}>
+        <div className="max-w-sm w-full text-center">
+          <div className="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F3EDE4", border: "2px solid #D2693F" }}>
+            <svg className="w-8 h-8" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
           </div>
+          <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "Tenor Sans, serif" }}>Order Confirmed!</h1>
+          <p className="text-sm mb-6" style={{ color: "#9A6E50" }}>Thank you for shopping with Kria</p>
 
-          <h1
-            className="text-2xl lg:text-3xl font-bold mb-3"
-            style={{ fontFamily: "'Tenor Sans', serif", color: "#2D2D2D" }}
-          >
-            Order Confirmed!
-          </h1>
-
-          <p className="text-sm mb-6" style={{ color: "#9A6E50" }}>
-            Thank you for shopping with Kria
-          </p>
-
-          <div
-            className="mb-6 px-4 py-4"
-            style={{ backgroundColor: "#F3EDE4", border: "1px solid #E0D0B8" }}
-          >
-            <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9A6E50" }}>
-              Order ID
-            </p>
-            <p className="text-sm font-semibold" style={{ color: "#2D2D2D" }}>
-              #{orderDetails?.orderId}
-            </p>
+          <div className="rounded-xl px-5 py-4 mb-4" style={{ backgroundColor: "#fff", border: "1px solid #E0D0B8" }}>
+            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: "#9A6E50" }}>Order ID</p>
+            <p className="text-sm font-bold" style={{ color: "#2D2D2D" }}>#{orderDetails?.orderId}</p>
           </div>
 
           {orderDetails?.estimatedDelivery && (
-            <p className="text-sm mb-6" style={{ color: "#9A6E50" }}>
+            <p className="text-sm mb-4" style={{ color: "#9A6E50" }}>
               Estimated delivery: <span className="font-semibold" style={{ color: "#2D2D2D" }}>{orderDetails.estimatedDelivery} business days</span>
             </p>
           )}
 
-          <p className="text-sm mb-6" style={{ color: "#9A6E50" }}>
-            A confirmation has been sent to your email.
-          </p>
+          <p className="text-sm mb-6" style={{ color: "#9A6E50" }}>A confirmation has been sent to your email.</p>
 
-          <div
-            className="mb-8 px-4 py-4"
-            style={{ backgroundColor: "#F3EDE4", border: "1px solid #E0D0B8" }}
-          >
-            <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "#9A6E50" }}>
-              Need Help?
-            </p>
-            <a
-              href="https://wa.me/919894414445"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold"
-              style={{ color: "#D2693F" }}
-            >
-              <span
-                className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold"
-                style={{ backgroundColor: "#D2693F", color: "#fff" }}
-              >
-                W
-              </span>
+          <div className="rounded-xl px-5 py-4 mb-6" style={{ backgroundColor: "#fff", border: "1px solid #E0D0B8" }}>
+            <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: "#9A6E50" }}>Need Help?</p>
+            <a href="https://wa.me/919894414445" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "#D2693F" }}>
+              <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded" style={{ backgroundColor: "#D2693F", color: "#fff" }}>W</span>
               Chat on WhatsApp
             </a>
           </div>
 
-          <button
-            onClick={() => router.push("/")}
-            className="w-full py-3 text-sm font-semibold tracking-wide transition-colors"
-            style={{ backgroundColor: "#D2693F", color: "#fff" }}
-            onMouseOver={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
-          >
+          <button onClick={() => router.push("/")} className="w-full py-3 text-sm font-bold tracking-wide rounded-xl transition-all" style={{ backgroundColor: "#D2693F", color: "#fff" }}>
             Continue Shopping
           </button>
         </div>
@@ -593,55 +531,20 @@ function CheckoutContent() {
 
   if (orderStatus === "failed") {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4 py-12"
-        style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-      >
-        <div
-          className="max-w-md w-full px-8 py-10 text-center"
-          style={{ border: "1px solid #E0D0B8" }}
-        >
-          <div
-            className="w-20 h-20 mx-auto mb-6 flex items-center justify-center"
-            style={{ backgroundColor: "#F3EDE4", border: "2px solid #D2693F" }}
-          >
-            <svg
-              className="w-10 h-10"
-              style={{ color: "#D2693F" }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#F9F6F0" }}>
+        <div className="max-w-sm w-full text-center">
+          <div className="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F3EDE4", border: "2px solid #D2693F" }}>
+            <svg className="w-8 h-8" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-
-          <h1
-            className="text-2xl lg:text-3xl font-bold mb-4"
-            style={{ fontFamily: "'Tenor Sans', serif", color: "#2D2D2D" }}
-          >
-            Payment Unsuccessful
-          </h1>
-          <p className="text-sm mb-8" style={{ color: "#9A6E50" }}>
-            Your payment could not be processed. Please try again or contact support for assistance.
-          </p>
+          <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "Tenor Sans, serif" }}>Payment Unsuccessful</h1>
+          <p className="text-sm mb-8" style={{ color: "#9A6E50" }}>Your payment could not be processed. Please try again.</p>
           <div className="flex flex-col gap-3">
-            <button
-              onClick={() => setOrderStatus("checkout")}
-              className="py-3 text-sm font-semibold tracking-wide transition-colors"
-              style={{ backgroundColor: "#D2693F", color: "#fff" }}
-              onMouseOver={(e) => (e.currentTarget.style.opacity = "0.9")}
-              onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
-            >
+            <button onClick={() => setOrderStatus("checkout")} className="py-3 text-sm font-bold tracking-wide rounded-xl" style={{ backgroundColor: "#D2693F", color: "#fff" }}>
               Try Again
             </button>
-            <button
-              onClick={() => router.push("/")}
-              className="py-3 text-sm font-semibold tracking-wide transition-colors"
-              style={{ backgroundColor: "#F3EDE4", color: "#2D2D2D", border: "1px solid #E0D0B8" }}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#E0D0B8")}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#F3EDE4")}
-            >
+            <button onClick={() => router.push("/")} className="py-3 text-sm font-bold tracking-wide rounded-xl" style={{ backgroundColor: "#F3EDE4", color: "#2D2D2D", border: "1px solid #E0D0B8" }}>
               Return Home
             </button>
           </div>
@@ -652,49 +555,18 @@ function CheckoutContent() {
 
   if (items.length === 0) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4 py-12"
-        style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-      >
-        <div
-          className="max-w-md w-full px-8 py-10 text-center"
-          style={{ border: "1px solid #E0D0B8" }}
-        >
-          <div
-            className="w-24 h-24 mx-auto mb-6 flex items-center justify-center"
-            style={{ backgroundColor: "#F3EDE4", border: "1px solid #E0D0B8" }}
-          >
-            <svg
-              className="w-12 h-12"
-              style={{ color: "#9A6E50" }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-              />
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ backgroundColor: "#F9F6F0" }}>
+        <div className="max-w-sm w-full text-center">
+          <div className="w-20 h-20 mx-auto mb-5 flex items-center justify-center rounded-full" style={{ backgroundColor: "#F3EDE4", border: "1px solid #E0D0B8" }}>
+            <svg className="w-10 h-10" style={{ color: "#9A6E50" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
           </div>
-          <h1
-            className="text-2xl lg:text-3xl font-bold mb-4"
-            style={{ fontFamily: "'Tenor Sans', serif", color: "#2D2D2D" }}
-          >
-            Your Cart is Empty
-          </h1>
+          <h1 className="text-2xl font-bold mb-3" style={{ fontFamily: "Tenor Sans, serif" }}>Your Cart is Empty</h1>
           <p className="text-sm mb-8 max-w-xs mx-auto" style={{ color: "#9A6E50" }}>
-            Looks like you haven't added any items to your cart yet. Start shopping to see your items here.
+            Looks like you haven't added any items yet. Start shopping to see your items here.
           </p>
-          <button
-            onClick={() => router.push("/")}
-            className="py-3 px-8 text-sm font-semibold tracking-wide transition-colors"
-            style={{ backgroundColor: "#D2693F", color: "#fff" }}
-            onMouseOver={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
-          >
+          <button onClick={() => router.push("/")} className="py-3 px-8 text-sm font-bold tracking-wide rounded-xl" style={{ backgroundColor: "#D2693F", color: "#fff" }}>
             Start Shopping
           </button>
         </div>
@@ -703,239 +575,262 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-10 md:px-10 md:py-14 flex justify-center" style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}>
-      <div className="w-full max-w-md px-4 py-6" style={{ border: "1px solid #E0D0B8" }}>
-        <header className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "'Tenor Sans', serif" }}>
-            Checkout
-          </h1>
-          <span className="text-xs" style={{ color: "#9A6E50" }}>
-            {items.length} item{items.length === 1 ? "" : "s"}
-          </span>
-        </header>
-
-        <section className="mb-6" style={{ border: "1px solid #E0D0B8" }}>
-          <div
-            className="px-4 py-3 text-sm font-semibold tracking-wide uppercase"
-            style={{ borderBottom: "1px solid #E0D0B8", color: "#9A6E50" }}
-          >
-            Shipping Details
+    <div className="min-h-screen" style={{ backgroundColor: "#F9F6F0", color: "#2D2D2D" }}>
+      {/* Top Bar */}
+      <header className="sticky top-0 z-50 border-b" style={{ backgroundColor: "#F9F6F0", borderColor: "#E0D0B8" }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
+          <button onClick={() => router.push("/")} className="flex items-center gap-2">
+            <svg className="w-5 h-5" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+            </svg>
+            <span className="text-sm font-semibold tracking-wide" style={{ fontFamily: "Tenor Sans, serif" }}>Back to Shop</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <svg className="w-4 h-4" style={{ color: "#9A6E50" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <span className="text-xs" style={{ color: "#9A6E50" }}>Secure Checkout</span>
           </div>
-          <div className="px-4 py-4 space-y-4 text-sm">
-            <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: "#9A6E50" }}>
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={customerDetails.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                className="w-full px-3 py-2 text-sm"
-                style={{ border: "1px solid #E0D0B8", backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-                placeholder="Enter your full name"
-              />
-            </div>
+        </div>
+      </header>
 
-            <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: "#9A6E50" }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={customerDetails.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                className="w-full px-3 py-2 text-sm"
-                style={{ border: "1px solid #E0D0B8", backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-                placeholder="you@example.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: "#9A6E50" }}>
-                Phone
-              </label>
-              <div className="flex items-center gap-2">
-                <span
-                  className="px-3 py-2 text-xs select-none"
-                  style={{ border: "1px solid #E0D0B8", backgroundColor: "#F3EDE4", color: "#9A6E50" }}
-                >
-                  +91
-                </span>
-                <input
-                  type="tel"
-                  value={customerDetails.phone}
-                  onChange={(e) => handleInputChange("phone", e.target.value)}
-                  className="w-full px-3 py-2 text-sm"
-                  style={{ border: "1px solid #E0D0B8", backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-                  placeholder="10 digit mobile number"
-                  maxLength={10}
-                  pattern="[0-9]{10}"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold mb-1" style={{ color: "#9A6E50" }}>
-                Address
-              </label>
-              <textarea
-                value={customerDetails.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                className="w-full px-3 py-2 text-sm resize-none"
-                style={{ border: "1px solid #E0D0B8", backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-                rows={2}
-                placeholder="Street, area, city"
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="block text-xs font-semibold mb-1" style={{ color: "#9A6E50" }}>
-                  PIN Code
-                </label>
-                <input
-                  type="text"
-                  value={customerDetails.pinCode}
-                  onChange={(e) => handleInputChange("pinCode", e.target.value)}
-                  className="w-full px-3 py-2 text-sm"
-                  style={{ border: "1px solid #E0D0B8", backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-                  placeholder="6 digit PIN"
-                  maxLength={6}
-                  pattern="[0-9]{6}"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-xs font-semibold mb-1" style={{ color: "#9A6E50" }}>
-                  State / City
-                </label>
-                <input
-                  type="text"
-                  value={customerDetails.stateCity}
-                  onChange={(e) => handleInputChange("stateCity", e.target.value)}
-                  className="w-full px-3 py-2 text-sm"
-                  style={{ border: "1px solid #E0D0B8", backgroundColor: "#F9F6F0", color: "#2D2D2D" }}
-                  placeholder="State / City"
-                />
-              </div>
-            </div>
+      {/* Progress Steps */}
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-4">
+        <div className="flex items-center gap-3 max-w-lg">
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full" style={{ backgroundColor: "#D2693F", color: "#fff" }}>1</span>
+            <span className="text-sm font-semibold" style={{ color: "#D2693F" }}>Shipping</span>
           </div>
-        </section>
-
-        <section className="mb-6" style={{ border: "1px solid #E0D0B8" }}>
-          <div
-            className="px-4 py-3 text-sm font-semibold tracking-wide uppercase"
-            style={{ borderBottom: "1px solid #E0D0B8", color: "#9A6E50" }}
-          >
-            Order Summary
+          <div className="flex-1 h-px" style={{ backgroundColor: "#E0D0B8" }} />
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 flex items-center justify-center text-xs font-bold rounded-full" style={{ backgroundColor: "#E0D0B8", color: "#9A6E50" }}>2</span>
+            <span className="text-sm" style={{ color: "#9A6E50" }}>Payment</span>
           </div>
-          <div className="px-4 py-3 text-sm">
-            <ul className="mb-3" style={{ borderBottom: "1px solid #E0D0B8" }}>
-              {items.map((item) => {
-                const key = String(item.ID);
-                const prod = inventoryMap[key];
-                const basePrice = resolvePricing({
-                  Price: prod?.Price,
-                  OriginalPrice: prod?.OriginalPrice,
-                  DiscountPercent: prod?.DiscountPercent,
-                }).selling;
-                const customPrice = item.isCustomized && item.customPrice ? Number(item.customPrice) : 0;
-                const linePrice = (basePrice + customPrice) * Number(item.Quantity || 0);
+        </div>
+      </div>
 
-                return (
-                  <li
-                    key={String(item.docId ?? item.ID)}
-                    className="py-2 flex items-center justify-between gap-4"
-                    style={{ borderBottom: "1px solid #E0D0B8" }}
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm" style={{ color: "#2D2D2D" }}>
-                        {prod?.ProductName ?? prod?.Description ?? ""}
-                        {item.Quantity > 1 ? ` x ${item.Quantity}` : ""}
-                      </p>
-                      {item.Size && (
-                        <p className="text-xs" style={{ color: "#9A6E50" }}>
-                          {item.Color ? `${item.Color} / ` : ""}Size: {item.Size}
-                        </p>
-                      )}
-                      {item.ItemNotes && (
-                        <p className="text-[10px] italic" style={{ color: "#9A6E50" }}>
-                          Note: {item.ItemNotes}
-                        </p>
-                      )}
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 md:px-8 pb-16">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Column — Form */}
+          <div className="flex-1 min-w-0">
+            <section className="mb-6">
+              <h2 className="text-lg font-bold mb-4" style={{ fontFamily: "Tenor Sans, serif" }}>Shipping Details</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Full Name</label>
+                  <input
+                    type="text"
+                    value={customerDetails.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
+                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    placeholder="John Doe"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Email</label>
+                  <input
+                    type="email"
+                    value={customerDetails.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
+                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    placeholder="you@example.com"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Phone</label>
+                  <div className="flex items-center">
+                    <span
+                      className="px-4 py-3 text-sm select-none rounded-l-lg"
+                      style={{ border: "1px solid #E0D0B8", borderRight: "none", backgroundColor: "#F3EDE4", color: "#9A6E50" }}
+                    >
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      value={customerDetails.phone}
+                      onChange={(e) => handleInputChange("phone", e.target.value)}
+                      className="w-full px-4 py-3 text-sm rounded-r-lg outline-none transition-colors"
+                      style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
+                      onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                      placeholder="98944 14445"
+                      maxLength={10}
+                      pattern="[0-9]{10}"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Address</label>
+                  <textarea
+                    value={customerDetails.address}
+                    onChange={(e) => handleInputChange("address", e.target.value)}
+                    className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors resize-none"
+                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    rows={2}
+                    placeholder="Flat / House No., Building, Street, Area"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>PIN Code</label>
+                  <input
+                    type="text"
+                    value={customerDetails.pinCode}
+                    onChange={(e) => handleInputChange("pinCode", e.target.value)}
+                    className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
+                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    placeholder="411033"
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>State / City</label>
+                  <input
+                    type="text"
+                    value={customerDetails.stateCity}
+                    onChange={(e) => handleInputChange("stateCity", e.target.value)}
+                    className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
+                    style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
+                    placeholder="Auto-filled from PIN"
+                  />
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column — Order Summary (sticky on desktop) */}
+          <div className="w-full lg:w-[380px] lg:shrink-0">
+            <div className="lg:sticky lg:top-20">
+              <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff" }}>
+                <div className="px-5 py-4" style={{ borderBottom: "1px solid #E0D0B8" }}>
+                  <h2 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#9A6E50" }}>
+                    Order Summary · {items.length} item{items.length === 1 ? "" : "s"}
+                  </h2>
+                </div>
+
+                <div className="px-5 py-3 max-h-64 overflow-y-auto">
+                  <ul className="space-y-3">
+                    {items.map((item) => {
+                      const key = String(item.ID);
+                      const prod = inventoryMap[key];
+                      const basePrice = resolvePricing({
+                        Price: prod?.Price,
+                        OriginalPrice: prod?.OriginalPrice,
+                        DiscountPercent: prod?.DiscountPercent,
+                      }).selling;
+                      const customPrice = item.isCustomized && item.customPrice ? Number(item.customPrice) : 0;
+                      const linePrice = (basePrice + customPrice) * Number(item.Quantity || 0);
+
+                      return (
+                        <li key={String(item.docId ?? item.ID)} className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate" style={{ color: "#2D2D2D" }}>
+                              {prod?.ProductName ?? prod?.Description ?? `Item ${item.ID}`}
+                            </p>
+                            <p className="text-xs mt-0.5" style={{ color: "#9A6E50" }}>
+                              {item.Color && <>{item.Color}{item.Size ? " / " : ""}</>}
+                              {item.Size && <>Size: {item.Size}</>}
+                              {!item.Color && !item.Size && <>Qty: {item.Quantity}</>}
+                              {item.Quantity > 1 && <> · Qty: {item.Quantity}</>}
+                            </p>
+                            {item.ItemNotes && (
+                              <p className="text-[11px] italic mt-0.5" style={{ color: "#9A6E50" }}>
+                                {item.ItemNotes}
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-sm font-medium shrink-0" style={{ color: "#2D2D2D" }}>
+                            <PriceText amount={linePrice} />
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                <div className="px-5 py-4 space-y-2" style={{ borderTop: "1px solid #E0D0B8" }}>
+                  <div className="flex items-center justify-between text-sm">
+                    <span style={{ color: "#9A6E50" }}>Subtotal</span>
+                    <span className="font-medium"><PriceText amount={grandTotal} /></span>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span style={{ color: "#9A6E50" }}>Discount ({discountPercent}%)</span>
+                      <span className="font-medium" style={{ color: "#D2693F" }}>- <PriceText amount={discountAmount} /></span>
                     </div>
-                    <div className="text-sm font-medium" style={{ color: "#2D2D2D" }}>
-                      <PriceText amount={linePrice} />
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                  )}
+                  <div className="flex items-center justify-between text-sm">
+                    <span style={{ color: "#9A6E50" }}>Shipping</span>
+                    <span className="font-medium" style={{ color: "#2D2D2D" }}>
+                      {pincodeChecked && customerDetails.pinCode.length === 6
+                        ? shippingInfo.charge === 0
+                          ? <span style={{ color: "#2D2D2D" }}>Free</span>
+                          : <PriceText amount={shippingInfo.charge} />
+                        : "—"}
+                    </span>
+                  </div>
+                  {pincodeChecked && customerDetails.pinCode.length === 6 && (
+                    <p className="text-[11px]" style={{ color: "#9A6E50" }}>
+                      {shippingInfo.estimatedDays} business days via {shippingInfo.courierPartner}
+                      {shippingInfo.zone && <span className="ml-1">· {shippingInfo.zone} zone</span>}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between pt-2 mt-2" style={{ borderTop: "1px solid #E0D0B8" }}>
+                    <span className="text-base font-bold">Total</span>
+                    <span className="text-lg font-bold"><PriceText amount={finalTotal} /></span>
+                  </div>
+                </div>
+              </div>
 
-            <div className="flex items-center justify-between mb-1">
-              <span style={{ color: "#9A6E50" }}>Subtotal</span>
-              <span className="font-medium">
-                <PriceText amount={grandTotal} />
-              </span>
-            </div>
-            {discountAmount > 0 && (
-              <div className="flex items-center justify-between mb-1 text-xs">
-                <span style={{ color: "#9A6E50" }}>Discount ({discountPercent}%)</span>
-                <span className="font-medium" style={{ color: "#D2693F" }}>
-                  - <PriceText amount={discountAmount} />
-                </span>
+              {/* Pay Button */}
+              <button
+                onClick={handlePayment}
+                disabled={!isFormValid() || orderStatus === "processing" || !razorpayLoaded}
+                className="w-full mt-4 py-3.5 text-sm font-bold tracking-wide rounded-xl transition-all"
+                style={{
+                  backgroundColor: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "#D2693F" : "#E0D0B8",
+                  color: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "#fff" : "#9A6E50",
+                  cursor: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "pointer" : "not-allowed",
+                }}
+              >
+                {orderStatus === "processing"
+                  ? "Processing..."
+                  : `Pay Rs.${formatCurrency(finalTotal)}`}
+              </button>
+
+              {!razorpayLoaded && (
+                <p className="text-[11px] mt-2 text-center" style={{ color: "#9A6E50" }}>
+                  Initializing secure payment...
+                </p>
+              )}
+
+              <div className="flex items-center justify-center gap-2 mt-3">
+                <svg className="w-3.5 h-3.5" style={{ color: "#9A6E50" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <span className="text-[11px]" style={{ color: "#9A6E50" }}>Payments via Razorpay · 256-bit SSL</span>
               </div>
-            )}
-            <div className="flex items-center justify-between mb-1">
-              <span style={{ color: "#9A6E50" }}>Shipping</span>
-              <span className="font-medium">
-                {pincodeChecked && customerDetails.pinCode.length === 6
-                  ? shippingInfo.charge === 0
-                    ? "Free"
-                    : `Rs.${formatCurrency(shippingInfo.charge)}`
-                  : "—"}
-              </span>
-            </div>
-            {pincodeChecked && customerDetails.pinCode.length === 6 && (
-              <div className="flex items-center justify-between mb-1 text-xs">
-                <span style={{ color: "#9A6E50" }}>Delivery estimate</span>
-                <span style={{ color: "#9A6E50" }}>
-                  {shippingInfo.zone && <>{shippingInfo.zone} · </>}
-                  {shippingInfo.estimatedDays} business days via DTDC
-                </span>
-              </div>
-            )}
-            <div
-              className="flex items-center justify-between text-base font-semibold mt-2 pt-2"
-              style={{ borderTop: "1px solid #E0D0B8" }}
-            >
-              <span>Total</span>
-              <span>
-                <PriceText amount={finalTotal} />
-              </span>
             </div>
           </div>
-        </section>
-
-        <button
-          onClick={handlePayment}
-          disabled={!isFormValid() || orderStatus === "processing" || !razorpayLoaded}
-          className="w-full py-3 text-sm font-semibold tracking-wide transition-colors"
-          style={{
-            backgroundColor: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "#D2693F" : "#E0D0B8",
-            color: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "#fff" : "#9A6E50",
-            cursor: isFormValid() && razorpayLoaded && orderStatus !== "processing" ? "pointer" : "not-allowed",
-          }}
-        >
-          {orderStatus === "processing"
-            ? "Processing..."
-            : `Place Order • Rs.${formatCurrency(finalTotal)}`}
-        </button>
-
-        {!razorpayLoaded && (
-          <p className="text-[11px] mt-2 text-center" style={{ color: "#9A6E50" }}>
-            Initializing secure payment...
-          </p>
-        )}
+        </div>
       </div>
     </div>
   );
