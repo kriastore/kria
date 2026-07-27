@@ -7,8 +7,18 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+    const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      console.error("postalpincode.in returned non-OK status:", res.status);
+      return NextResponse.json({ city: "", state: "", district: "", error: `upstream ${res.status}` });
+    }
+
     const data = await res.json();
+    console.log("postalpincode.in raw response:", JSON.stringify(data));
 
     if (data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
       const po = data[0].PostOffice[0];
@@ -19,8 +29,10 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({ city: "", state: "", district: "" });
-  } catch {
-    return NextResponse.json({ city: "", state: "", district: "" });
+    console.warn("postalpincode.in lookup not successful:", data[0]?.Status, data[0]?.Message);
+    return NextResponse.json({ city: "", state: "", district: "", upstreamStatus: data[0]?.Status });
+  } catch (err) {
+    console.error("Pincode lookup fetch failed:", err);
+    return NextResponse.json({ city: "", state: "", district: "", error: String(err) }, { status: 500 });
   }
 }
