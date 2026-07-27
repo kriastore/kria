@@ -19,6 +19,8 @@ import {
 } from "firebase/firestore";
 import { resolvePricing } from "@/utils/pricing";
 import { calculateShipping, type ShippingResult } from "@/utils/shipping";
+import { useCartSidebar } from "@/context/CartSidebarContext";
+import ProductImage from "@/components/ProductImage";
 
 type CartItem = {
   docId?: string;
@@ -65,6 +67,7 @@ function CheckoutContent() {
   const { user, loading } = useAuth();
   const { cart, removeItem } = useCart();
   const router = useRouter();
+  const { openCart } = useCartSidebar();
 
   const [items, setItems] = useState<CartItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
@@ -600,11 +603,11 @@ function CheckoutContent() {
       {/* Top Bar */}
       <header className="sticky top-0 z-50 border-b" style={{ backgroundColor: "#F9F6F0", borderColor: "#E0D0B8" }}>
         <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
-          <button onClick={() => router.push("/")} className="flex items-center gap-2">
+          <button onClick={openCart} className="flex items-center gap-2">
             <svg className="w-5 h-5" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
-            <span className="text-sm font-semibold tracking-wide" style={{ fontFamily: "Tenor Sans, serif" }}>Back to Shop</span>
+            <span className="text-sm font-semibold tracking-wide" style={{ fontFamily: "Tenor Sans, serif" }}>Back to Cart</span>
           </button>
           <div className="flex items-center gap-2">
             <svg className="w-4 h-4" style={{ color: "#9A6E50" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -761,7 +764,17 @@ function CheckoutContent() {
                       const linePrice = (basePrice + customPrice) * Number(item.Quantity || 0);
 
                       return (
-                        <li key={String(item.docId ?? item.ID)} className="flex items-start justify-between gap-3">
+                        <li key={String(item.docId ?? item.ID)} className="flex items-start gap-3">
+                          <div className="w-12 h-12 border border-[#E0D0B8] overflow-hidden flex-shrink-0 bg-white">
+                            <ProductImage
+                              src={prod?.ImageUrl1 || "/placeholder.png"}
+                              srcMedium={prod?.ImageUrl1Medium}
+                              srcThumb={prod?.ImageUrl1Thumb}
+                              size="thumb"
+                              alt={prod?.ProductName ?? prod?.Description ?? ""}
+                              className="w-full h-full"
+                            />
+                          </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate" style={{ color: "#2D2D2D" }}>
                               {prod?.ProductName ?? prod?.Description ?? `Item ${item.ID}`}
