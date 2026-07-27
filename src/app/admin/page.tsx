@@ -96,6 +96,16 @@ export default function AdminPage() {
     });
   }, [isAdmin]);
 
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [sidebarOpen]);
+
   if (authLoading || adminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F9F6F0]">
@@ -191,7 +201,7 @@ export default function AdminPage() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed lg:sticky top-0 left-0 z-50 h-[100dvh] h-screen w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-200 lg:translate-x-0 overflow-y-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-6 border-b border-gray-100">
           <h1 className="text-lg font-bold text-[#2D2D2D]" style={{ fontFamily: "var(--font-playfair)" }}>Kria Admin</h1>
           <p className="text-xs text-gray-400 mt-0.5">Dashboard</p>
