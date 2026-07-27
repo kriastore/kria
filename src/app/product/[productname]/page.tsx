@@ -689,13 +689,11 @@ export default function ProductPage() {
                   } ${
                     availableStock === 0 && !isVariantFallback
                       ? 'bg-[#E9E1D2] text-[#A79A83] cursor-not-allowed'
-                      : isVariantFallback
-                        ? 'bg-[#C5A059] hover:bg-[#B8963F] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(197,160,89,0.35)] hover:shadow-[0_4px_14px_rgba(197,160,89,0.45)]'
-                        : 'bg-[#D2693F] hover:bg-[#B85A34] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(210,105,63,0.35)] hover:shadow-[0_4px_14px_rgba(210,105,63,0.45)]'
+                      : 'bg-[#D2693F] hover:bg-[#B85A34] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(210,105,63,0.35)] hover:shadow-[0_4px_14px_rgba(210,105,63,0.45)]'
                   }`}
                   style={{ fontFamily: 'Tenor Sans', fontWeight: '600', fontSize: '14px', letterSpacing: '0.02em' }}
                 >
-                  {availableStock === 0 && !isVariantFallback ? 'Sold Out' : isVariantFallback ? 'Make to Order' : 'Add to Cart'}
+                  {availableStock === 0 && !isVariantFallback ? 'Sold Out' : 'Add to Cart'}
                 </button>
 
                 {/* Quantity stepper */}
