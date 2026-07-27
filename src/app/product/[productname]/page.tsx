@@ -695,7 +695,7 @@ export default function ProductPage() {
                 </button>
                 {questionsOpen && (
                   <p className="text-sm text-[#5C5142] leading-relaxed mt-2">
-                    Please reach out to us on <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="underline text-[#D2693F] hover:text-[#B85A34] transition-colors">WhatsApp</a> or email us at <a href="mailto:admin@gmail.com" className="underline text-[#D2693F] hover:text-[#B85A34] transition-colors">admin@gmail.com</a> and we'll be happy to help.
+                    Please reach out to us on <a href="https://wa.me/919894414445" target="_blank" rel="noopener noreferrer" className="underline text-[#D2693F] hover:text-[#B85A34] transition-colors">WhatsApp</a> or email us at <a href="mailto:Kriastore@gmail.com" className="underline text-[#D2693F] hover:text-[#B85A34] transition-colors">Kriastore@gmail.com</a> and we'll be happy to help.
                   </p>
                 )}
               </div>

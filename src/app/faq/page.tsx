@@ -68,7 +68,7 @@ export default function FAQPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5">✉️</div>
-                  <span className="font-medium">hello@kria.in</span>
+                  <span className="font-medium">Kriastore@gmail.com</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5">🕒</div>

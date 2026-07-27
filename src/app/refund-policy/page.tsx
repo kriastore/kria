@@ -63,7 +63,7 @@ export default function RefundPolicyPage() {
           <ul className="list-decimal pl-5 text-sm md:text-base text-gray-800 space-y-1">
             <li>
               Email our support team at
-               &nbsp;<a href="mailto:hello@kria.in" className="font-semibold underline">hello@kria.in</a>.
+               &nbsp;<a href="mailto:Kriastore@gmail.com" className="font-semibold underline">Kriastore@gmail.com</a>.
             </li>
             <li>
               Mention your <span className="font-semibold">Order ID</span> and provide a brief
