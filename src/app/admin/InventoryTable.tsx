@@ -22,7 +22,6 @@ type Item = { id: string; [k: string]: any };
 export type FormState = {
   ProductName: string;
   Description: string;
-  Instructions: string;
   ID: string;
   ImageUrl1: string;
   ImageUrl1Medium: string;
@@ -159,10 +158,6 @@ function ProductForm({
           <div>
             <label className={LABEL_CLS}>Description</label>
             <textarea rows={3} className={INPUT_CLS + " resize-none"} value={form.Description} onChange={(e) => updateForm('Description', e.target.value)} placeholder="Detailed product description…" />
-          </div>
-          <div>
-            <label className={LABEL_CLS}>Instructions</label>
-            <textarea className={INPUT_CLS + " min-h-[80px]"} value={form.Instructions} onChange={(e) => updateForm('Instructions', e.target.value)} placeholder={"e.g. Hand wash gently\nStore in a dry place"} />
           </div>
           <div>
             <label className={LABEL_CLS}>Care</label>
@@ -402,7 +397,6 @@ export default function InventoryTable() {
   const emptyForm: FormState = {
     ProductName: "",
     Description: "",
-    Instructions: "",
     ID: "",
     ImageUrl1: "",
     ImageUrl1Medium: "",
@@ -506,7 +500,6 @@ export default function InventoryTable() {
       const payload: any = {
         ProductName: form.ProductName || "",
         Description: form.Description || "",
-        Instructions: form.Instructions || "",
         ID: nextId,
         ImageUrl1: form.ImageUrl1 || "",
         ImageUrl1Medium: form.ImageUrl1Medium || "",
@@ -547,7 +540,6 @@ export default function InventoryTable() {
     setForm({
       ProductName: item.ProductName ?? item.Description ?? "",
       Description: item.Description ?? "",
-      Instructions: item.Instructions ?? "",
       ID: item.ID ? String(item.ID) : (item.id ?? ""),
       ImageUrl1: item.ImageUrl1 ?? "",
       ImageUrl1Medium: item.ImageUrl1Medium ?? "",
@@ -584,7 +576,6 @@ export default function InventoryTable() {
       const payload: any = {
         ProductName: form.ProductName || "",
         Description: form.Description || "",
-        Instructions: form.Instructions || "",
         ID: form.ID ? Number(form.ID) : undefined,
         ImageUrl1: form.ImageUrl1 || "",
         ImageUrl1Medium: form.ImageUrl1Medium || "",

@@ -30,7 +30,6 @@ type Product = {
   ProductName?: string;
   Price?: number;
   Material?: string;
-  Instructions?: string;
   Care?: string;
   ImageUrl1?: string;
   ImageUrl2?: string;
@@ -683,13 +682,10 @@ export default function ProductPage() {
               )}
             </div>
 
-              {/* Description & Instructions */}
+              {/* Description */}
               <div className="mt-6 text-sm text-[#3A3226]">
                 <h3 className="font-semibold text-[#211A12] mb-1.5 tracking-wide">Description</h3>
                 <p className="text-sm text-[#5C5142] leading-relaxed whitespace-pre-line">{product.Description}</p>
-
-                <h3 className="font-semibold text-[#211A12] mt-4 mb-1.5 tracking-wide">Instructions</h3>
-                <p className="text-sm text-[#5C5142] leading-relaxed whitespace-pre-line">{product.Instructions || product.Material || 'No instructions available.'}</p>
               </div>
 
               {/* Divider */}
