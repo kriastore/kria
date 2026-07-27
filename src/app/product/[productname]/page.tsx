@@ -299,13 +299,19 @@ export default function ProductPage() {
     // Made-to-order products have infinite stock
     if (isMadeToOrder) return Infinity;
 
-    // If product has both colors and sizes, check variant-specific stock
     const hasColors = (product.Colors || []).length > 0;
     const hasSizes = (product.Sizes || []).length > 0;
-    if (hasColors && hasSizes && selectedColor && selectedSize) {
-      const variantKey = `${selectedColor}|${selectedSize}`;
-      const variantQty = product.VariantStock?.[variantKey] ?? 0;
-      return Math.max(0, variantQty - (cartQuantityForVariant[variantKey] || 0));
+    const hasVariants = hasColors || hasSizes;
+
+    // Check variant-specific stock if any variants exist
+    if (hasVariants) {
+      const color = hasColors ? selectedColor : "";
+      const size = hasSizes ? selectedSize : "One Size";
+      const variantKey = `${color}|${size}`;
+      const variantQty = product.VariantStock?.[variantKey];
+      if (typeof variantQty === "number") {
+        return Math.max(0, variantQty - (cartQuantityForVariant[variantKey] || 0));
+      }
     }
 
     const totalStock = product.Stock !== undefined ? product.Stock : 0;
@@ -316,9 +322,19 @@ export default function ProductPage() {
   const hasVariantStock = (() => {
     const hasColors = (product.Colors || []).length > 0;
     const hasSizes = (product.Sizes || []).length > 0;
-    if (hasColors && hasSizes && selectedColor && selectedSize) {
-      const variantKey = `${selectedColor}|${selectedSize}`;
-      return (product.VariantStock?.[variantKey] ?? 0) > 0;
+    const hasVariants = hasColors || hasSizes;
+
+    if (hasVariants) {
+      const color = hasColors ? selectedColor : "";
+      const size = hasSizes ? selectedSize : "One Size";
+      const variantKey = `${color}|${size}`;
+      const variantQty = product.VariantStock?.[variantKey];
+      // If variant has explicit entry (even 0), use it; otherwise fall back to total stock
+      if (variantKey in (product.VariantStock || {})) {
+        return variantQty! > 0;
+      }
+      // No entry for this variant — treat as available if total stock exists
+      return true;
     }
     return true;
   })();
