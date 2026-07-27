@@ -347,8 +347,8 @@ export default function ProductPage() {
   const handleAddToCart = async (addQty?: number) => {
     const qty = addQty ?? 1;
 
-    // Check stock availability (skip for made-to-order)
-    if (!isMadeToOrder) {
+    // Check stock availability (skip for made-to-order and fallback variants)
+    if (!isMadeToOrder && !isVariantFallback) {
       const effectiveStock = availableStock;
       if (effectiveStock === 0) {
         alert(isGeneralStockProduct ? "This item is out of stock" : "This size is out of stock");
