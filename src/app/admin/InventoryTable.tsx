@@ -142,8 +142,10 @@ function ProductForm({
 }) {
   const parsedColors = form.Colors ? form.Colors.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
   const parsedSizes = form.Sizes ? form.Sizes.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
-  const variantTotal = parsedColors.reduce((sum, color) =>
-    sum + parsedSizes.reduce((s, size) => s + (form.VariantStock[`${color}|${size}`] || 0), 0), 0
+  const gridColors = parsedColors.length > 0 ? parsedColors : [""];
+  const gridSizes = parsedSizes.length > 0 ? parsedSizes : ["One Size"];
+  const variantTotal = gridColors.reduce((sum, color) =>
+    sum + gridSizes.reduce((s, size) => s + (form.VariantStock[`${color}|${size}`] || 0), 0), 0
   );
 
   return (
@@ -288,7 +290,7 @@ function ProductForm({
               <input type="number" min="0" className={INPUT_CLS} value={form.Stock} onChange={(e) => updateForm('Stock', e.target.value)} placeholder="0" />
             </div>
           )}
-          {form.StockType === "ready_stock" && parsedColors.length > 0 && parsedSizes.length > 0 && (
+          {form.StockType === "ready_stock" && (parsedColors.length > 0 || parsedSizes.length > 0) && (
             <div className="space-y-3">
               <div>
                 <label className={LABEL_CLS}>Stock by Variant</label>
@@ -299,19 +301,19 @@ function ProductForm({
                   <thead>
                     <tr>
                       <th className="px-2 py-1.5 text-left font-semibold text-slate-500 border border-slate-200 bg-slate-50"></th>
-                      {parsedSizes.map((size) => (
-                        <th key={size} className="px-2 py-1.5 text-center font-semibold text-slate-500 border border-slate-200 bg-slate-50 min-w-[60px]">{size}</th>
+                      {gridSizes.map((size) => (
+                        <th key={size} className="px-2 py-1.5 text-center font-semibold text-slate-500 border border-slate-200 bg-slate-50 min-w-[60px]">{size || "All"}</th>
                       ))}
                       <th className="px-2 py-1.5 text-center font-semibold text-slate-500 border border-slate-200 bg-slate-50 min-w-[60px]">Row Total</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {parsedColors.map((color) => {
-                      const rowTotal = parsedSizes.reduce((sum, size) => sum + (form.VariantStock[`${color}|${size}`] || 0), 0);
+                    {gridColors.map((color) => {
+                      const rowTotal = gridSizes.reduce((sum, size) => sum + (form.VariantStock[`${color}|${size}`] || 0), 0);
                       return (
-                        <tr key={color}>
-                          <td className="px-2 py-1 font-medium text-slate-700 border border-slate-200 bg-slate-50 whitespace-nowrap">{color}</td>
-                          {parsedSizes.map((size) => (
+                        <tr key={color || "_"}>
+                          <td className="px-2 py-1 font-medium text-slate-700 border border-slate-200 bg-slate-50 whitespace-nowrap">{color || "All"}</td>
+                          {gridSizes.map((size) => (
                             <td key={size} className="px-1 py-1 border border-slate-200">
                               <input
                                 type="number"
@@ -334,8 +336,8 @@ function ProductForm({
                   <tfoot>
                     <tr>
                       <td className="px-2 py-1.5 font-semibold text-slate-500 border border-slate-200 bg-slate-50">Col Total</td>
-                      {parsedSizes.map((size) => {
-                        const colTotal = parsedColors.reduce((sum, color) => sum + (form.VariantStock[`${color}|${size}`] || 0), 0);
+                      {gridSizes.map((size) => {
+                        const colTotal = gridColors.reduce((sum, color) => sum + (form.VariantStock[`${color}|${size}`] || 0), 0);
                         return (
                           <td key={size} className={`px-2 py-1.5 text-center font-semibold border border-slate-200 bg-slate-50 ${colTotal > 0 ? "text-[#D2693F]" : "text-slate-400"}`}>{colTotal}</td>
                         );

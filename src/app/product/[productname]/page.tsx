@@ -588,7 +588,7 @@ export default function ProductPage() {
             )}
 
             {/* Shipping Time */}
-            {(product.StockType === "made_to_order" || isVariantFallback) && (
+            {(product.StockType === "made_to_order" || isVariantFallback || product.DeliveryTime) && (
               <p className="text-sm text-[#9A6E50] mb-3">
                 <Link href="/shipping-policy" className="underline underline-offset-2 decoration-[#9A6E50] hover:text-[#D2693F] transition-colors">Ships</Link> in {isVariantFallback ? (product.FallbackDeliveryTime || "7-10 days") : (product.DeliveryTime || "7-10 days")}
                 {isVariantFallback && <span className="text-xs text-[#9A6E50]/70 ml-1">(made to order for this variant)</span>}
