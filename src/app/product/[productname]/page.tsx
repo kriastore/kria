@@ -327,12 +327,12 @@ export default function ProductPage() {
       const size = hasSizes ? selectedSize : "One Size";
       const variantKey = `${color}|${size}`;
       const variantQty = product.VariantStock?.[variantKey];
-      // If variant has explicit entry (even 0), use it; otherwise fall back to total stock
+      // If variant has explicit entry, check if it has stock
       if (variantKey in (product.VariantStock || {})) {
         return variantQty! > 0;
       }
-      // No entry for this variant — treat as available if total stock exists
-      return true;
+      // No entry for this variant — no allocated stock, treat as fallback
+      return false;
     }
     return true;
   })();
