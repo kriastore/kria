@@ -18,7 +18,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { resolvePricing } from "@/utils/pricing";
-import { calculateShipping, lookupPincode, type ShippingResult } from "@/utils/shipping";
+import { calculateShipping, type ShippingResult } from "@/utils/shipping";
 
 type CartItem = {
   docId?: string;
@@ -208,14 +208,17 @@ function CheckoutContent() {
       const totalItems = items.reduce((sum, it) => sum + Number(it.Quantity || 0), 0);
       const result = calculateShipping(totalItems, grandTotal, customerDetails.pinCode);
       setShippingInfo(result);
-      lookupPincode(customerDetails.pinCode).then((info) => {
-        if (info) {
-          setCustomerDetails((prev) => ({
-            ...prev,
-            stateCity: `${info.city}, ${info.state}`,
-          }));
-        }
-      });
+      fetch(`/api/lookup-pincode?pincode=${customerDetails.pinCode}`)
+        .then((r) => r.json())
+        .then((info) => {
+          if (info && info.state) {
+            setCustomerDetails((prev) => ({
+              ...prev,
+              stateCity: `${info.city}, ${info.state}`,
+            }));
+          }
+        })
+        .catch(() => {});
     } else {
       setPincodeChecked(false);
       setShippingInfo({ available: true, charge: 0, estimatedDays: "5-7", courierPartner: "DTDC", zone: "" });
