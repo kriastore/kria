@@ -18,8 +18,6 @@ export type PincodeInfo = {
   available: boolean;
 };
 
-const FREE_SHIPPING_THRESHOLD = 999;
-
 // Zone-based rates from Pune (411033) via DTDC
 // Rates include fuel surcharge (~20%). GST (18%) applied on top.
 type ZoneDef = { rate: number; perItem: number; days: string; label: string };
@@ -150,24 +148,10 @@ export function calculateShipping(
   orderValue: number,
   pincode: string
 ): ShippingResult {
-  // Free shipping above threshold
-  if (orderValue >= FREE_SHIPPING_THRESHOLD) {
-    const zone = getZone(pincode);
-    const z = ZONES[zone];
-    return {
-      available: true,
-      charge: 0,
-      estimatedDays: z.days,
-      courierPartner: "DTDC",
-      zone: z.label,
-      message: "Free shipping on orders above ₹999",
-    };
-  }
-
   const zone = getZone(pincode);
   const z = ZONES[zone];
 
-  // Base rate + per-item charge for additional items
+  // Flat base rate + per-item charge for additional items
   const baseCharge = z.rate + Math.max(0, totalItems - 1) * z.perItem;
 
   // GST on shipping (18%)

@@ -488,7 +488,7 @@ export default function CartSidebar() {
                   prod?.ImageUrl1 ||
                   prod?.ImageUrl2 ||
                   prod?.ImageUrl3 ||
-                  "/favicon.ico";
+                  "/placeholder.png";
                 const pricing = resolvePricing({
                   Price: prod?.Price,
                   OriginalPrice: prod?.OriginalPrice,
