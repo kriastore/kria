@@ -207,7 +207,7 @@ export default function AdminPage() {
           <p className="text-xs text-gray-400 mt-0.5">Dashboard</p>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="p-3 space-y-1">
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -222,19 +222,16 @@ export default function AdminPage() {
               {item.label}
             </button>
           ))}
-        </nav>
-
-        <div className="p-4 pb-8 border-t border-gray-100 shrink-0">
           <button
             onClick={() => router.push("/")}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors mt-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
             Back to Store
           </button>
-        </div>
+        </nav>
       </aside>
 
       {/* Main content */}
