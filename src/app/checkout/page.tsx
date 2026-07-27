@@ -209,7 +209,7 @@ function CheckoutContent() {
       const result = calculateShipping(totalItems, grandTotal, customerDetails.pinCode);
       setShippingInfo(result);
       lookupPincode(customerDetails.pinCode).then((info) => {
-        if (info && !customerDetails.stateCity.trim()) {
+        if (info) {
           setCustomerDetails((prev) => ({
             ...prev,
             stateCity: `${info.city}, ${info.state}`,
