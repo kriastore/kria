@@ -69,6 +69,7 @@ export default function ProductPage() {
   const [imageIndex, setImageIndex] = useState(0);
   const [shareCopied, setShareCopied] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [cartQuantity, setCartQuantity] = useState(0);
   const [careOpen, setCareOpen] = useState(false);
   const [questionsOpen, setQuestionsOpen] = useState(false);
@@ -186,6 +187,39 @@ export default function ProductPage() {
     };
 
     fetchStyleItWith();
+  }, [product]);
+
+  // Fetch similar products (same category, name overlap)
+  useEffect(() => {
+    if (!product || !db) return;
+
+    const fetchSimilar = async () => {
+      const currentCategory = (product as any).Category || (product as any).Product || "";
+      if (!currentCategory) return;
+
+      const snap = await getDocs(
+        query(collection(db!, "inventory"), where("Category", "==", currentCategory))
+      );
+
+      const currentName = ((product as any).ProductName || product.Description || "").toLowerCase();
+      const currentWords = currentName.split(/\s+/).filter((w: string) => w.length > 2);
+
+      const scored = snap.docs
+        .map((d) => {
+          const p = d.data() as Product;
+          if (p.ID === product.ID) return null;
+          const name = ((p as any).ProductName || p.Description || "").toLowerCase();
+          const words = name.split(/\s+/).filter((w: string) => w.length > 2);
+          const overlap = words.filter((w: string) => currentWords.includes(w)).length;
+          return { product: p, overlap };
+        })
+        .filter(Boolean) as { product: Product; overlap: number }[];
+
+      scored.sort((a, b) => b.overlap - a.overlap);
+      setSimilarProducts(scored.slice(0, 4).map((s) => s.product));
+    };
+
+    fetchSimilar();
   }, [product]);
 
   // Preload adjacent gallery images
@@ -776,6 +810,39 @@ export default function ProductPage() {
                   </span>
                 </div>
               </div>
+
+              {/* SIMILAR PRODUCTS */}
+              {similarProducts.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-[#E0D0B8]">
+                  <h3 className="text-sm font-semibold text-[#211A12] tracking-wide mb-4">Similar Products</h3>
+                  <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
+                    {similarProducts.map((sp) => (
+                      <button
+                        key={sp.ID}
+                        type="button"
+                        onClick={() => router.push(`/product/${encodeURIComponent((sp as any).ProductName || sp.Description)}`)}
+                        className="flex-shrink-0 w-[140px] snap-start text-left group"
+                      >
+                        <div className="w-full aspect-square overflow-hidden border border-[#E9E1D2] mb-2">
+                          <ProductImage
+                            src={(sp as any).ImageUrl1}
+                            srcMedium={(sp as any).ImageUrl1Medium}
+                            srcThumb={(sp as any).ImageUrl1Thumb}
+                            size="thumb"
+                            alt={(sp as any).ProductName || sp.Description}
+                            className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <p className="text-xs text-[#2D2D2D] leading-snug line-clamp-2">{(sp as any).ProductName || sp.Description}</p>
+                        <PriceText
+                          amount={resolvePricing({ Price: sp.Price, OriginalPrice: (sp as any).OriginalPrice, DiscountPercent: sp.DiscountPercent }).selling}
+                          className="text-xs font-bold text-[#211A12] mt-0.5"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
