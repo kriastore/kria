@@ -202,28 +202,32 @@ function CheckoutContent() {
   const discountedTotal = grandTotal - discountAmount;
   const finalTotal = discountedTotal + shippingInfo.charge;
 
+  // Calculate shipping when pincode or cart changes
   useEffect(() => {
     if (customerDetails.pinCode.length === 6) {
       setPincodeChecked(true);
       const totalItems = items.reduce((sum, it) => sum + Number(it.Quantity || 0), 0);
       const result = calculateShipping(totalItems, grandTotal, customerDetails.pinCode);
       setShippingInfo(result);
-      fetch(`/api/lookup-pincode?pincode=${customerDetails.pinCode}`)
-        .then((r) => r.json())
-        .then((info) => {
-          if (info && info.state) {
-            setCustomerDetails((prev) => ({
-              ...prev,
-              stateCity: `${info.city}, ${info.state}`,
-            }));
-          }
-        })
-        .catch(() => {});
     } else {
       setPincodeChecked(false);
       setShippingInfo({ available: true, charge: 0, estimatedDays: "5-7", courierPartner: "DTDC", zone: "" });
     }
   }, [customerDetails.pinCode, grandTotal, items]);
+
+  const lookupPincodeAuto = async (pincode: string) => {
+    if (pincode.length !== 6) return;
+    try {
+      const res = await fetch(`/api/lookup-pincode?pincode=${pincode}`);
+      const info = await res.json();
+      if (info && info.state) {
+        setCustomerDetails((prev) => ({
+          ...prev,
+          stateCity: `${info.city}, ${info.state}`,
+        }));
+      }
+    } catch {}
+  };
 
   const handleInputChange = (field: keyof CustomerDetails, value: string) => {
     if (field === "phone") {
@@ -233,6 +237,9 @@ function CheckoutContent() {
       value = value.replace(/\D/g, "").slice(0, 6);
     }
     setCustomerDetails((prev) => ({ ...prev, [field]: value }));
+    if (field === "pinCode" && value.length === 6) {
+      lookupPincodeAuto(value);
+    }
   };
 
   const isFormValid = () => {
@@ -692,10 +699,10 @@ function CheckoutContent() {
                     type="text"
                     value={customerDetails.pinCode}
                     onChange={(e) => handleInputChange("pinCode", e.target.value)}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = "#E0D0B8"; lookupPincodeAuto(customerDetails.pinCode); }}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
                     style={{ border: "1px solid #E0D0B8", backgroundColor: "#fff", color: "#2D2D2D" }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#D2693F"}
-                    onBlur={(e) => e.currentTarget.style.borderColor = "#E0D0B8"}
                     placeholder="411033"
                     maxLength={6}
                     pattern="[0-9]{6}"
