@@ -285,13 +285,11 @@ function ProductForm({
               <input type="number" min="0" className={INPUT_CLS} value={form.Stock} onChange={(e) => updateForm('Stock', e.target.value)} placeholder="0" />
             </div>
           )}
-          {form.StockType === "made_to_order" && (
-            <div>
-              <label className={LABEL_CLS}>Delivery Time</label>
-              <input className={INPUT_CLS} value={form.DeliveryTime} onChange={(e) => updateForm('DeliveryTime', e.target.value)} placeholder="e.g. 7-10 days" />
-              <p className="text-xs text-slate-400 mt-1">Displayed to customers on the product page</p>
-            </div>
-          )}
+          <div>
+            <label className={LABEL_CLS}>Delivery Time</label>
+            <input className={INPUT_CLS} value={form.DeliveryTime} onChange={(e) => updateForm('DeliveryTime', e.target.value)} placeholder="e.g. 2-4 days" />
+            <p className="text-xs text-slate-400 mt-1">Displayed to customers on the product page</p>
+          </div>
         </section>
 
         {/* ── Options ── */}
@@ -525,7 +523,7 @@ export default function InventoryTable() {
         createdAt: serverTimestamp(),
         Stock: form.StockType === "ready_stock" ? (form.Stock ? Number(form.Stock) : 0) : undefined,
         StockType: form.StockType || "ready_stock",
-        DeliveryTime: form.StockType === "made_to_order" ? (form.DeliveryTime || "") : undefined,
+        DeliveryTime: form.DeliveryTime || "",
         IsCustomizable: form.IsCustomizable || false,
         CustomizationNote: form.CustomizationNote || "",
         DiscountPercent: form.PricingMode === "discount" && form.DiscountPercent ? Number(form.DiscountPercent) : undefined,
@@ -602,7 +600,7 @@ export default function InventoryTable() {
         OriginalPrice: form.OriginalPrice ? Number(form.OriginalPrice) : undefined,
         Stock: form.StockType === "ready_stock" ? (form.Stock ? Number(form.Stock) : 0) : undefined,
         StockType: form.StockType || "ready_stock",
-        DeliveryTime: form.StockType === "made_to_order" ? (form.DeliveryTime || "") : undefined,
+        DeliveryTime: form.DeliveryTime || "",
         IsCustomizable: form.IsCustomizable || false,
         CustomizationNote: form.CustomizationNote || "",
         DiscountPercent: form.PricingMode === "discount" && form.DiscountPercent ? Number(form.DiscountPercent) : null,
