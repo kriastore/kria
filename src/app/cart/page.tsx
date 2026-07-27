@@ -30,6 +30,8 @@ type CartItem = {
   ID: number | string;
   Quantity: number;
   Size?: string;
+  Color?: string;
+  ItemNotes?: string;
   UserMail?: string;
   AddedOn?: string;
   isCustomized?: boolean;
@@ -59,6 +61,7 @@ type InventoryItem = {
    StockM?: number;
    StockL?: number;
    StockXL?: number;
+  VariantStock?: Record<string, number>;
   _docId?: string;
 };
 
@@ -221,6 +224,19 @@ export default function CartPage() {
 
   // Ensure all cart items are within available stock.
   // If any are not, silently remove them from the cart.
+  function resolveItemStock(prod: InventoryItem, item: CartItem): number | undefined {
+    if (prod.VariantStock && item.Color && item.Size) {
+      const key = `${item.Color}|${item.Size}`;
+      if (typeof prod.VariantStock[key] === "number") return prod.VariantStock[key];
+    }
+    const size = (item.Size || "").toUpperCase();
+    if (size === "S" && typeof prod.StockS === "number") return prod.StockS;
+    if (size === "M" && typeof prod.StockM === "number") return prod.StockM;
+    if (size === "L" && typeof prod.StockL === "number") return prod.StockL;
+    if (size === "XL" && typeof prod.StockXL === "number") return prod.StockXL;
+    return typeof prod.Stock === "number" ? prod.Stock : undefined;
+  }
+
   function hasSufficientStock() {
     if (!items.length) return false;
 
@@ -236,16 +252,7 @@ export default function CartPage() {
         return;
       }
 
-      let sizeStock: number | undefined;
-      const size = (item.Size || "").toUpperCase();
-      if (size === "S") sizeStock = prod.StockS;
-      else if (size === "M") sizeStock = prod.StockM;
-      else if (size === "L") sizeStock = prod.StockL;
-      else if (size === "XL") sizeStock = prod.StockXL;
-
-      const maxAllowed =
-        (typeof sizeStock === "number" ? sizeStock : undefined) ??
-        (typeof prod.Stock === "number" ? prod.Stock : undefined);
+      const maxAllowed = resolveItemStock(prod, item);
 
       if (typeof maxAllowed === "number" && (maxAllowed <= 0 || qty > maxAllowed)) {
         removedItems.push(item);
@@ -294,16 +301,9 @@ export default function CartPage() {
     if (delta > 0) {
       const prod = inventoryMap[String(item.ID)];
       if (prod) {
-        let sizeStock: number | undefined;
-        const size = (item.Size || "").toUpperCase();
-        if (size === "S") sizeStock = prod.StockS;
-        else if (size === "M") sizeStock = prod.StockM;
-        else if (size === "L") sizeStock = prod.StockL;
-        else if (size === "XL") sizeStock = prod.StockXL;
-
-        const maxAllowed = sizeStock ?? prod.Stock;
+        const maxAllowed = resolveItemStock(prod, item) ?? prod.Stock;
         if (typeof maxAllowed === "number" && newQty > maxAllowed) {
-          alert("No more stock available for this size.");
+          alert("No more stock available for this variant.");
           return;
         }
       }
@@ -453,8 +453,8 @@ export default function CartPage() {
                               {prod?.ProductName ?? prod?.Description ?? ""}
                             </p>
                             {it.Size && (
-                              <p className="text-[11px] text-gray-500">
-                                Size: {it.Size}
+                              <p className="text-xs" style={{ color: "#9A6E50" }}>
+                                {it.Color ? `${it.Color} / ` : ""}Size: {it.Size}
                               </p>
                             )}
                           </div>
@@ -490,16 +490,9 @@ export default function CartPage() {
                             </span>
                             {(() => {
                               const prodForLine = inventoryMap[String(it.ID)];
-                              let sizeStock: number | undefined;
-                              const size = (it.Size || "").toUpperCase();
-                              if (size === "S") sizeStock = prodForLine?.StockS;
-                              else if (size === "M") sizeStock = prodForLine?.StockM;
-                              else if (size === "L") sizeStock = prodForLine?.StockL;
-                              else if (size === "XL") sizeStock = prodForLine?.StockXL;
-
-                              const maxAllowed =
-                                (typeof sizeStock === "number" ? sizeStock : undefined) ??
-                                (typeof prodForLine?.Stock === "number" ? prodForLine.Stock : undefined);
+                              const maxAllowed = prodForLine
+                                ? resolveItemStock(prodForLine, it)
+                                : undefined;
                               const atMax =
                                 typeof maxAllowed === "number" &&
                                 Number(it.Quantity || 0) >= maxAllowed;

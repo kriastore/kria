@@ -100,6 +100,8 @@ export function readGuestCartFromCookie(): Array<{
   ID: string | number; 
   Quantity: number; 
   Size?: string; 
+  Color?: string;
+  ItemNotes?: string;
   AddedOn?: any;
   isCustomized?: boolean;
   customizationText?: string;
@@ -121,6 +123,8 @@ export function writeGuestCartToCookie(cartArray: Array<{
   ID: string | number; 
   Quantity: number; 
   Size?: string; 
+  Color?: string;
+  ItemNotes?: string;
   AddedOn?: any;
   isCustomized?: boolean;
   customizationText?: string;

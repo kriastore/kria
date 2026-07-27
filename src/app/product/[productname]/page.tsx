@@ -51,6 +51,8 @@ type Product = {
   IsFeatured?: boolean;
   Colors?: string[];
   Sizes?: string[];
+  VariantStock?: Record<string, number>;
+  FallbackDeliveryTime?: string;
 };
 
 export default function ProductPage() {
@@ -70,6 +72,7 @@ export default function ProductPage() {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [cartQuantity, setCartQuantity] = useState(0);
+  const [cartQuantityForVariant, setCartQuantityForVariant] = useState<Record<string, number>>({});
   const [careOpen, setCareOpen] = useState(false);
   const [questionsOpen, setQuestionsOpen] = useState(false);
   const [showAdded, setShowAdded] = useState(false);
@@ -105,34 +108,37 @@ export default function ProductPage() {
     const fetchCartQuantity = async () => {
       if (!user?.email || !db || !product) return;
 
-      // Check if this product uses general stock (no sizes defined) or size-based stock
-      const hasProductSizes = (product as any).Sizes && (product as any).Sizes.length > 0;
-      const catRaw = (product as any).Category || (product as any).Product || "";
-      const catStr = typeof catRaw === 'string' ? catRaw : String(catRaw || '');
-      const isGeneralStock = !hasProductSizes || catStr === "Purses" || catStr === "Earrings" ||
-                              catStr.toLowerCase().includes("purse") ||
-                              catStr.toLowerCase().includes("earring");
-      const sizeToUse = isGeneralStock ? "One Size" : (hasProductSizes ? selectedSize : "One Size");
-
       const cartRef = collection(db!, "Cart");
       const q = query(
         cartRef,
         where("UserMail", "==", user.email),
-        where("ID", "==", product.ID),
-        where("Size", "==", sizeToUse)
+        where("ID", "==", product.ID)
       );
 
       const snap = await getDocs(q);
-      if (!snap.empty) {
-        const cartItem = snap.docs[0].data();
-        setCartQuantity(cartItem.Quantity || 0);
-      } else {
-        setCartQuantity(0);
-      }
+
+      // Build per-variant quantity map
+      const variantMap: Record<string, number> = {};
+      let totalQty = 0;
+      snap.docs.forEach((d) => {
+        const item = d.data();
+        const qty = item.Quantity || 0;
+        totalQty += qty;
+        const itemSize = item.Size || "One Size";
+        const itemColor = item.Color || "";
+        const key = itemColor ? `${itemColor}|${itemSize}` : itemSize;
+        variantMap[key] = (variantMap[key] || 0) + qty;
+      });
+
+      // Also set size-specific quantity for the current selected size
+      const sizeToUse = isGeneralStockProduct ? "One Size" : (hasSizes ? selectedSize : "One Size");
+      const currentSizeKey = selectedColor ? `${selectedColor}|${sizeToUse}` : sizeToUse;
+      setCartQuantity(variantMap[currentSizeKey] || 0);
+      setCartQuantityForVariant(variantMap);
     };
 
     fetchCartQuantity();
-  }, [user?.email, product, selectedSize]);
+  }, [user?.email, product, selectedSize, selectedColor]);
 
   // Fetch cross-category recommendations (Style It With)
   useEffect(() => {
@@ -293,9 +299,32 @@ export default function ProductPage() {
     // Made-to-order products have infinite stock
     if (isMadeToOrder) return Infinity;
 
+    // If product has both colors and sizes, check variant-specific stock
+    const hasColors = (product.Colors || []).length > 0;
+    const hasSizes = (product.Sizes || []).length > 0;
+    if (hasColors && hasSizes && selectedColor && selectedSize) {
+      const variantKey = `${selectedColor}|${selectedSize}`;
+      const variantQty = product.VariantStock?.[variantKey] ?? 0;
+      return Math.max(0, variantQty - (cartQuantityForVariant[variantKey] || 0));
+    }
+
     const totalStock = product.Stock !== undefined ? product.Stock : 0;
     return Math.max(0, totalStock - cartQuantity);
   };
+
+  // Check if current variant has ready stock
+  const hasVariantStock = (() => {
+    const hasColors = (product.Colors || []).length > 0;
+    const hasSizes = (product.Sizes || []).length > 0;
+    if (hasColors && hasSizes && selectedColor && selectedSize) {
+      const variantKey = `${selectedColor}|${selectedSize}`;
+      return (product.VariantStock?.[variantKey] ?? 0) > 0;
+    }
+    return true;
+  })();
+
+  // Is the current variant out of stock but product has total stock?
+  const isVariantFallback = !isMadeToOrder && !hasVariantStock && (product.Stock ?? 0) > 0;
 
   const availableStock = getAvailableStock();
 
@@ -341,12 +370,14 @@ export default function ProductPage() {
 
     // For general stock products, use "One Size" as the size identifier
     const sizeToUse = isGeneralStockProduct ? "One Size" : selectedSize;
+    const colorToUse = selectedColor || "";
 
     const q = query(
       cartRef,
       where("UserMail", "==", user.email),
       where("ID", "==", product.ID),
-      where("Size", "==", sizeToUse)
+      where("Size", "==", sizeToUse),
+      where("Color", "==", colorToUse)
     );
 
     const snap = await getDocs(q);
@@ -365,6 +396,7 @@ export default function ProductPage() {
         ID: product.ID,
         Quantity: qty,
         Size: sizeToUse,
+        Color: colorToUse,
         UserMail: user.email,
         ["Added On"]: serverTimestamp(),
       });
@@ -385,11 +417,13 @@ export default function ProductPage() {
 
     const cartRef = collection(db!, "Cart");
     const sizeToUse = isGeneralStockProduct ? "One Size" : selectedSize;
+    const colorToUse = selectedColor || "";
     const q = query(
       cartRef,
       where("UserMail", "==", user.email),
       where("ID", "==", product.ID),
-      where("Size", "==", sizeToUse)
+      where("Size", "==", sizeToUse),
+      where("Color", "==", colorToUse)
     );
 
     const snap = await getDocs(q);
@@ -553,10 +587,11 @@ export default function ProductPage() {
               </p>
             )}
 
-            {/* Shipping Time (for made-to-order) */}
-            {product.StockType === "made_to_order" && (
+            {/* Shipping Time */}
+            {(product.StockType === "made_to_order" || isVariantFallback) && (
               <p className="text-sm text-[#9A6E50] mb-3">
-                <Link href="/shipping-policy" className="underline underline-offset-2 decoration-[#9A6E50] hover:text-[#D2693F] transition-colors">Ships</Link> in {product.DeliveryTime || "7-10 days"}
+                <Link href="/shipping-policy" className="underline underline-offset-2 decoration-[#9A6E50] hover:text-[#D2693F] transition-colors">Ships</Link> in {isVariantFallback ? (product.FallbackDeliveryTime || "7-10 days") : (product.DeliveryTime || "7-10 days")}
+                {isVariantFallback && <span className="text-xs text-[#9A6E50]/70 ml-1">(made to order for this variant)</span>}
               </p>
             )}
 
@@ -623,26 +658,28 @@ export default function ProductPage() {
 
             {/* ADD TO CART / QUANTITY STEPPER */}
             <div className="mb-5">
-              {availableStock === 0 && !isMadeToOrder && (
+              {availableStock === 0 && !isMadeToOrder && !isVariantFallback && (
                 <p className="text-sm text-[#C0392B] mb-2 font-medium">
-                  {isGeneralStockProduct ? "Out of stock" : `Out of stock in size ${selectedSize}`}
+                  {isGeneralStockProduct ? "Out of stock" : `Out of stock in ${selectedColor ? selectedColor + " / " : ""}size ${selectedSize}`}
                 </p>
               )}
               <div className="relative" style={{ height: '54px', width: '350px', maxWidth: '100%' }}>
                 {/* Add to Cart */}
                 <button
                   onClick={() => handleAddToCart(1)}
-                  disabled={availableStock === 0}
+                  disabled={availableStock === 0 && !isVariantFallback}
                   className={`absolute inset-0 flex items-center justify-center px-2 transition-all duration-300 ease-in-out ${
                     cartQuantity > 0 ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
                   } ${
-                    availableStock === 0
+                    availableStock === 0 && !isVariantFallback
                       ? 'bg-[#E9E1D2] text-[#A79A83] cursor-not-allowed'
-                      : 'bg-[#D2693F] hover:bg-[#B85A34] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(210,105,63,0.35)] hover:shadow-[0_4px_14px_rgba(210,105,63,0.45)]'
+                      : isVariantFallback
+                        ? 'bg-[#C5A059] hover:bg-[#B8963F] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(197,160,89,0.35)] hover:shadow-[0_4px_14px_rgba(197,160,89,0.45)]'
+                        : 'bg-[#D2693F] hover:bg-[#B85A34] active:scale-[0.99] text-white shadow-[0_3px_10px_rgba(210,105,63,0.35)] hover:shadow-[0_4px_14px_rgba(210,105,63,0.45)]'
                   }`}
                   style={{ fontFamily: 'Tenor Sans', fontWeight: '600', fontSize: '14px', letterSpacing: '0.02em' }}
                 >
-                  {availableStock === 0 ? 'Sold Out' : 'Add to Cart'}
+                  {availableStock === 0 && !isVariantFallback ? 'Sold Out' : isVariantFallback ? 'Make to Order' : 'Add to Cart'}
                 </button>
 
                 {/* Quantity stepper */}

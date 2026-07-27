@@ -25,6 +25,8 @@ type CartItem = {
   ID: number | string;
   Quantity: number;
   Size?: string;
+  Color?: string;
+  ItemNotes?: string;
   UserMail?: string;
   AddedOn?: any;
   isCustomized?: boolean;
@@ -260,17 +262,25 @@ function CheckoutContent() {
       const qty = Number(item.Quantity || 0);
       if (!qty || qty <= 0) return;
       let sizeStock: number | undefined;
-      const size = (item.Size || "").toUpperCase();
-      if (size === "S") sizeStock = prod.StockS;
-      else if (size === "M") sizeStock = prod.StockM;
-      else if (size === "L") sizeStock = prod.StockL;
-      else if (size === "XL") sizeStock = prod.StockXL;
+      // Try VariantStock first
+      if (prod.VariantStock && item.Color && item.Size) {
+        const key = `${item.Color}|${item.Size}`;
+        if (typeof prod.VariantStock[key] === "number") sizeStock = prod.VariantStock[key];
+      }
+      if (sizeStock === undefined) {
+        const size = (item.Size || "").toUpperCase();
+        if (size === "S") sizeStock = prod.StockS;
+        else if (size === "M") sizeStock = prod.StockM;
+        else if (size === "L") sizeStock = prod.StockL;
+        else if (size === "XL") sizeStock = prod.StockXL;
+      }
       const maxAllowed =
         (typeof sizeStock === "number" ? sizeStock : undefined) ??
         (typeof prod.Stock === "number" ? prod.Stock : undefined);
       if (typeof maxAllowed === "number" && qty > maxAllowed) {
         const label = prod.ProductName || prod.Description || prod.Product || `Item ${item.ID}`;
-        stockIssues.push(`${label} (${size || ""}) - only ${maxAllowed} left`);
+        const variant = item.Color ? `${item.Color} / ${item.Size || ""}` : (item.Size || "");
+        stockIssues.push(`${label} (${variant}) - only ${maxAllowed} left`);
       }
     });
 
@@ -295,6 +305,8 @@ function CheckoutContent() {
         ID: item.ID,
         Quantity: item.Quantity,
         Size: item.Size,
+        Color: item.Color || "",
+        ItemNotes: item.ItemNotes || "",
         product: inventoryMap[String(item.ID)],
         ...(item.isCustomized && {
           isCustomized: true,
@@ -338,30 +350,33 @@ function CheckoutContent() {
           setOrderStatus("success");
 
           try {
-            const sizeFieldMap: Record<string, string> = {
-              S: "StockS",
-              M: "StockM",
-              L: "StockL",
-              XL: "StockXL",
-            };
-
             await Promise.all(
               items.map(async (item) => {
                 const prod: any = inventoryMap[String(item.ID)];
                 if (!prod?._docId) return;
                 const qty = Number(item.Quantity || 0);
                 if (!qty || qty <= 0) return;
-                const updates: Record<string, number> = {};
-                if (item.Size) {
-                  const sizeKey = sizeFieldMap[String(item.Size).toUpperCase()];
-                  if (sizeKey && typeof prod[sizeKey] === "number") {
-                    const current = Number(prod[sizeKey] || 0);
-                    updates[sizeKey] = Math.max(0, current - qty);
+                const updates: Record<string, any> = {};
+                // Deduct variant stock if applicable
+                if (item.Color && item.Size && prod.VariantStock) {
+                  const key = `${item.Color}|${item.Size}`;
+                  if (typeof prod.VariantStock[key] === "number") {
+                    const newVariantStock = { ...prod.VariantStock };
+                    newVariantStock[key] = Math.max(0, (newVariantStock[key] || 0) - qty);
+                    updates.VariantStock = newVariantStock;
                   }
                 }
+                // Also deduct per-size field if present
+                if (item.Size) {
+                  const sizeFieldMap: Record<string, string> = { S: "StockS", M: "StockM", L: "StockL", XL: "StockXL" };
+                  const sizeKey = sizeFieldMap[String(item.Size).toUpperCase()];
+                  if (sizeKey && typeof prod[sizeKey] === "number") {
+                    updates[sizeKey] = Math.max(0, Number(prod[sizeKey] || 0) - qty);
+                  }
+                }
+                // Always deduct general Stock
                 if (typeof prod.Stock === "number") {
-                  const currentTotal = Number(prod.Stock || 0);
-                  updates.Stock = Math.max(0, currentTotal - qty);
+                  updates.Stock = Math.max(0, Number(prod.Stock || 0) - qty);
                 }
                 if (Object.keys(updates).length === 0) return;
                 await updateDoc(firestoreDoc(db!, "inventory", prod._docId), updates);
@@ -839,7 +854,12 @@ function CheckoutContent() {
                       </p>
                       {item.Size && (
                         <p className="text-xs" style={{ color: "#9A6E50" }}>
-                          Size: {item.Size}
+                          {item.Color ? `${item.Color} / ` : ""}Size: {item.Size}
+                        </p>
+                      )}
+                      {item.ItemNotes && (
+                        <p className="text-[10px] italic" style={{ color: "#9A6E50" }}>
+                          Note: {item.ItemNotes}
                         </p>
                       )}
                     </div>

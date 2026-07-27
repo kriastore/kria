@@ -32,6 +32,8 @@ type CartItem = {
   ID: number | string;
   Quantity: number;
   Size?: string;
+  Color?: string;
+  ItemNotes?: string;
   UserMail?: string;
   AddedOn?: string;
   isCustomized?: boolean;
@@ -61,6 +63,8 @@ type InventoryItem = {
   StockM?: number;
   StockL?: number;
   StockXL?: number;
+  VariantStock?: Record<string, number>;
+  StockType?: string;
   _docId?: string;
 };
 
@@ -255,6 +259,22 @@ export default function CartSidebar() {
   const subtotal = grandTotal;
   const total = subtotal + shippingAmount;
 
+  function resolveItemStock(prod: InventoryItem, item: CartItem): number | undefined {
+    // Try variant stock first (Color|Size key)
+    if (prod.VariantStock && item.Color && item.Size) {
+      const key = `${item.Color}|${item.Size}`;
+      if (typeof prod.VariantStock[key] === "number") return prod.VariantStock[key];
+    }
+    // Fallback to per-size fields
+    const size = (item.Size || "").toUpperCase();
+    if (size === "S" && typeof prod.StockS === "number") return prod.StockS;
+    if (size === "M" && typeof prod.StockM === "number") return prod.StockM;
+    if (size === "L" && typeof prod.StockL === "number") return prod.StockL;
+    if (size === "XL" && typeof prod.StockXL === "number") return prod.StockXL;
+    // Fallback to general stock
+    return typeof prod.Stock === "number" ? prod.Stock : undefined;
+  }
+
   function hasSufficientStock() {
     if (!items.length) return false;
 
@@ -271,11 +291,7 @@ export default function CartSidebar() {
       }
 
       let sizeStock: number | undefined;
-      const size = (item.Size || "").toUpperCase();
-      if (size === "S") sizeStock = prod.StockS;
-      else if (size === "M") sizeStock = prod.StockM;
-      else if (size === "L") sizeStock = prod.StockL;
-      else if (size === "XL") sizeStock = prod.StockXL;
+      sizeStock = resolveItemStock(prod, item);
 
       const maxAllowed =
         (typeof sizeStock === "number" ? sizeStock : undefined) ??
@@ -327,16 +343,10 @@ export default function CartSidebar() {
     if (delta > 0) {
       const prod = inventoryMap[String(item.ID)];
       if (prod) {
-        let sizeStock: number | undefined;
-        const size = (item.Size || "").toUpperCase();
-        if (size === "S") sizeStock = prod.StockS;
-        else if (size === "M") sizeStock = prod.StockM;
-        else if (size === "L") sizeStock = prod.StockL;
-        else if (size === "XL") sizeStock = prod.StockXL;
-
+        const sizeStock = resolveItemStock(prod, item);
         const maxAllowed = sizeStock ?? prod.Stock;
         if (typeof maxAllowed === "number" && newQty > maxAllowed) {
-          alert("No more stock available for this size.");
+          alert("No more stock available for this variant.");
           return;
         }
       }
@@ -538,9 +548,22 @@ export default function CartSidebar() {
                           </p>
                           {it.Size && (
                             <p className="text-[11px] text-[#9A6E50]">
-                              Size: {it.Size}
+                              {it.Color ? `${it.Color} / ` : ""}Size: {it.Size}
                             </p>
                           )}
+                          <input
+                            type="text"
+                            placeholder="Add notes (e.g. gift wrap)"
+                            defaultValue={it.ItemNotes || ""}
+                            onBlur={async (e) => {
+                              const val = e.target.value;
+                              if (val === (it.ItemNotes || "")) return;
+                              if (user?.email && it.docId && db) {
+                                await updateDoc(firestoreDoc(db, "Cart", it.docId), { ItemNotes: val });
+                              }
+                            }}
+                            className="text-[10px] text-[#9A6E50] bg-transparent border-b border-[#E0D0B8] focus:border-[#D2693F] outline-none w-full mt-1 placeholder:text-[#C5B8A5]"
+                          />
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-sm font-semibold text-[#2D2D2D]">
@@ -574,23 +597,9 @@ export default function CartSidebar() {
                           </span>
                           {(() => {
                             const prodForLine = inventoryMap[String(it.ID)];
-                            let sizeStock: number | undefined;
-                            const size = (it.Size || "").toUpperCase();
-                            if (size === "S") sizeStock = prodForLine?.StockS;
-                            else if (size === "M")
-                              sizeStock = prodForLine?.StockM;
-                            else if (size === "L")
-                              sizeStock = prodForLine?.StockL;
-                            else if (size === "XL")
-                              sizeStock = prodForLine?.StockXL;
-
-                            const maxAllowed =
-                              (typeof sizeStock === "number"
-                                ? sizeStock
-                                : undefined) ??
-                              (typeof prodForLine?.Stock === "number"
-                                ? prodForLine.Stock
-                                : undefined);
+                            const maxAllowed = prodForLine
+                              ? resolveItemStock(prodForLine, it)
+                              : undefined;
                             const atMax =
                               typeof maxAllowed === "number" &&
                               Number(it.Quantity || 0) >= maxAllowed;

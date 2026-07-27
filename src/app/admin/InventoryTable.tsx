@@ -46,6 +46,8 @@ export type FormState = {
   Colors: string;
   Sizes: string;
   Care: string;
+  VariantStock: Record<string, number>;
+  FallbackDeliveryTime: string;
 };
 
 const INPUT_CLS = "w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all";
@@ -138,6 +140,12 @@ function ProductForm({
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }) {
+  const parsedColors = form.Colors ? form.Colors.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
+  const parsedSizes = form.Sizes ? form.Sizes.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
+  const variantTotal = parsedColors.reduce((sum, color) =>
+    sum + parsedSizes.reduce((s, size) => s + (form.VariantStock[`${color}|${size}`] || 0), 0), 0
+  );
+
   return (
     <form onSubmit={onSubmit} className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 overflow-y-auto px-7 py-5 space-y-7">
@@ -278,6 +286,76 @@ function ProductForm({
             <div>
               <label className={LABEL_CLS}>Quantity in Stock</label>
               <input type="number" min="0" className={INPUT_CLS} value={form.Stock} onChange={(e) => updateForm('Stock', e.target.value)} placeholder="0" />
+            </div>
+          )}
+          {form.StockType === "ready_stock" && parsedColors.length > 0 && parsedSizes.length > 0 && (
+            <div className="space-y-3">
+              <div>
+                <label className={LABEL_CLS}>Stock by Variant</label>
+                <p className="text-xs text-slate-400 mb-2">Allocate stock to each colour × size combination. Unfilled cells = made-to-order.</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="px-2 py-1.5 text-left font-semibold text-slate-500 border border-slate-200 bg-slate-50"></th>
+                      {parsedSizes.map((size) => (
+                        <th key={size} className="px-2 py-1.5 text-center font-semibold text-slate-500 border border-slate-200 bg-slate-50 min-w-[60px]">{size}</th>
+                      ))}
+                      <th className="px-2 py-1.5 text-center font-semibold text-slate-500 border border-slate-200 bg-slate-50 min-w-[60px]">Row Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parsedColors.map((color) => {
+                      const rowTotal = parsedSizes.reduce((sum, size) => sum + (form.VariantStock[`${color}|${size}`] || 0), 0);
+                      return (
+                        <tr key={color}>
+                          <td className="px-2 py-1 font-medium text-slate-700 border border-slate-200 bg-slate-50 whitespace-nowrap">{color}</td>
+                          {parsedSizes.map((size) => (
+                            <td key={size} className="px-1 py-1 border border-slate-200">
+                              <input
+                                type="number"
+                                min="0"
+                                className="w-full text-center border border-slate-200 rounded px-1 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#C5A059]"
+                                value={form.VariantStock[`${color}|${size}`] || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const num = val === "" ? 0 : Number(val);
+                                  updateForm("VariantStock", { ...form.VariantStock, [`${color}|${size}`]: num });
+                                }}
+                              />
+                            </td>
+                          ))}
+                          <td className={`px-2 py-1.5 text-center font-semibold border border-slate-200 ${rowTotal > 0 ? "text-[#D2693F]" : "text-slate-400"}`}>{rowTotal}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td className="px-2 py-1.5 font-semibold text-slate-500 border border-slate-200 bg-slate-50">Col Total</td>
+                      {parsedSizes.map((size) => {
+                        const colTotal = parsedColors.reduce((sum, color) => sum + (form.VariantStock[`${color}|${size}`] || 0), 0);
+                        return (
+                          <td key={size} className={`px-2 py-1.5 text-center font-semibold border border-slate-200 bg-slate-50 ${colTotal > 0 ? "text-[#D2693F]" : "text-slate-400"}`}>{colTotal}</td>
+                        );
+                      })}
+                      <td className={`px-2 py-1.5 text-center font-bold border border-slate-200 bg-slate-50 ${variantTotal > 0 ? "text-[#D2693F]" : "text-slate-400"}`}>{variantTotal}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              {Number(form.Stock || 0) > 0 && variantTotal > Number(form.Stock || 0) && (
+                <p className="text-xs text-red-600 font-medium">Warning: Variant total ({variantTotal}) exceeds stock ({form.Stock}).</p>
+              )}
+              {Number(form.Stock || 0) > 0 && variantTotal < Number(form.Stock || 0) && (
+                <p className="text-xs text-slate-400">{Number(form.Stock) - variantTotal} units unallocated (will be made-to-order).</p>
+              )}
+              <div>
+                <label className={LABEL_CLS}>Fallback Delivery Time (for unallocated variants)</label>
+                <input className={INPUT_CLS} value={form.FallbackDeliveryTime} onChange={(e) => updateForm('FallbackDeliveryTime', e.target.value)} placeholder="e.g. 10-15 days" />
+                <p className="text-xs text-slate-400 mt-1">Shown when a variant has 0 stock but total stock is available</p>
+              </div>
             </div>
           )}
           <div>
@@ -421,6 +499,8 @@ export default function InventoryTable() {
     Colors: "",
     Sizes: "",
     Care: "",
+    VariantStock: {},
+    FallbackDeliveryTime: "",
   };
 
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -524,6 +604,8 @@ export default function InventoryTable() {
         Colors: form.Colors ? form.Colors.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
         Sizes: form.Sizes ? form.Sizes.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
         Care: form.Care || "",
+        VariantStock: Object.keys(form.VariantStock).length > 0 ? form.VariantStock : undefined,
+        FallbackDeliveryTime: form.FallbackDeliveryTime || "",
       };
       Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
       await addDoc(collection(db!, 'inventory'), payload);
@@ -564,6 +646,8 @@ export default function InventoryTable() {
       Colors: Array.isArray(item.Colors) ? item.Colors.join(", ") : (item.Colors ?? ""),
       Sizes: Array.isArray(item.Sizes) ? item.Sizes.join(", ") : (item.Sizes ?? ""),
       Care: item.Care ?? "",
+      VariantStock: (item.VariantStock && typeof item.VariantStock === "object") ? item.VariantStock : {},
+      FallbackDeliveryTime: item.FallbackDeliveryTime ?? "",
     });
     setShowEditModal(true);
   }
@@ -599,6 +683,8 @@ export default function InventoryTable() {
         Colors: form.Colors ? form.Colors.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
         Sizes: form.Sizes ? form.Sizes.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
         Care: form.Care || "",
+        VariantStock: Object.keys(form.VariantStock).length > 0 ? form.VariantStock : undefined,
+        FallbackDeliveryTime: form.FallbackDeliveryTime || "",
       };
       Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
       await updateDoc(firestoreDoc(db!, 'inventory', editingId), payload);
