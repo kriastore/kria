@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCategories } from "@/hooks/useCategories";
+import { useMarquee } from "@/hooks/useMarquee";
 import ReviewCarousel from "@/components/ReviewCarousel";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
@@ -36,6 +37,7 @@ export default function Home() {
   const [productsLoaded, setProductsLoaded] = useState(false);
 
   const { categories: firestoreCategories, loading: categoriesLoading } = useCategories();
+  const { items: marqueeItems } = useMarquee();
   const categories = firestoreCategories.map((c) => c.name);
   const categoryImages: Record<string, string> = Object.fromEntries(
     firestoreCategories.filter((c) => c.image).map((c) => [c.name, c.image!])
@@ -88,6 +90,8 @@ export default function Home() {
 
   const isReady = !authLoading && !categoriesLoading && productsLoaded;
 
+  const doubledMarquee = [...marqueeItems, ...marqueeItems];
+
   if (!isReady) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-[#F9F6F0]">
@@ -104,6 +108,15 @@ export default function Home() {
 
   return (
     <>
+      {/* Top Promotional Marquee */}
+      <div className="w-full bg-[#2D2D2D] py-2.5 overflow-hidden">
+        <div className="animate-marquee text-xs sm:text-sm text-[#F9F6F0] tracking-wider font-medium">
+          {doubledMarquee.map((text, i) => (
+            <span key={i} className="mx-6 sm:mx-8 inline-block whitespace-nowrap">✦ {text}</span>
+          ))}
+        </div>
+      </div>
+
       {/* Hero */}
       <section className="w-full bg-[#F9F6F0]">
         <div className="flex flex-col items-center justify-center py-12 sm:py-16 md:py-24 px-4">
@@ -125,7 +138,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Marquee */}
+      {/* Category Marquee */}
       <div className="w-full bg-[#F9F6F0] py-3 border-t border-b border-[#E0D0B8] overflow-hidden">
         <div className="animate-marquee text-xs sm:text-sm text-[#9A6E50] tracking-widest font-medium">
           {[...categories, "Handmade with Love", "Supporting Indian Artisans", "Eco-Friendly Craft",
@@ -341,6 +354,15 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* Bottom Promotional Marquee */}
+      <div className="w-full bg-[#D2693F] py-3 overflow-hidden">
+        <div className="animate-marquee text-xs sm:text-sm text-white tracking-wider font-medium">
+          {doubledMarquee.map((text, i) => (
+            <span key={i} className="mx-6 sm:mx-8 inline-block whitespace-nowrap">✦ {text}</span>
+          ))}
+        </div>
+      </div>
 
       <ReviewCarousel />
     </>

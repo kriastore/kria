@@ -30,18 +30,25 @@ export default function ShippingPolicyPage() {
         <section className="space-y-2">
           <h2 className="text-xl md:text-2xl font-semibold">Order Processing Time</h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
-            Orders are processed within <span className="font-semibold">24–48 business hours</span>
+            Orders are typically dispatched within <span className="font-semibold">5–7 business days</span>
             &nbsp;from the time of order confirmation, excluding Sundays and public holidays.
+          </p>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            Orders placed before 12 PM will be processed on the same day (excluding Sundays and public holidays).
+            Orders placed after 12 PM will be processed on the next business day.
           </p>
         </section>
 
         {/* Shipping Time */}
         <section className="space-y-2">
           <h2 className="text-xl md:text-2xl font-semibold">Shipping Time</h2>
-          <ul className="list-disc pl-5 text-sm md:text-base text-gray-800 space-y-1">
-            <li>Metro cities: <span className="font-semibold">3–5 business days</span></li>
-            <li>Other locations: <span className="font-semibold">5–7 business days</span></li>
-          </ul>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            <span className="font-semibold">Delivery within India:</span> 7–10 business days from the date of dispatch.
+          </p>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            <span className="font-semibold">International Shipping:</span> Delivery timelines vary by destination
+            and typically range from 10–21 business days.
+          </p>
           <p className="text-xs md:text-sm text-gray-600 mt-1">
             Delivery timelines are estimates and may vary based on your exact location
             and courier partner operations.
@@ -52,13 +59,13 @@ export default function ShippingPolicyPage() {
         <section className="space-y-2">
           <h2 className="text-xl md:text-2xl font-semibold">Shipping Charges</h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
-            We offer <span className="font-semibold">FREE shipping across India on all orders.</span>
+            We offer <span className="font-semibold">FREE shipping across India on all orders above ₹1,000</span>.
           </p>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
-            In rare cases, orders shipped to remote or special serviceable locations
-            (such as islands or certain non-serviceable pin codes) may attract
-            additional shipping charges as per courier partner rates. Any such
-            charges will be clearly communicated to you before order confirmation.
+            For orders below ₹1,000, a flat shipping charge may apply and will be calculated at checkout.
+          </p>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            International shipping charges are calculated based on destination and weight at checkout.
           </p>
         </section>
 
@@ -84,6 +91,7 @@ export default function ShippingPolicyPage() {
             and your location to ensure the best possible delivery experience.
           </p>
         </section>
+
 
         {/* Delivery Delays + Note */}
         <section className="space-y-3">

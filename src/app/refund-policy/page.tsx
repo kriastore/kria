@@ -29,90 +29,76 @@ export default function RefundPolicyPage() {
         {/* Return Eligibility */}
         <section className="space-y-2">
           <h2 className="text-xl md:text-2xl font-semibold">Return Eligibility</h2>
-          <ul className="list-disc pl-5 text-sm md:text-base text-gray-800 space-y-1">
-            <li>Returns are accepted within <span className="font-semibold">7 days of delivery</span>.</li>
-            <li>
-              Items must be <span className="font-semibold">unused, unwashed, and in their original condition</span>
-              &nbsp;with all tags, labels, and packaging intact.
-            </li>
-          </ul>
-          <p className="text-xs md:text-sm text-gray-600 mt-1">
-            Returns that do not meet these conditions may be rejected or may be
-            eligible only for partial refund or store credit, at our discretion.
-          </p>
-        </section>
-
-        {/* Non-Returnable Items */}
-        <section className="space-y-2">
-          <h2 className="text-xl md:text-2xl font-semibold">Non-Returnable Items</h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
-            For hygiene and safety reasons, certain product categories cannot be
-            returned. This includes, but may not be limited to:
+            We have a <span className="font-semibold">14-day return policy</span>, which means you have
+            14 days after receiving your item to request a return.
           </p>
-          <ul className="list-disc pl-5 text-sm md:text-base text-gray-800 space-y-1">
-            <li><span className="font-semibold">Accessories</span></li>
-          </ul>
-        </section>
-
-        {/* Return Process */}
-        <section className="space-y-2">
-          <h2 className="text-xl md:text-2xl font-semibold">Return Process</h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
-            To initiate a return, please follow these steps:
-          </p>
-          <ul className="list-decimal pl-5 text-sm md:text-base text-gray-800 space-y-1">
-            <li>
-              Email our support team at
-               &nbsp;<a href="mailto:Kriastore@gmail.com" className="font-semibold underline">Kriastore@gmail.com</a>.
-            </li>
-            <li>
-              Mention your <span className="font-semibold">Order ID</span> and provide a brief
-              <span className="font-semibold"> reason for return</span>.
-            </li>
-          </ul>
-          <p className="text-xs md:text-sm text-gray-600 mt-1">
-            Our team will review your request and share the return instructions,
-            including pickup or self-ship details, based on your location.
+            To be eligible for a return, your item must be in the same condition that you received it,
+            <span className="font-semibold"> unworn or unused, with tags, and in its original packaging</span>.
+            You will also need the receipt or proof of purchase.
           </p>
         </section>
 
-        {/* Refund Method */}
+        {/* How to Start a Return */}
         <section className="space-y-2">
-          <h2 className="text-xl md:text-2xl font-semibold">Refund Method</h2>
-          <ul className="list-disc pl-5 text-sm md:text-base text-gray-800 space-y-1">
-            <li>
-              Approved refunds are processed to the <span className="font-semibold">original payment method</span>
-              &nbsp;used at the time of purchase.
-            </li>
-            <li>
-              Refund processing time is typically
-              &nbsp;<span className="font-semibold">5–10 business days</span> from the date we receive and
-              inspect the returned item.
-            </li>
-          </ul>
-          <p className="text-xs md:text-sm text-gray-600 mt-1">
-            The exact time taken for the refund to reflect in your account may
-            vary depending on your bank or payment provider.
-          </p>
-        </section>
-
-        {/* Damaged / Wrong Product */}
-        <section className="space-y-2">
-          <h2 className="text-xl md:text-2xl font-semibold">Damaged or Wrong Product</h2>
+          <h2 className="text-xl md:text-2xl font-semibold">How to Start a Return</h2>
           <p className="text-sm md:text-base text-gray-800 leading-relaxed">
-            If you receive a damaged item or an incorrect product, please notify us
-            as soon as possible so we can assist you.
+            To start a return, you can contact us at
+            &nbsp;<a href="mailto:Kriastore@gmail.com" className="font-semibold underline">Kriastore@gmail.com</a>.
           </p>
-          <ul className="list-disc pl-5 text-sm md:text-base text-gray-800 space-y-1">
-            <li>
-              Issues must be reported within
-              &nbsp;<span className="font-semibold">24–48 hours of delivery</span>.
-            </li>
-            <li>
-              You may be asked to share clear photos or videos of the product and
-              packaging to help us investigate with the courier partner.
-            </li>
-          </ul>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            If your return is accepted, we will send you a return shipping label, as well as
+            instructions on how and where to send your package. Items sent back to us without
+            first requesting a return will not be accepted.
+          </p>
+        </section>
+
+        {/* Damages and Issues */}
+        <section className="space-y-2">
+          <h2 className="text-xl md:text-2xl font-semibold">Damages and Issues</h2>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            Please inspect your order upon reception and contact us immediately if the item is
+            defective, damaged, or if you receive the wrong item, so that we can evaluate the
+            issue and make it right.
+          </p>
+        </section>
+
+        {/* Exceptions / Non-Returnable Items */}
+        <section className="space-y-2">
+          <h2 className="text-xl md:text-2xl font-semibold">Exceptions / Non-Returnable Items</h2>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            Certain types of items cannot be returned. For hygiene and safety reasons,
+            <span className="font-semibold"> accessories</span> are non-returnable.
+          </p>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            Please get in touch if you have questions or concerns about your specific item.
+          </p>
+        </section>
+
+        {/* Exchanges */}
+        <section className="space-y-2">
+          <h2 className="text-xl md:text-2xl font-semibold">Exchanges</h2>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            The fastest way to ensure you get what you want is to return the item you have,
+            and once the return is accepted, make a separate purchase for the new item.
+          </p>
+        </section>
+
+        {/* Refunds */}
+        <section className="space-y-2">
+          <h2 className="text-xl md:text-2xl font-semibold">Refunds</h2>
+          <p className="text-sm md:text-base text-gray-800 leading-relaxed">
+            We will notify you once we have received and inspected your return, and let you know
+            if the refund was approved or not. If approved, you will be automatically refunded on
+            your original payment method within
+            &nbsp;<span className="font-semibold">10 business days</span>. Please remember it can take
+            some time for your bank or credit card company to process and post the refund too.
+          </p>
+          <p className="text-xs md:text-sm text-gray-600 mt-1">
+            If more than 15 business days have passed since we approved your return, please contact us
+            at <a href="mailto:Kriastore@gmail.com" className="underline">Kriastore@gmail.com</a>.
+          </p>
         </section>
 
         {/* Help */}

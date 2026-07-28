@@ -42,6 +42,12 @@ service cloud.firestore {
       allow create, update, delete: if isOwner();
     }
 
+    // ── Settings (public read, owner write) ──
+    match /settings/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isOwner();
+    }
+
     // ── Reviews (public read, signed-in users write their own) ──
     match /reviews/{docId} {
       allow read: if true;
