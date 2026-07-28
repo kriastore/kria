@@ -34,6 +34,7 @@ export type FormState = {
   ImageUrl3Thumb: string;
   Price: string;
   Category: string;
+  Subcategory: string;
   OriginalPrice: string;
   Stock: string;
   StockType: string;
@@ -124,6 +125,8 @@ function ProductForm({
   form,
   updateForm,
   categories,
+  categoryObjects,
+  subcategories,
   uploadingField,
   onUpload,
   onFileSelect,
@@ -134,6 +137,8 @@ function ProductForm({
   form: FormState;
   updateForm: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   categories: string[];
+  categoryObjects: { id: string; name: string }[];
+  subcategories: { name: string; categoryId: string }[];
   uploadingField: "ImageUrl1" | "ImageUrl2" | "ImageUrl3" | null;
   onUpload: (file: File, fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => void;
   onFileSelect: (file: File, fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => void;
@@ -157,8 +162,20 @@ function ProductForm({
           <h4 className={SECTION_TITLE_CLS}>Basic Info</h4>
           <div>
             <label className={LABEL_CLS}>Category</label>
-            <select className={INPUT_CLS} value={form.Category} onChange={(e) => updateForm('Category', e.target.value)}>
+            <select className={INPUT_CLS} value={form.Category} onChange={(e) => { updateForm('Category', e.target.value); updateForm('Subcategory', ''); }}>
               {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={LABEL_CLS}>Subcategory</label>
+            <select className={INPUT_CLS} value={form.Subcategory} onChange={(e) => updateForm('Subcategory', e.target.value)}>
+              <option value="">None</option>
+              {subcategories
+                .filter(s => {
+                  const catObj = categoryObjects.find(c => c.name === form.Category);
+                  return catObj && s.categoryId === catObj.id;
+                })
+                .map(sub => <option key={sub.name} value={sub.name}>{sub.name}</option>)}
             </select>
           </div>
           <div>
@@ -489,6 +506,7 @@ export default function InventoryTable() {
     ImageUrl3Thumb: "",
     Price: "",
     Category: CATEGORIES[0] || "",
+    Subcategory: "",
     OriginalPrice: "",
     Stock: "0",
     StockType: "ready_stock",
@@ -594,6 +612,7 @@ export default function InventoryTable() {
         ImageUrl3Thumb: form.ImageUrl3Thumb || "",
         Price: form.PricingMode === "price" && form.Price ? Number(form.Price) : undefined,
         Category: form.Category || "",
+        Subcategory: form.Subcategory || "",
         OriginalPrice: form.OriginalPrice ? Number(form.OriginalPrice) : undefined,
         createdAt: serverTimestamp(),
         Stock: form.StockType === "ready_stock" ? (form.Stock ? Number(form.Stock) : 0) : undefined,
@@ -636,6 +655,7 @@ export default function InventoryTable() {
       ImageUrl3Thumb: item.ImageUrl3Thumb ?? "",
       Price: item.Price ? String(item.Price) : "",
       Category: item.Category ?? item.Product ?? CATEGORIES[0] ?? "",
+      Subcategory: item.Subcategory ?? "",
       OriginalPrice: item.OriginalPrice ? String(item.OriginalPrice) : "",
       Stock: item.Stock !== undefined ? String(item.Stock) : "0",
       StockType: item.StockType ?? "ready_stock",
@@ -674,6 +694,7 @@ export default function InventoryTable() {
         ImageUrl3Thumb: form.ImageUrl3Thumb || "",
         Price: form.PricingMode === "price" && form.Price ? Number(form.Price) : null,
         Category: form.Category || "",
+        Subcategory: form.Subcategory || "",
         OriginalPrice: form.OriginalPrice ? Number(form.OriginalPrice) : undefined,
         Stock: form.StockType === "ready_stock" ? (form.Stock ? Number(form.Stock) : 0) : undefined,
         StockType: form.StockType || "ready_stock",
@@ -698,10 +719,14 @@ export default function InventoryTable() {
     }
   }
 
+  const allSubcategories = firestoreCategories.flatMap(c => (c.subcategories || []).map(s => ({ name: s.name, categoryId: c.id })));
+
   const formProps = {
     form,
     updateForm,
     categories: CATEGORIES,
+    categoryObjects: firestoreCategories.map(c => ({ id: c.id, name: c.name })),
+    subcategories: allSubcategories,
     uploadingField,
     onUpload: handleFileUpload,
     onFileSelect: (file: File, fieldName: "ImageUrl1" | "ImageUrl2" | "ImageUrl3") => {

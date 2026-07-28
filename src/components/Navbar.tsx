@@ -180,7 +180,7 @@ function NavbarContent() {
       </div>
 
       {/* Header */}
-      <header className="static z-[80] backdrop-blur-md bg-[#F5F5F5]">
+      <header className="sticky top-0 z-[100] backdrop-blur-md bg-white border-b border-[#E8E0D8]">
         <div className="relative flex items-center justify-between px-4 sm:px-6 md:px-10 py-3 sm:py-4 text-white">
           <div className="flex w-full items-center justify-between relative min-h-[48px]">
             {/* Hamburger */}

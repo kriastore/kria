@@ -18,6 +18,7 @@ type Product = {
   OriginalPrice?: number;
   ProductName: string;
   Category?: string;
+  Subcategory?: string;
   Stock?: number;
   StockType?: string;
   IsCustomizable?: boolean;
@@ -32,11 +33,13 @@ function ShopContent() {
   const defaultCategories = firestoreCategories.map((c) => c.name);
   const [products, setProducts] = useState<Product[]>([]);
   const [filter, setFilter] = useState<string | null>(null);
+  const [subcategoryFilter, setSubcategoryFilter] = useState<string | null>(null);
   const [sort, setSort] = useState<string>("relevance");
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
   const [showMobileSort, setShowMobileSort] = useState(false);
   const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const [mobileSubView, setMobileSubView] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const params = useSearchParams();
   const search = params.get("search")?.toLowerCase() || "";
@@ -56,6 +59,7 @@ function ShopContent() {
 
   const filtered = products.filter(p => {
     if (filter && (p.Category ?? null) !== filter) return false;
+    if (subcategoryFilter && (p.Subcategory ?? null) !== subcategoryFilter) return false;
     if (search && !p.Description.toLowerCase().includes(search)) return false;
     return true;
   });
@@ -95,7 +99,7 @@ function ShopContent() {
               <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-semibold text-[#2D2D2D]">Filters</div>
                 <button
-                  onClick={() => { setFilter(null); setSort('relevance'); setSelectedSubcategory(null); }}
+                  onClick={() => { setFilter(null); setSort('relevance'); setSelectedSubcategory(null); setSubcategoryFilter(null); }}
                   className="text-xs text-gray-500 hover:underline"
                 >
                   Reset
@@ -104,27 +108,51 @@ function ShopContent() {
 
               <div className="space-y-1">
                 <button
-                  onClick={() => { setFilter(null); setSelectedSubcategory(null); }}
+                  onClick={() => { setFilter(null); setSelectedSubcategory(null); setSubcategoryFilter(null); }}
                   className={`w-full text-left px-3 py-2 text-sm transition-colors ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
                 >
                   All
                 </button>
 
-                {defaultCategories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => { setFilter(cat); setSelectedSubcategory(cat); }}
-                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${selectedSubcategory === cat ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
-                  >
-                    {cat}
-                  </button>
-                ))}
+                {firestoreCategories.map(cat => {
+                  const isActive = filter === cat.name;
+                  const catSubs = (cat.subcategories || []).sort((a: any, b: any) => a.order - b.order);
+                  const hasSubs = catSubs.length > 0;
+                  return (
+                    <div key={cat.id}>
+                      <button
+                        onClick={() => { if (isActive) { setFilter(null); setSubcategoryFilter(null); } else { setFilter(cat.name); setSelectedSubcategory(cat.name); setSubcategoryFilter(null); } }}
+                        className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between ${isActive ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                      >
+                        <span>{cat.name}</span>
+                        {hasSubs && (
+                          <svg className={`w-3 h-3 transition-transform ${isActive ? 'rotate-180 text-white/70' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        )}
+                      </button>
+                      {isActive && hasSubs && (
+                        <div className="pl-4 pb-1 space-y-0.5">
+                          {catSubs.map((sub: any) => (
+                            <button
+                              key={sub.name}
+                              onClick={() => setSubcategoryFilter(sub.name)}
+                              className={`block w-full text-left px-3 py-1 text-xs transition-colors ${subcategoryFilter === sub.name ? 'text-[#D2693F] font-medium' : 'text-[#2D2D2D] hover:text-[#D2693F]'}`}
+                            >
+                              {sub.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
 
-                {categories.filter(c => c && !defaultCategories.includes(c)).map(c => (
+                {categories.filter(c => c && !firestoreCategories.some(fc => fc.name === c)).map(c => (
                   <button
                     key={c}
-                    onClick={() => { setFilter(c); setSelectedSubcategory(c); }}
-                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${selectedSubcategory === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
+                    onClick={() => { setFilter(c); setSelectedSubcategory(c); setSubcategoryFilter(null); }}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${filter === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
                   >
                     {c}
                   </button>
@@ -149,7 +177,7 @@ function ShopContent() {
                 </button>
 
                 <button
-                  onClick={() => { setShowMobileSort(false); setShowFilterPopover(s => !s); }}
+                  onClick={() => { setShowMobileSort(false); setMobileSubView(null); setShowFilterPopover(s => !s); }}
                   aria-expanded={showFilterPopover}
                   aria-controls="filter-popover"
                   className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
@@ -190,48 +218,91 @@ function ShopContent() {
 
               {/* Mobile filter popover */}
               {showFilterPopover && (
-                <div id="filter-popover" className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-4 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8]">
+                <div id="filter-popover" className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-4 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8] max-h-[70vh] overflow-y-auto">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm font-semibold text-[#2D2D2D]">Filters</div>
+                    <div className="flex items-center gap-2">
+                      {mobileSubView && (
+                        <button onClick={() => setMobileSubView(null)} className="text-[#D2693F] text-sm font-medium">← Back</button>
+                      )}
+                      <div className="text-sm font-semibold text-[#2D2D2D]">{mobileSubView || 'Filters'}</div>
+                    </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => { setFilter(null); setSort("relevance"); setSelectedSubcategory(null); }}
+                        onClick={() => { setFilter(null); setSort("relevance"); setSelectedSubcategory(null); setSubcategoryFilter(null); setMobileSubView(null); }}
                         className="text-sm bg-[#F3EDE4] text-[#2D2D2D] px-2 py-1 cursor-pointer hover:bg-[#E0D0B8]"
                       >
                         Reset
                       </button>
-                      <button onClick={() => setShowFilterPopover(false)} className="text-gray-500 text-sm cursor-pointer">Close</button>
+                      <button onClick={() => { setShowFilterPopover(false); setMobileSubView(null); }} className="text-gray-500 text-sm cursor-pointer">Close</button>
                     </div>
                   </div>
 
-                  <div className="space-y-1 mb-4">
-                    <button
-                      onClick={() => { setFilter(null); setSelectedSubcategory(null); setShowFilterPopover(false); }}
-                      className={`w-full text-left px-3 py-2 text-sm ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
-                    >
-                      All
-                    </button>
-
-                    {defaultCategories.map(cat => (
+                  {!mobileSubView ? (
+                    <div className="space-y-1">
                       <button
-                        key={cat}
-                        onClick={() => { setFilter(cat); setSelectedSubcategory(cat); setShowFilterPopover(false); }}
-                        className={`w-full text-left px-3 py-2 text-sm ${selectedSubcategory === cat ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
+                        onClick={() => { setFilter(null); setSelectedSubcategory(null); setSubcategoryFilter(null); setShowFilterPopover(false); }}
+                        className={`w-full text-left px-3 py-2 text-sm ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
                       >
-                        {cat}
+                        All
                       </button>
-                    ))}
 
-                    {categories.filter(c => c && !defaultCategories.includes(c)).map(c => (
-                      <button
-                        key={c}
-                        onClick={() => { setFilter(c); setSelectedSubcategory(c); setShowFilterPopover(false); }}
-                        className={`w-full text-left px-3 py-2 text-sm ${selectedSubcategory === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
+                      {firestoreCategories.map(cat => {
+                        const hasSubs = (cat.subcategories || []).length > 0;
+                        const isActive = filter === cat.name;
+                        return (
+                          <button
+                            key={cat.id}
+                            onClick={() => {
+                              if (hasSubs) {
+                                setMobileSubView(cat.name);
+                                setFilter(cat.name);
+                                setSubcategoryFilter(null);
+                              } else {
+                                setFilter(cat.name);
+                                setSelectedSubcategory(cat.name);
+                                setSubcategoryFilter(null);
+                                setShowFilterPopover(false);
+                              }
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between ${isActive ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                          >
+                            <span>{cat.name}</span>
+                            {hasSubs && (
+                              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            )}
+                          </button>
+                        );
+                      })}
+
+                      {categories.filter(c => c && !firestoreCategories.some(fc => fc.name === c)).map(c => (
+                        <button
+                          key={c}
+                          onClick={() => { setFilter(c); setSelectedSubcategory(c); setSubcategoryFilter(null); setShowFilterPopover(false); }}
+                          className={`w-full text-left px-3 py-2 text-sm ${filter === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {(() => {
+                        const cat = firestoreCategories.find(c => c.name === mobileSubView);
+                        const subs = (cat?.subcategories || []).sort((a: any, b: any) => a.order - b.order);
+                        return subs.map((sub: any) => (
+                          <button
+                            key={sub.name}
+                            onClick={() => { setSubcategoryFilter(sub.name); setShowFilterPopover(false); setMobileSubView(null); }}
+                            className={`w-full text-left px-3 py-2 text-sm ${subcategoryFilter === sub.name ? 'bg-[#C5A059] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                          >
+                            {sub.name}
+                          </button>
+                        ));
+                      })()}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

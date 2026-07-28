@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -36,10 +36,40 @@ export default function Home() {
   const [productsLoaded, setProductsLoaded] = useState(false);
 
   const { categories: firestoreCategories, loading: categoriesLoading } = useCategories();
-  const categories = firestoreCategories.slice(0, 4).map((c) => c.name);
+  const categories = firestoreCategories.map((c) => c.name);
   const categoryImages: Record<string, string> = Object.fromEntries(
-    firestoreCategories.slice(0, 4).filter((c) => c.image).map((c) => [c.name, c.image!])
+    firestoreCategories.filter((c) => c.image).map((c) => [c.name, c.image!])
   );
+
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [checkScroll, firestoreCategories]);
+
+  const scrollCarousel = (dir: "left" | "right") => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const cardWidth = el.querySelector<HTMLElement>("a")?.offsetWidth || 200;
+    el.scrollBy({ left: dir === "left" ? -(cardWidth + 24) : cardWidth + 24, behavior: "smooth" });
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -115,16 +145,18 @@ export default function Home() {
           >
             Browse By Category
           </h2>
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6 md:grid md:grid-cols-4">
+
+          {/* Mobile: 2-col grid, all categories */}
+          <div className="md:hidden grid grid-cols-2 gap-3 sm:gap-4">
             {categories.map(cat => {
               const imgSrc = categoryImages[cat] || `https://picsum.photos/seed/${encodeURIComponent(cat)}/400/600`;
               return (
                 <Link
                   key={cat}
                   href={`/shop?category=${encodeURIComponent(cat)}`}
-                  className="w-[calc(50%-0.375rem)] sm:w-[calc(50%-0.5rem)] md:w-auto group block overflow-hidden border border-[#E8E0D8] shadow-[0_1px_10px_rgba(45,32,20,0.05)] hover:shadow-[0_10px_28px_rgba(45,32,20,0.16)] transition-shadow duration-300"
+                  className="group block overflow-hidden border border-[#E8E0D8] shadow-[0_1px_10px_rgba(45,32,20,0.05)] hover:shadow-[0_10px_28px_rgba(45,32,20,0.16)] transition-shadow duration-300"
                 >
-                  <div className="relative h-44 sm:h-56 md:h-80 lg:h-96 bg-[#F3EDE4] flex items-center justify-center overflow-hidden">
+                  <div className="relative h-44 sm:h-56 bg-[#F3EDE4] flex items-center justify-center overflow-hidden">
                     <ProductImage
                       src={imgSrc}
                       size="thumb"
@@ -133,7 +165,7 @@ export default function Home() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent z-10 flex items-end justify-center pb-5 sm:pb-7">
                       <span
-                        className="text-sm sm:text-lg md:text-2xl lg:text-3xl text-white drop-shadow-lg tracking-wide text-center px-2 relative after:content-[''] after:block after:w-8 after:h-[2px] after:bg-white/70 after:mx-auto after:mt-2 after:scale-x-0 group-hover:after:scale-x-100 after:transition-transform after:duration-300"
+                        className="text-sm sm:text-lg text-white drop-shadow-lg tracking-wide text-center px-2 relative after:content-[''] after:block after:w-8 after:h-[2px] after:bg-white/70 after:mx-auto after:mt-2 after:scale-x-0 group-hover:after:scale-x-100 after:transition-transform after:duration-300"
                         style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
                       >
                         Shop {cat}
@@ -143,6 +175,65 @@ export default function Home() {
                 </Link>
               );
             })}
+          </div>
+
+          {/* Desktop: 4-col carousel with arrows */}
+          <div className="hidden md:block relative">
+            {canScrollLeft && (
+              <button
+                onClick={() => scrollCarousel("left")}
+                className="absolute -left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-[#F9F6F0] border border-[#E8E0D8] shadow-md flex items-center justify-center hover:bg-white transition-colors"
+                aria-label="Scroll left"
+              >
+                <svg className="w-5 h-5 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+            {canScrollRight && (
+              <button
+                onClick={() => scrollCarousel("right")}
+                className="absolute -right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-[#F9F6F0] border border-[#E8E0D8] shadow-md flex items-center justify-center hover:bg-white transition-colors"
+                aria-label="Scroll right"
+              >
+                <svg className="w-5 h-5 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+            <div
+              ref={carouselRef}
+              className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {categories.map(cat => {
+                const imgSrc = categoryImages[cat] || `https://picsum.photos/seed/${encodeURIComponent(cat)}/400/600`;
+                return (
+                  <Link
+                    key={cat}
+                    href={`/shop?category=${encodeURIComponent(cat)}`}
+                    className="flex-none w-[calc(25%-18px)] group block overflow-hidden border border-[#E8E0D8] shadow-[0_1px_10px_rgba(45,32,20,0.05)] hover:shadow-[0_10px_28px_rgba(45,32,20,0.16)] transition-shadow duration-300"
+                  >
+                    <div className="relative h-80 lg:h-96 bg-[#F3EDE4] flex items-center justify-center overflow-hidden">
+                      <ProductImage
+                        src={imgSrc}
+                        size="thumb"
+                        alt={cat}
+                        className="absolute inset-0 w-full h-full group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent z-10 flex items-end justify-center pb-7">
+                        <span
+                          className="text-2xl lg:text-3xl text-white drop-shadow-lg tracking-wide text-center px-2 relative after:content-[''] after:block after:w-8 after:h-[2px] after:bg-white/70 after:mx-auto after:mt-2 after:scale-x-0 group-hover:after:scale-x-100 after:transition-transform after:duration-300"
+                          style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
+                        >
+                          Shop {cat}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
