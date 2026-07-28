@@ -331,7 +331,7 @@ export default function CategoriesManager() {
                         <p className="text-[11px] text-gray-400 mt-0.5">{catSubs.length} subcategories</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => setExpandedCategoryId(isExpanded ? null : cat.id)}
                         className="p-2 rounded-lg text-slate-400 hover:text-[#C5A059] hover:bg-[#F9F6F0] transition-colors"

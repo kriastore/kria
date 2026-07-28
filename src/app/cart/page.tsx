@@ -24,6 +24,7 @@ import {
   readGuestCartFromCookie,
   writeGuestCartToCookie,
 } from "@/context/CartContext";
+import { useDeliverySettings } from "@/hooks/useDeliverySettings";
 
 type CartItem = {
   docId?: string;
@@ -74,6 +75,7 @@ function formatCurrency(n: number | string | undefined) {
 export default function CartPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { settings: deliverySettings } = useDeliverySettings();
   const postAuthHandled = useRef(false);
 
   const [items, setItems] = useState<CartItem[]>([]);
@@ -221,6 +223,13 @@ export default function CartPage() {
   const shippingAmount = 0;
   const subtotal = grandTotal;
   const total = subtotal + shippingAmount;
+  const freeDeliveryThreshold = deliverySettings.freeDeliveryThreshold;
+  const amountUntilFreeDelivery =
+    freeDeliveryThreshold > 0
+      ? Math.max(0, freeDeliveryThreshold - grandTotal)
+      : 0;
+  const qualifiesForFreeDelivery =
+    freeDeliveryThreshold > 0 && grandTotal >= freeDeliveryThreshold;
 
   // Ensure all cart items are within available stock.
   // If any are not, silently remove them from the cart.
@@ -532,11 +541,21 @@ export default function CartPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-medium">
-                    {shippingAmount === 0
+                    {qualifiesForFreeDelivery
                       ? "Free"
                       : <PriceText amount={shippingAmount} />}
                   </span>
                 </div>
+                {freeDeliveryThreshold > 0 && amountUntilFreeDelivery > 0 && (
+                  <p className="text-xs text-center py-1.5 rounded bg-[#F9F6F0] text-[#9A6E50] font-medium">
+                    Add <PriceText amount={amountUntilFreeDelivery} /> more for free delivery
+                  </p>
+                )}
+                {qualifiesForFreeDelivery && (
+                  <p className="text-xs text-center py-1.5 rounded bg-emerald-50 text-emerald-700 font-medium">
+                    You qualify for free delivery!
+                  </p>
+                )}
                 <hr className="my-2" />
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Total</span>

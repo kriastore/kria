@@ -19,6 +19,7 @@ import {
 } from "firebase/firestore";
 import { resolvePricing } from "@/utils/pricing";
 import { calculateShipping, type ShippingResult } from "@/utils/shipping";
+import { useDeliverySettings } from "@/hooks/useDeliverySettings";
 import { useCartSidebar } from "@/context/CartSidebarContext";
 import ProductImage from "@/components/ProductImage";
 
@@ -68,6 +69,7 @@ function CheckoutContent() {
   const { cart, removeItem } = useCart();
   const router = useRouter();
   const { openCart } = useCartSidebar();
+  const { settings: deliverySettings } = useDeliverySettings();
 
   const [items, setItems] = useState<CartItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
@@ -210,13 +212,19 @@ function CheckoutContent() {
     if (customerDetails.pinCode.length === 6) {
       setPincodeChecked(true);
       const totalItems = items.reduce((sum, it) => sum + Number(it.Quantity || 0), 0);
-      const result = calculateShipping(totalItems, grandTotal, customerDetails.pinCode);
+      const result = calculateShipping(
+        totalItems,
+        grandTotal,
+        customerDetails.pinCode,
+        deliverySettings.zones,
+        deliverySettings.freeDeliveryThreshold
+      );
       setShippingInfo(result);
     } else {
       setPincodeChecked(false);
       setShippingInfo({ available: true, charge: 0, estimatedDays: "5-7", courierPartner: "DTDC", zone: "" });
     }
-  }, [customerDetails.pinCode, grandTotal, items]);
+  }, [customerDetails.pinCode, grandTotal, items, deliverySettings]);
 
   const lookupPincodeAuto = async (pincode: string) => {
     if (pincode.length !== 6) return;
@@ -603,7 +611,7 @@ function CheckoutContent() {
       {/* Top Bar */}
       <header className="sticky top-0 z-50 border-b" style={{ backgroundColor: "#F9F6F0", borderColor: "#E0D0B8" }}>
         <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
-          <button onClick={openCart} className="flex items-center gap-2">
+          <button onClick={() => { sessionStorage.setItem("openCartAfterNav", "1"); router.push("/"); }} className="flex items-center gap-2">
             <svg className="w-5 h-5" style={{ color: "#D2693F" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>

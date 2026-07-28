@@ -18,9 +18,10 @@ import {
 import InventoryTable from "./InventoryTable";
 import CategoriesManager from "./CategoriesManager";
 import MarqueeManager from "./MarqueeManager";
+import DeliverySettingsManager from "./DeliverySettingsManager";
 import ProductImage from "@/components/ProductImage";
 
-type AdminTab = "overview" | "products" | "categories" | "orders" | "marquee";
+type AdminTab = "overview" | "products" | "categories" | "orders" | "marquee" | "settings";
 
 type OrderStatus = "placed" | "processing" | "shipped" | "done" | "cancelled";
 
@@ -201,6 +202,16 @@ export default function AdminPage() {
         </svg>
       ),
     },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.204-.107-.397.165-.71.505-.78.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.142-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -222,7 +233,7 @@ export default function AdminPage() {
             <button
               key={item.id}
               onClick={() => { setTab(item.id); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-4 py-3 sm:py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 tab === item.id
                   ? "bg-[#D2693F] text-white"
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -285,13 +296,13 @@ export default function AdminPage() {
                 ))}
               </div>
 
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">Recent Orders</h3>
                 {orders.length === 0 ? (
                   <p className="text-sm text-gray-400">No orders yet.</p>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                  <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <table className="w-full text-sm min-w-[480px]">
                       <thead>
                         <tr className="border-b border-gray-100">
                           <th className="text-left py-2 pr-4 font-medium text-gray-500">Order</th>
@@ -337,6 +348,9 @@ export default function AdminPage() {
           {/* ── MARQUEE ── */}
           {tab === "marquee" && <MarqueeManager />}
 
+          {/* ── SETTINGS ── */}
+          {tab === "settings" && <DeliverySettingsManager />}
+
           {/* ── ORDERS ── */}
           {tab === "orders" && (
             <div className="space-y-4">
@@ -375,7 +389,7 @@ export default function AdminPage() {
                           value={order.status}
                           onChange={(e) => handleStatusUpdate(order.id, e.target.value as OrderStatus)}
                           disabled={updatingOrderId === order.id}
-                          className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium bg-white hover:bg-gray-50 disabled:opacity-50"
+                          className="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-xs font-medium bg-white hover:bg-gray-50 disabled:opacity-50"
                         >
                           {ORDER_STATUSES.map((s) => (
                             <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
@@ -387,12 +401,12 @@ export default function AdminPage() {
                             value={trackingEdits[order.id] ?? order.trackingId ?? ""}
                             onChange={(e) => setTrackingEdits((p) => ({ ...p, [order.id]: e.target.value }))}
                             placeholder="Tracking ID"
-                            className="flex-1 sm:w-36 border border-gray-200 rounded-lg px-3 py-1.5 text-xs"
+                            className="flex-1 sm:w-36 border border-gray-200 rounded-lg px-3 py-2 text-xs"
                           />
                           <button
                             onClick={() => handleTrackingUpdate(order.id)}
                             disabled={updatingTrackingId === order.id}
-                            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                            className="px-4 py-2 text-xs font-medium rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50 whitespace-nowrap"
                           >
                             Save
                           </button>

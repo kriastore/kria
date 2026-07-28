@@ -11,6 +11,7 @@ import {
   readGuestCartFromCookie,
   writeGuestCartToCookie,
 } from "@/context/CartContext";
+import { useDeliverySettings } from "@/hooks/useDeliverySettings";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 import { resolvePricing } from "@/utils/pricing";
@@ -70,9 +71,10 @@ type InventoryItem = {
 
 export default function CartSidebar() {
   const router = useRouter();
-  const { open, closeCart } = useCartSidebar();
+  const { open, closeCart, openCart } = useCartSidebar();
   const { user, loading } = useAuth();
   const { syncTotal } = useCart();
+  const { settings: deliverySettings } = useDeliverySettings();
   const postAuthHandled = useRef(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +91,14 @@ export default function CartSidebar() {
     setMounted(true);
     return () => setMounted(false);
   }, []);
+
+  // Open cart if flagged by another page (e.g. checkout "Back to Cart")
+  useEffect(() => {
+    if (typeof window !== "undefined" && sessionStorage.getItem("openCartAfterNav") === "1") {
+      sessionStorage.removeItem("openCartAfterNav");
+      openCart();
+    }
+  }, [openCart]);
 
   // Escape key closes sidebar
   useEffect(() => {
@@ -257,6 +267,13 @@ export default function CartSidebar() {
 
   const subtotal = grandTotal;
   const total = subtotal;
+  const freeDeliveryThreshold = deliverySettings.freeDeliveryThreshold;
+  const qualifiesForFreeDelivery =
+    freeDeliveryThreshold > 0 && grandTotal >= freeDeliveryThreshold;
+  const amountUntilFreeDelivery =
+    freeDeliveryThreshold > 0
+      ? Math.max(0, freeDeliveryThreshold - grandTotal)
+      : 0;
 
   function resolveItemStock(prod: InventoryItem, item: CartItem): number | undefined {
     // Try variant stock first (Color|Size key)
@@ -643,9 +660,15 @@ export default function CartSidebar() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#9A6E50]">Shipping</span>
-                <span className="text-[#9A6E50] text-xs">
-                  Calculated at checkout
-                </span>
+                {qualifiesForFreeDelivery ? (
+                  <span className="text-emerald-600 text-xs font-medium">Free</span>
+                ) : (
+                  <span className="text-[#9A6E50] text-xs">
+                    {freeDeliveryThreshold > 0 && amountUntilFreeDelivery > 0
+                      ? `Add Rs.${amountUntilFreeDelivery.toLocaleString("en-IN")} for free delivery`
+                      : "Calculated at checkout"}
+                  </span>
+                )}
               </div>
               <div className="border-t border-[#E0D0B8] pt-2 flex items-center justify-between text-sm">
                 <span className="text-[#2D2D2D] font-semibold">Total</span>

@@ -23,7 +23,6 @@ export type PincodeInfo = {
 type ZoneDef = { rate: number; perItem: number; days: string; label: string };
 
 const ZONES: Record<string, ZoneDef> = {
-  local:  { rate: 35,  perItem: 10, days: "1-2", label: "Pune Local" },
   state:  { rate: 50,  perItem: 15, days: "2-4", label: "Maharashtra" },
   metro:  { rate: 65,  perItem: 20, days: "3-5", label: "Metro" },
   zone_a: { rate: 75,  perItem: 20, days: "4-6", label: "Regional" },
@@ -94,8 +93,8 @@ function getZone(pincode: string): string {
   // ODA check first (most specific remote)
   if (ODA_PREFIXES.has(p3)) return "oda";
 
-  // Local: Pune
-  if (p3 === "411") return "local";
+  // Pune (same as Maharashtra)
+  if (p3 === "411") return "state";
 
   // Metro
   if (METRO_PREFIXES.has(p3)) return "metro";
@@ -143,13 +142,28 @@ export async function validatePincode(pincode: string): Promise<PincodeInfo> {
 }
 
 // Calculate shipping charge based on zone
+// Optionally accepts custom zones and a free delivery threshold from admin settings
 export function calculateShipping(
   totalItems: number,
   orderValue: number,
-  pincode: string
+  pincode: string,
+  customZones?: Record<string, { rate: number; perItem: number; days: string; label: string }>,
+  freeDeliveryThreshold?: number
 ): ShippingResult {
   const zone = getZone(pincode);
-  const z = ZONES[zone];
+  const zones = customZones && Object.keys(customZones).length > 0 ? customZones : ZONES;
+  const z = zones[zone] || ZONES[zone];
+
+  // Free delivery if order value meets the threshold
+  if (typeof freeDeliveryThreshold === "number" && freeDeliveryThreshold > 0 && orderValue >= freeDeliveryThreshold) {
+    return {
+      available: true,
+      charge: 0,
+      estimatedDays: z.days,
+      courierPartner: "DTDC",
+      zone: z.label,
+    };
+  }
 
   // Flat base rate + per-item charge for additional items
   const baseCharge = z.rate + Math.max(0, totalItems - 1) * z.perItem;
