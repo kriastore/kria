@@ -392,7 +392,7 @@ export default function CartSidebar() {
 
   return (
     <div
-      className="fixed inset-0 z-[90]"
+      className="fixed inset-0 z-[200]"
       style={{ pointerEvents: open ? "auto" : "none" }}
     >
       {/* Backdrop */}
