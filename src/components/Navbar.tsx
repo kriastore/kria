@@ -198,13 +198,19 @@ function NavbarContent() {
               </button>
             </div>
 
-            {/* Brand Name */}
+            {/* Brand Logo */}
             <Link
               href="/"
-              className="block absolute left-1/2 -translate-x-1/2 text-xl md:text-2xl tracking-wide transition-colors"
-              style={{ color: '#2D2D2D', fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
+              className="block absolute left-1/2 -translate-x-1/2"
             >
-              KRIA
+              <Image
+                src="/navbarlogo.png"
+                alt="KRIA"
+                width={160}
+                height={48}
+                className="h-16 md:h-20 w-auto object-contain"
+                priority
+              />
             </Link>
 
             {/* Right side: search, user, cart */}
