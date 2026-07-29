@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { useCategories } from "@/hooks/useCategories";
+import { useCategories, Category, MAIN_TEXT_SIZES } from "@/hooks/useCategories";
 import { useMarquee } from "@/hooks/useMarquee";
 import ReviewCarousel from "@/components/ReviewCarousel";
 import { collection, getDocs } from "firebase/firestore";
@@ -27,50 +26,97 @@ type Product = {
   IsFeatured?: boolean;
   ImageUrl1Medium?: string;
   ImageUrl1Thumb?: string;
+  createdAt?: any;
+  SKU?: string;
 };
 
+function CategoryCard({ cat }: { cat: Category }) {
+  return (
+    <Link
+      href={`/shop?category=${encodeURIComponent(cat.name)}`}
+      className="group block overflow-hidden border border-[#E8E0D8]"
+    >
+      <div className="relative aspect-square flex flex-col items-center justify-center p-4 sm:p-5" style={{ backgroundColor: cat.bgColor || '#F3EDE4' }}>
+        <div className="border-2 border-black w-full h-full flex flex-col items-center justify-center text-center p-1 sm:p-2 overflow-hidden">
+          <span style={{ fontFamily: cat.mainTextFont || "'Great Vibes', cursive", wordBreak: 'keep-all' }} className={"text-[#211A12] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[cat.mainTextSize || 4] || MAIN_TEXT_SIZES[4])}>
+            {cat.mainText || cat.name}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function Home() {
-  const { totalItems, pulse } = useCart();
-  const { user, loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoaded, setProductsLoaded] = useState(false);
 
   const { categories: firestoreCategories, loading: categoriesLoading } = useCategories();
   const { items: marqueeItems } = useMarquee();
-  const categories = firestoreCategories.map((c) => c.name);
-  const categoryImages: Record<string, string> = Object.fromEntries(
-    firestoreCategories.filter((c) => c.image).map((c) => [c.name, c.image!])
-  );
+  const categoryNames = firestoreCategories.map((c) => c.name);
 
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
+  const leftBtnRef = useRef<HTMLButtonElement>(null);
+  const rightBtnRef = useRef<HTMLButtonElement>(null);
 
-  const checkScroll = useCallback(() => {
+  const updateArrows = useCallback(() => {
     const el = carouselRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    const leftBtn = leftBtnRef.current;
+    const rightBtn = rightBtnRef.current;
+    if (!el || !leftBtn || !rightBtn) return;
+    const atStart = el.scrollLeft <= 4;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    leftBtn.classList.toggle("opacity-100", !atStart);
+    leftBtn.classList.toggle("opacity-30", atStart);
+    leftBtn.classList.toggle("cursor-pointer", !atStart);
+    leftBtn.classList.toggle("cursor-default", atStart);
+    rightBtn.classList.toggle("opacity-100", !atEnd);
+    rightBtn.classList.toggle("opacity-30", atEnd);
+    rightBtn.classList.toggle("cursor-pointer", !atEnd);
+    rightBtn.classList.toggle("cursor-default", atEnd);
   }, []);
 
   useEffect(() => {
     const el = carouselRef.current;
     if (!el) return;
-    checkScroll();
-    el.addEventListener("scroll", checkScroll, { passive: true });
-    window.addEventListener("resize", checkScroll);
-    return () => {
-      el.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
+
+    el.scrollLeft = 0;
+
+    const run = () => requestAnimationFrame(() => requestAnimationFrame(() => updateArrows()));
+
+    const ro = new ResizeObserver(run);
+    ro.observe(el);
+
+    const onPageshow = () => {
+      el.scrollLeft = 0;
+      requestAnimationFrame(() => requestAnimationFrame(() => updateArrows()));
     };
-  }, [checkScroll, firestoreCategories]);
+    window.addEventListener("pageshow", onPageshow);
+
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+
+    run();
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("pageshow", onPageshow);
+      el.removeEventListener("scroll", updateArrows);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, [updateArrows, firestoreCategories]);
 
   const scrollCarousel = (dir: "left" | "right") => {
     const el = carouselRef.current;
     if (!el) return;
-    const cardWidth = el.querySelector<HTMLElement>("a")?.offsetWidth || 200;
-    el.scrollBy({ left: dir === "left" ? -(cardWidth + 24) : cardWidth + 24, behavior: "smooth" });
+    const card = el.querySelector<HTMLElement>("a");
+    if (!card) return;
+    const gap = 12;
+    const scrollAmount = (card.offsetWidth + gap) * 2;
+    el.scrollBy({ left: dir === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+    requestAnimationFrame(() => requestAnimationFrame(() => updateArrows()));
   };
 
   useEffect(() => {
@@ -141,8 +187,8 @@ export default function Home() {
       {/* Category Marquee */}
       <div className="w-full bg-[#F9F6F0] py-3 border-t border-b border-[#E0D0B8] overflow-hidden">
         <div className="animate-marquee text-xs sm:text-sm text-[#9A6E50] tracking-widest font-medium">
-          {[...categories, "Handmade with Love", "Supporting Indian Artisans", "Eco-Friendly Craft",
-            ...categories, "Handmade with Love", "Supporting Indian Artisans", "Eco-Friendly Craft"
+          {[...categoryNames, "Handmade with Love", "Supporting Indian Artisans", "Eco-Friendly Craft",
+            ...categoryNames, "Handmade with Love", "Supporting Indian Artisans", "Eco-Friendly Craft"
           ].map((cat, i) => (
             <span key={i} className="mx-6 sm:mx-8 inline-block whitespace-nowrap">✦ {cat}</span>
           ))}
@@ -159,93 +205,49 @@ export default function Home() {
             Browse By Category
           </h2>
 
-          {/* Mobile: 2-col grid, all categories */}
-          <div className="md:hidden grid grid-cols-2 gap-3 sm:gap-4">
-            {categories.map(cat => {
-              const imgSrc = categoryImages[cat] || `https://picsum.photos/seed/${encodeURIComponent(cat)}/400/600`;
-              return (
-                <Link
-                  key={cat}
-                  href={`/shop?category=${encodeURIComponent(cat)}`}
-                  className="group block overflow-hidden border border-[#E8E0D8] shadow-[0_1px_10px_rgba(45,32,20,0.05)] hover:shadow-[0_10px_28px_rgba(45,32,20,0.16)] transition-shadow duration-300"
-                >
-                  <div className="relative h-44 sm:h-56 bg-[#F3EDE4] flex items-center justify-center overflow-hidden">
-                    <ProductImage
-                      src={imgSrc}
-                      size="thumb"
-                      alt={cat}
-                      className="absolute inset-0 w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent z-10 flex items-end justify-center pb-5 sm:pb-7">
-                      <span
-                        className="text-sm sm:text-lg text-white drop-shadow-lg tracking-wide text-center px-2 relative after:content-[''] after:block after:w-8 after:h-[2px] after:bg-white/70 after:mx-auto after:mt-2 after:scale-x-0 group-hover:after:scale-x-100 after:transition-transform after:duration-300"
-                        style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
-                      >
-                        Shop {cat}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+          {/* Mobile: 2-col grid */}
+          <div className="lg:hidden grid grid-cols-2 gap-2 sm:gap-3">
+            {firestoreCategories.map(cat => (
+              <CategoryCard key={cat.id} cat={cat} />
+            ))}
           </div>
 
-          {/* Desktop: 4-col carousel with arrows */}
-          <div className="hidden md:block relative">
-            {canScrollLeft && (
-              <button
-                onClick={() => scrollCarousel("left")}
-                className="absolute -left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-[#F9F6F0] border border-[#E8E0D8] shadow-md flex items-center justify-center hover:bg-white transition-colors"
-                aria-label="Scroll left"
-              >
-                <svg className="w-5 h-5 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Desktop: carousel showing 4 at a time */}
+          <div className="hidden lg:block relative">
+            <button
+              ref={leftBtnRef}
+              onClick={() => scrollCarousel("left")}
+              className="absolute left-0 top-0 bottom-0 z-10 w-14 flex items-center justify-center transition-opacity duration-300 opacity-30 cursor-default"
+              aria-label="Scroll left"
+            >
+              <span className="w-10 h-10 rounded-full bg-white shadow-sm border border-[#E8E0D8] flex items-center justify-center hover:bg-gray-50 transition-colors">
+                <svg className="w-4 h-4 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
                 </svg>
-              </button>
-            )}
-            {canScrollRight && (
-              <button
-                onClick={() => scrollCarousel("right")}
-                className="absolute -right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-[#F9F6F0] border border-[#E8E0D8] shadow-md flex items-center justify-center hover:bg-white transition-colors"
-                aria-label="Scroll right"
-              >
-                <svg className="w-5 h-5 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              </span>
+            </button>
+            <button
+              ref={rightBtnRef}
+              onClick={() => scrollCarousel("right")}
+              className="absolute right-0 top-0 bottom-0 z-10 w-14 flex items-center justify-center transition-opacity duration-300 opacity-100 cursor-pointer"
+              aria-label="Scroll right"
+            >
+              <span className="w-10 h-10 rounded-full bg-white shadow-sm border border-[#E8E0D8] flex items-center justify-center hover:bg-gray-50 transition-colors">
+                <svg className="w-4 h-4 text-[#2D2D2D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
                 </svg>
-              </button>
-            )}
+              </span>
+            </button>
             <div
               ref={carouselRef}
-              className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth"
+              className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              {categories.map(cat => {
-                const imgSrc = categoryImages[cat] || `https://picsum.photos/seed/${encodeURIComponent(cat)}/400/600`;
-                return (
-                  <Link
-                    key={cat}
-                    href={`/shop?category=${encodeURIComponent(cat)}`}
-                    className="flex-none w-[calc(25%-18px)] group block overflow-hidden border border-[#E8E0D8] shadow-[0_1px_10px_rgba(45,32,20,0.05)] hover:shadow-[0_10px_28px_rgba(45,32,20,0.16)] transition-shadow duration-300"
-                  >
-                    <div className="relative h-80 lg:h-96 bg-[#F3EDE4] flex items-center justify-center overflow-hidden">
-                      <ProductImage
-                        src={imgSrc}
-                        size="thumb"
-                        alt={cat}
-                        className="absolute inset-0 w-full h-full group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent z-10 flex items-end justify-center pb-7">
-                        <span
-                          className="text-2xl lg:text-3xl text-white drop-shadow-lg tracking-wide text-center px-2 relative after:content-[''] after:block after:w-8 after:h-[2px] after:bg-white/70 after:mx-auto after:mt-2 after:scale-x-0 group-hover:after:scale-x-100 after:transition-transform after:duration-300"
-                          style={{ fontFamily: "'Tenor Sans', sans-serif", fontWeight: 600 }}
-                        >
-                          Shop {cat}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+              {firestoreCategories.map(cat => (
+                <div key={cat.id} className="flex-none w-[calc(25%-9px)]">
+                  <CategoryCard cat={cat} />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -262,13 +264,18 @@ export default function Home() {
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-7">
-            {products.map((p) => (
+            {products.map((p) => {
+              const isNew = p.createdAt && (Date.now() - p.createdAt.toDate()) < 30 * 24 * 60 * 60 * 1000;
+              return (
               <Link
                 key={p.ID}
                 href={`/product/${encodeURIComponent(p.ProductName || p.Description)}`}
                 className="flex flex-col items-center group"
               >
                 <div className="aspect-square border border-[#E8E0D8] mb-2.5 sm:mb-3.5 overflow-hidden w-full bg-white relative shadow-[0_1px_6px_rgba(45,32,20,0.04)] group-hover:shadow-[0_8px_20px_rgba(45,32,20,0.14)] group-hover:border-[#D2693F]/40 transition-all duration-300">
+                  {isNew && (
+                    <span className="absolute top-2 right-2 bg-[#D2693F] text-white text-[10px] font-bold px-2 py-0.5 z-10 uppercase tracking-wider">New</span>
+                  )}
                   <ProductImage
                     src={p.ImageUrl1}
                     srcMedium={(p as any).ImageUrl1Medium}
@@ -280,11 +287,14 @@ export default function Home() {
                 </div>
 
                 <div
-                  className="truncate text-[#211A12] text-xs sm:text-sm md:text-base mb-1 w-full text-center px-1"
+                  className="truncate text-[#211A12] text-xs sm:text-sm md:text-base mb-0.5 w-full text-center px-1"
                   style={{ fontFamily: "'Tenor Sans', sans-serif" }}
                 >
                   {p.ProductName || p.Description}
                 </div>
+                {p.SKU && (
+                  <div className="text-[10px] text-[#B0A38C] text-center mb-1 px-1">{p.SKU}</div>
+                )}
 
                 <div className="text-center px-1">
                   {(() => { const pr = resolvePricing({ Price: p.Price, OriginalPrice: p.OriginalPrice, DiscountPercent: p.DiscountPercent }); return (
@@ -297,7 +307,7 @@ export default function Home() {
                   ); })()}
                 </div>
               </Link>
-            ))}
+            );})}
           </div>
         </div>
       </section>
@@ -314,13 +324,18 @@ export default function Home() {
             </h2>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-7">
-              {products.slice(6, 9).map((p) => (
+              {products.slice(6, 9).map((p) => {
+                const isNew = p.createdAt && (Date.now() - p.createdAt.toDate()) < 30 * 24 * 60 * 60 * 1000;
+                return (
                 <Link
                   key={p.ID}
                   href={`/product/${encodeURIComponent(p.ProductName || p.Description)}`}
                   className="flex flex-col items-center group"
                 >
                   <div className="aspect-square border border-[#E8E0D8] mb-2.5 sm:mb-3.5 overflow-hidden w-full bg-white relative shadow-[0_1px_6px_rgba(45,32,20,0.04)] group-hover:shadow-[0_8px_20px_rgba(45,32,20,0.14)] group-hover:border-[#D2693F]/40 transition-all duration-300">
+                    {isNew && (
+                      <span className="absolute top-2 right-2 bg-[#D2693F] text-white text-[10px] font-bold px-2 py-0.5 z-10 uppercase tracking-wider">New</span>
+                    )}
                     <ProductImage
                       src={p.ImageUrl1}
                       srcMedium={(p as any).ImageUrl1Medium}
@@ -332,11 +347,14 @@ export default function Home() {
                   </div>
 
                   <div
-                    className="truncate text-[#211A12] text-xs sm:text-sm md:text-base mb-1 w-full text-center px-1"
+                    className="truncate text-[#211A12] text-xs sm:text-sm md:text-base mb-0.5 w-full text-center px-1"
                     style={{ fontFamily: "'Tenor Sans', sans-serif" }}
                   >
                     {p.ProductName || p.Description}
                   </div>
+                  {p.SKU && (
+                    <div className="text-[10px] text-[#B0A38C] text-center mb-1 px-1">{p.SKU}</div>
+                  )}
 
                   <div className="text-center px-1">
                     {(() => { const pr = resolvePricing({ Price: p.Price, OriginalPrice: p.OriginalPrice, DiscountPercent: p.DiscountPercent }); return (
@@ -349,7 +367,7 @@ export default function Home() {
                     ); })()}
                   </div>
                 </Link>
-              ))}
+              );})}
             </div>
           </div>
         </section>

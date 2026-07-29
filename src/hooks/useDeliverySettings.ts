@@ -22,6 +22,12 @@ const DEFAULT_ZONES: Record<string, ZoneDef> = {
   zone_c: { rate: 80,  perItem: 20, days: "5-7", label: "South India" },
   zone_d: { rate: 90,  perItem: 25, days: "6-8", label: "East India" },
   oda:    { rate: 130, perItem: 30, days: "8-12", label: "Remote / ODA" },
+  intl_asia:       { rate: 350,  perItem: 100, days: "7-14",  label: "Asia" },
+  intl_europe:     { rate: 450,  perItem: 150, days: "10-18", label: "Europe" },
+  intl_namerica:   { rate: 500,  perItem: 180, days: "10-18", label: "North America" },
+  intl_samerica:   { rate: 550,  perItem: 200, days: "12-20", label: "South America" },
+  intl_africa:     { rate: 500,  perItem: 160, days: "10-18", label: "Africa" },
+  intl_oceania:    { rate: 480,  perItem: 170, days: "10-18", label: "Australia / Oceania" },
 };
 
 const DEFAULT_SETTINGS: DeliverySettings = {

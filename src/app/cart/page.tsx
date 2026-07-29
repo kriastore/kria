@@ -548,7 +548,7 @@ export default function CartPage() {
                 </div>
                 {freeDeliveryThreshold > 0 && amountUntilFreeDelivery > 0 && (
                   <p className="text-xs text-center py-1.5 rounded bg-[#F9F6F0] text-[#9A6E50] font-medium">
-                    Add <PriceText amount={amountUntilFreeDelivery} /> more for free delivery
+                    <PriceText amount={amountUntilFreeDelivery} /> away from free delivery
                   </p>
                 )}
                 {qualifiesForFreeDelivery && (

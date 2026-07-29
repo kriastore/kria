@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { db } from "@/firebase";
 import {
   collection,
@@ -589,6 +589,10 @@ export default function InventoryTable() {
     }
   }
 
+  function generateSKU(id: number): string {
+    return "K" + String(id).padStart(3, "0");
+  }
+
   async function handleAddSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!db) return setError('Firestore not initialized');
@@ -601,6 +605,7 @@ export default function InventoryTable() {
         ProductName: form.ProductName || "",
         Description: form.Description || "",
         ID: nextId,
+        SKU: generateSKU(nextId),
         ImageUrl1: form.ImageUrl1 || "",
         ImageUrl1Medium: form.ImageUrl1Medium || "",
         ImageUrl1Thumb: form.ImageUrl1Thumb || "",
@@ -638,8 +643,11 @@ export default function InventoryTable() {
     }
   }
 
+  const editingOriginalSkuRef = useRef<string | null>(null);
+
   function openEditModal(item: Item) {
     setEditingId(item.id ?? null);
+    editingOriginalSkuRef.current = item.SKU || null;
     setForm({
       ProductName: item.ProductName ?? item.Description ?? "",
       Description: item.Description ?? "",
@@ -679,10 +687,14 @@ export default function InventoryTable() {
     if (!db) return setError('Firestore not initialized');
     if (!editingId) return setError('No document selected for edit');
     try {
+      const sku = editingOriginalSkuRef.current || generateSKU(form.ID ? Number(form.ID) : 0);
+      editingOriginalSkuRef.current = null;
+
       const payload: any = {
         ProductName: form.ProductName || "",
         Description: form.Description || "",
         ID: form.ID ? Number(form.ID) : undefined,
+        SKU: sku,
         ImageUrl1: form.ImageUrl1 || "",
         ImageUrl1Medium: form.ImageUrl1Medium || "",
         ImageUrl1Thumb: form.ImageUrl1Thumb || "",

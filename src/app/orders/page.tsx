@@ -40,6 +40,7 @@ type OrderItem = {
     Price?: number;
     OriginalPrice?: number;
     DiscountPercent?: number;
+    SKU?: string;
   };
 };
 
@@ -351,12 +352,13 @@ export default function OrdersPage() {
                                  />
                                </div>
                               <div>
-                                <p className="font-medium">
-                                  {item.product?.ProductName ?? item.product?.Description ?? "Product"} × {item.Quantity}
-                                </p>
-                                <p className="text-xs" style={{ color: "#9A6E50" }}>
-                                  ID: {item.ID} • Size: {item.Size || "N/A"}
-                                </p>
+                                 <p className="font-medium">
+                                   {item.product?.ProductName ?? item.product?.Description ?? "Product"} × {item.Quantity}
+                                 </p>
+                                 {item.product?.SKU && <p className="text-[10px]" style={{ color: "#B0A38C" }}>{item.product.SKU}</p>}
+                                 <p className="text-xs" style={{ color: "#9A6E50" }}>
+                                   ID: {item.ID} • Size: {item.Size || "N/A"}
+                                 </p>
                               </div>
                             </div>
                             <span className="whitespace-nowrap font-semibold">

@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useState, useRef } from "react";
-import { useCategories, Category } from "@/hooks/useCategories";
+import { useCategories, Category, FONT_OPTIONS, MAIN_TEXT_SIZES } from "@/hooks/useCategories";
 import { convertToWebP } from "@/utils/uploadImage";
 import {
   ref as storageRef,
@@ -17,11 +17,18 @@ export default function CategoriesManager() {
   // Add form
   const [newName, setNewName] = useState("");
   const [newImage, setNewImage] = useState("");
+  const [newBgColor, setNewBgColor] = useState("#F3EDE4");
+  const [newMainTextFont, setNewMainTextFont] = useState("'Great Vibes', cursive");
+  const [newMainTextSize, setNewMainTextSize] = useState(4);
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editImage, setEditImage] = useState("");
+  const [editMainText, setEditMainText] = useState("");
+  const [editBgColor, setEditBgColor] = useState("#F3EDE4");
+  const [editMainTextFont, setEditMainTextFont] = useState("'Great Vibes', cursive");
+  const [editMainTextSize, setEditMainTextSize] = useState(4);
   const [editOrder, setEditOrder] = useState(0);
   const [saving, setSaving] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
@@ -44,9 +51,12 @@ export default function CategoriesManager() {
       return;
     }
     try {
-      await addCategory(newName.trim(), newImage.trim());
+      await addCategory(newName.trim(), newImage.trim(), undefined, newBgColor, newMainTextFont, newMainTextSize);
       setNewName("");
       setNewImage("");
+      setNewBgColor("#F3EDE4");
+      setNewMainTextFont("'Great Vibes', cursive");
+      setNewMainTextSize(4);
     } catch (err: any) {
       setError(err.message || "Failed to add category");
     }
@@ -66,6 +76,10 @@ export default function CategoriesManager() {
     setEditingId(cat.id);
     setEditName(cat.name);
     setEditImage(cat.image || "");
+    setEditMainText(cat.mainText || "");
+    setEditBgColor(cat.bgColor || "#F3EDE4");
+    setEditMainTextFont(cat.mainTextFont || "'Great Vibes', cursive");
+    setEditMainTextSize(cat.mainTextSize || 4);
     setEditOrder(cat.order);
   };
 
@@ -83,11 +97,16 @@ export default function CategoriesManager() {
     }
     setSaving(true);
     try {
-      await updateCategory(editingId, {
+      const updates: Record<string, any> = {
         name: editName.trim(),
         image: editImage.trim(),
+        bgColor: editBgColor,
+        mainTextFont: editMainTextFont,
+        mainTextSize: editMainTextSize,
         order: editOrder,
-      });
+      };
+      if (editMainText.trim()) updates.mainText = editMainText.trim();
+      await updateCategory(editingId, updates);
       setEditingId(null);
     } catch (err: any) {
       setError(err.message || "Failed to update category");
@@ -155,6 +174,36 @@ export default function CategoriesManager() {
     }
   };
 
+  function PreviewCard({ bgColor, name, mainText, mainTextFont, mainTextSize }: { bgColor: string; name: string; mainText?: string; mainTextFont: string; mainTextSize: number }) {
+    return (
+      <div className="sm:col-span-2 mt-2">
+        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Preview</label>
+        <div className="flex gap-6 items-start flex-wrap">
+          <div>
+            <div className="text-[10px] text-slate-400 text-center mb-1.5 font-medium">Mobile</div>
+            <div className="w-[180px] aspect-[3/4] flex flex-col items-center justify-center p-2 border border-slate-200 rounded-lg shadow-sm" style={{ backgroundColor: bgColor }}>
+              <div className="border border-black/40 w-full h-full flex flex-col items-center justify-center text-center p-1 overflow-hidden rounded-sm">
+                <span style={{ fontFamily: mainTextFont, wordBreak: 'keep-all' }} className={"text-[#211A12] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[mainTextSize] || MAIN_TEXT_SIZES[4])}>
+                  {mainText || name}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-slate-400 text-center mb-1.5 font-medium">Desktop</div>
+            <div className="w-[260px] aspect-[3/4] flex flex-col items-center justify-center p-4 border border-slate-200 rounded-lg shadow-sm" style={{ backgroundColor: bgColor }}>
+              <div className="border border-black/40 w-full h-full flex flex-col items-center justify-center text-center p-1 overflow-hidden rounded-sm">
+                <span style={{ fontFamily: mainTextFont, wordBreak: 'keep-all' }} className={"text-[#211A12] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[mainTextSize] || MAIN_TEXT_SIZES[4])}>
+                  {mainText || name}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {error && (
@@ -167,27 +216,49 @@ export default function CategoriesManager() {
       {/* Add form */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h3 className="text-sm font-semibold text-gray-900 mb-4">Add New Category</h3>
-        <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Category name"
-            className="flex-1 rounded-lg border border-gray-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
-          />
-          <input
-            type="url"
-            value={newImage}
-            onChange={(e) => setNewImage(e.target.value)}
-            placeholder="Image URL (optional)"
-            className="flex-1 rounded-lg border border-gray-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
-          />
-          <button
-            type="submit"
-            className="px-6 py-2.5 rounded-lg bg-[#D2693F] text-white text-sm font-semibold hover:bg-[#B85A34] shadow-sm transition-all active:scale-[0.98] whitespace-nowrap"
-          >
-            Add Category
-          </button>
+        <form onSubmit={handleAdd} className="space-y-3">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Category name"
+              className="flex-1 rounded-lg border border-gray-200 bg-slate-50/50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+            />
+            <div className="flex items-center gap-2 shrink-0">
+              <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Bg</label>
+              <input
+                type="color"
+                value={newBgColor}
+                onChange={(e) => setNewBgColor(e.target.value)}
+                className="w-9 h-9 rounded border border-gray-200 cursor-pointer"
+              />
+            </div>
+            <button
+              type="submit"
+              className="px-6 py-2.5 rounded-lg bg-[#D2693F] text-white text-sm font-semibold hover:bg-[#B85A34] shadow-sm transition-all active:scale-[0.98] whitespace-nowrap"
+            >
+              Add Category
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <select
+              value={newMainTextFont}
+              onChange={(e) => setNewMainTextFont(e.target.value)}
+              className="rounded-lg border border-gray-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+            >
+              {FONT_OPTIONS.map(f => (
+                <option key={f.value} value={f.value}>{f.label}</option>
+              ))}
+            </select>
+            <select
+              value={newMainTextSize}
+              onChange={(e) => setNewMainTextSize(Number(e.target.value))}
+              className="rounded-lg border border-gray-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+            >
+              {[1,2,3,4,5].map(s => <option key={s} value={s}>Size {s}</option>)}
+            </select>
+          </div>
         </form>
       </div>
 
@@ -214,48 +285,9 @@ export default function CategoriesManager() {
               if (isEditing) {
                 return (
                   <li key={cat.id} className="px-6 py-5 bg-[#F9F6F0]/30">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      {/* Image */}
-                      <div className="flex-shrink-0">
-                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Image</label>
-                        <label className="relative flex items-center justify-center w-20 h-20 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-[#C5A059] hover:bg-[#F9F6F0]/40 transition-all overflow-hidden group">
-                          {uploadingImg ? (
-                            <div className="w-5 h-5 border-2 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
-                          ) : editImage ? (
-                            <>
-                              <img src={editImage} alt="" className="w-full h-full object-cover" />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span className="text-[10px] text-white font-medium bg-black/50 px-2 py-1 rounded">Change</span>
-                              </div>
-                            </>
-                          ) : (
-                            <svg className="w-5 h-5 text-slate-300 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
-                          )}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (file) await handleImageUpload(file);
-                            }}
-                          />
-                        </label>
-                        {editImage && (
-                          <button
-                            type="button"
-                            onClick={() => setEditImage("")}
-                            className="mt-1 text-[10px] text-red-500 hover:text-red-700 font-medium transition-colors"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
 
                       {/* Fields */}
-                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-[1fr_80px] gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Name</label>
                           <input
@@ -274,18 +306,61 @@ export default function CategoriesManager() {
                             className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
                           />
                         </div>
-                        <div className="sm:col-span-2">
-                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Image URL</label>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Main Text <span className="text-slate-300 font-normal normal-case">(override display)</span></label>
                           <input
-                            type="url"
-                            value={editImage}
-                            onChange={(e) => setEditImage(e.target.value)}
-                            placeholder="Or paste an image URL"
+                            type="text"
+                            value={editMainText}
+                            onChange={(e) => setEditMainText(e.target.value)}
+                            placeholder="Leave blank to use Name"
                             className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
                           />
                         </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Background Color</label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={editBgColor}
+                              onChange={(e) => setEditBgColor(e.target.value)}
+                              className="w-9 h-9 rounded border border-gray-200 cursor-pointer shrink-0"
+                            />
+                            <input
+                              type="text"
+                              value={editBgColor}
+                              onChange={(e) => setEditBgColor(e.target.value)}
+                              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all font-mono"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Main Font</label>
+                          <select
+                            value={editMainTextFont}
+                            onChange={(e) => setEditMainTextFont(e.target.value)}
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                          >
+                            {FONT_OPTIONS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Main Size</label>
+                          <select
+                            value={editMainTextSize}
+                            onChange={(e) => setEditMainTextSize(Number(e.target.value))}
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all"
+                          >
+                            {[1,2,3,4,5].map(s => <option key={s} value={s}>Size {s}</option>)}
+                          </select>
+                        </div>
+                        <PreviewCard
+                          bgColor={editBgColor}
+                          name={editName || "Main Text"}
+                          mainText={editMainText}
+                          mainTextFont={editMainTextFont}
+                          mainTextSize={editMainTextSize}
+                        />
                       </div>
-                    </div>
 
                     {/* Actions */}
                     <div className="flex items-center gap-2 mt-4">
@@ -314,17 +389,11 @@ export default function CategoriesManager() {
                 <li key={cat.id} className="group">
                   <div className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50/50 transition-colors">
                     <span className="text-xs text-gray-300 font-mono w-4 text-center flex-shrink-0">{cat.order}</span>
-                    {cat.image ? (
-                      <img
-                        src={cat.image}
-                        alt={cat.name}
-                        className="w-12 h-12 rounded-lg object-cover bg-gray-100 flex-shrink-0"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-lg bg-[#F3EDE4] flex items-center justify-center flex-shrink-0">
-                        <span className="text-lg text-[#D2693F] font-semibold">{cat.name.charAt(0)}</span>
-                      </div>
-                    )}
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border border-slate-200" style={{ backgroundColor: cat.bgColor || '#F3EDE4' }}>
+                      <span style={{ fontFamily: cat.mainTextFont || "'Great Vibes', cursive", wordBreak: 'keep-all' }} className={"text-[#211A12] tracking-wide font-bold leading-tight px-1 " + (MAIN_TEXT_SIZES[cat.mainTextSize || 4] || MAIN_TEXT_SIZES[4])}>
+                        {cat.mainText ? cat.mainText.split(' ')[0] : cat.name.split(' ')[0]}
+                      </span>
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">{cat.name}</p>
                       {catSubs.length > 0 && (

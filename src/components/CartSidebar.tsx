@@ -665,7 +665,7 @@ export default function CartSidebar() {
                 ) : (
                   <span className="text-[#9A6E50] text-xs">
                     {freeDeliveryThreshold > 0 && amountUntilFreeDelivery > 0
-                      ? `Add Rs.${amountUntilFreeDelivery.toLocaleString("en-IN")} for free delivery`
+                      ? `Rs.${amountUntilFreeDelivery.toLocaleString("en-IN")} away from free delivery`
                       : "Calculated at checkout"}
                   </span>
                 )}

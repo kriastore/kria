@@ -15,6 +15,12 @@ const ZONE_KEYS = [
   "zone_c",
   "zone_d",
   "oda",
+  "intl_asia",
+  "intl_europe",
+  "intl_namerica",
+  "intl_samerica",
+  "intl_africa",
+  "intl_oceania",
 ] as const;
 
 export default function DeliverySettingsManager() {

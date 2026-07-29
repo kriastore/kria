@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const pincode = req.nextUrl.searchParams.get("pincode");
+  const country = req.nextUrl.searchParams.get("country") || "India";
+
+  // International: skip India Post, just return country as state
+  if (country !== "India") {
+    if (!pincode || pincode.length < 3) {
+      return NextResponse.json({ city: "", state: "", district: "", error: "Invalid postal code" }, { status: 400 });
+    }
+    return NextResponse.json({
+      city: pincode,
+      state: country,
+      district: "",
+    });
+  }
+
   if (!pincode || pincode.length !== 6) {
     return NextResponse.json({ error: "Invalid pincode" }, { status: 400 });
   }

@@ -54,6 +54,7 @@ type Product = {
   Sizes?: string[];
   VariantStock?: Record<string, number>;
   FallbackDeliveryTime?: string;
+  SKU?: string;
 };
 
 export default function ProductPage() {
@@ -578,6 +579,9 @@ export default function ProductPage() {
               </div>
             </div>
 
+            {product?.SKU && (
+              <p className="text-xs text-[#B0A38C] mt-2">{product.SKU}</p>
+            )}
             <div className="mt-1">
               <div
                 className="text-[#211A12] flex items-baseline flex-wrap gap-x-3"
@@ -834,7 +838,7 @@ export default function ProductPage() {
                       fontSize: '13px'
                     }}
                   >
-                    PAN India Shipping
+                    PAN India & Worldwide Shipping
                   </span>
                 </div>
                 <div className="flex items-center space-x-3">

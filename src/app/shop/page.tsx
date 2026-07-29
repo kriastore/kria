@@ -26,6 +26,8 @@ type Product = {
   IsFeatured?: boolean;
   ImageUrl1Medium?: string;
   ImageUrl1Thumb?: string;
+  createdAt?: any;
+  SKU?: string;
 };
 
 function ShopContent() {
@@ -367,8 +369,12 @@ function ShopContent() {
                 const outOfStock = (p as any).StockType === "ready_stock" && generalStock !== undefined && Number(generalStock) === 0;
                 const soldOut = !!(p as any).SoldOut || outOfStock;
                 const savePct = pr.discount > 0 ? pr.discount : null;
+                const isNew = (p as any).createdAt && (Date.now() - (p as any).createdAt.toDate()) < 30 * 24 * 60 * 60 * 1000;
                 return (
                 <Link key={p.ID} href={`/product/${encodeURIComponent(p.ProductName)}`} className="block relative p-0 font-light hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer overflow-hidden group">
+                  {isNew && (
+                    <span className="absolute top-3 right-3 bg-[#D2693F] text-white text-[10px] font-bold px-2 py-0.5 z-10 uppercase tracking-wider">New</span>
+                  )}
                   {outOfStock && (
                     <span className="absolute top-3 left-3 bg-red-200 text-red-800 text-xs font-bold px-3 py-1 z-10">
                       Out of Stock
@@ -392,6 +398,7 @@ function ShopContent() {
 
                   <div className="py-3 px-2">
                     <h3 className="text-sm md:text-base font-medium text-[#2D2D2D] leading-tight">{p.ProductName}</h3>
+                    {(p as any).SKU && <p className="text-[10px] text-[#B0A38C] mt-0.5">{(p as any).SKU}</p>}
                     <div className="mt-2 flex items-baseline gap-3">
                       <PriceText amount={pr.selling} className="text-sm md:text-base font-bold text-[#D2693F]" />
                       {pr.discount > 0 && (

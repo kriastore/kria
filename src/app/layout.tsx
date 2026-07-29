@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Tenor_Sans } from "next/font/google";
+import { Tenor_Sans, Playfair_Display, Great_Vibes, Montserrat, Alex_Brush } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -10,6 +10,30 @@ import SiteShell from "@/components/SiteShell";
 
 const tenorSans = Tenor_Sans({
   variable: "--font-tenor-sans",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const greatVibes = Great_Vibes({
+  variable: "--font-great-vibes",
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+});
+
+const alexBrush = Alex_Brush({
+  variable: "--font-alex-brush",
   subsets: ["latin"],
   weight: "400",
 });
@@ -53,9 +77,10 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
+
       </head>
       <body
-  className={`${tenorSans.variable} antialiased min-h-screen bg-[#F9F6F0] text-[#2D2D2D]`}
+      className={`${tenorSans.variable} ${playfairDisplay.variable} ${greatVibes.variable} ${montserrat.variable} ${alexBrush.variable} antialiased min-h-screen bg-[#F9F6F0] text-[#2D2D2D]`}
   style={{ fontFamily: "'Tenor Sans', var(--font-tenor-sans), sans-serif" }}
 >
 
