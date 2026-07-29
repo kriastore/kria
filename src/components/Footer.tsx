@@ -20,10 +20,21 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm mb-4">
               <li><a href="/shipping-policy" className="hover:underline">Shipping Policy</a></li>
+              <li><a href="/shipping-return" className="hover:underline">Shipping & Return</a></li>
               <li><a href="/refund-policy" className="hover:underline">Return & Refund</a></li>
+              <li><a href="/cancellation-refund" className="hover:underline">Cancellation & Refund</a></li>
               <li><a href="/privacy-policy" className="hover:underline">Privacy Policy</a></li>
               <li><a href="/tos" className="hover:underline">Terms & Conditions</a></li>
+            </ul>
+
+            <h4 className="text-[#2D2D2D] font-semibold text-lg mb-4 mt-6">
+              Learn
+            </h4>
+            <ul className="space-y-2 text-sm">
               <li><a href="/about-us" className="hover:underline">About Us</a></li>
+              <li><a href="/what-makes-kria-special" className="hover:underline">What Makes Kria Special</a></li>
+              <li><a href="/product-care" className="hover:underline">Product Care</a></li>
+              <li><a href="/faq" className="hover:underline">FAQs</a></li>
             </ul>
           </div>
           {/* Contact */}

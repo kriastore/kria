@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React from "react";
 
 export type ProductImageSize = "thumb" | "medium" | "full";
 
@@ -52,38 +52,34 @@ export default function ProductImage({
   onError,
   onLoad,
 }: ProductImageProps) {
-  const [loaded, setLoaded] = useState(false);
-
   const resolveUrl = () => {
     if (size === "thumb") return srcThumb || srcMedium || src || fallback;
     if (size === "medium") return srcMedium || src || fallback;
     return src || fallback;
   };
 
-  const handleLoad = () => {
-    setLoaded(true);
-    onLoad?.();
-  };
+  const thumbBackground = size !== "thumb" && srcThumb
+    ? { backgroundImage: `url(${srcThumb})`, backgroundSize: "cover" as const, backgroundPosition: "center" as const }
+    : undefined;
 
   if (fill) {
     return (
-      <div className={`relative ${className || ""}`} onClick={onClick}>
+      <div className={`relative ${className || ""}`} onClick={onClick} style={thumbBackground}>
         <Image
           src={resolveUrl()}
           alt={alt}
           fill
           sizes={SIZE_DEFAULTS[size]}
           priority={priority}
-          className={`${OBJECT_CLASS[size]} transition-opacity duration-150 ${loaded ? "opacity-100" : "opacity-0"}`}
+          className={OBJECT_CLASS[size]}
           onError={onError}
-          onLoad={handleLoad}
         />
       </div>
     );
   }
 
   return (
-    <div className={`relative inline-block ${className || ""}`} onClick={onClick}>
+    <div className={`relative inline-block ${className || ""}`} onClick={onClick} style={thumbBackground}>
       <Image
         src={resolveUrl()}
         alt={alt}
@@ -91,10 +87,9 @@ export default function ProductImage({
         height={height}
         sizes={SIZE_DEFAULTS[size]}
         priority={priority}
-        className={`transition-opacity duration-150 ${loaded ? "opacity-100" : "opacity-0"}`}
+        className=""
         onClick={onClick}
         onError={onError}
-        onLoad={handleLoad}
       />
     </div>
   );

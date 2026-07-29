@@ -89,9 +89,153 @@ function ShopContent() {
 
   return (
     <div className="bg-[#F9F6F0] min-h-screen">
-      <main className="px-4 py-8 max-w-6xl mx-auto">
-        <div className="mb-4">
+      <main className="px-4 pt-4 md:pt-8 pb-8 max-w-6xl mx-auto">
+        <div className="mb-1 md:mb-4">
           <div className="text-sm text-gray-500">Showing {sorted.length} products</div>
+        </div>
+
+        {/* Mobile top toolbar */}
+        <div className="md:hidden sticky top-0 z-40 w-full bg-[#F9F6F0] border-b border-[#E8E0D8]">
+          <div className="max-w-6xl mx-auto flex divide-x divide-white px-0 py-0">
+            <button
+              onClick={() => { setShowFilterPopover(false); setShowMobileSort(s => !s); }}
+              className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
+                <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M10 6h6M6 12h10M8 18h8" />
+              </svg>
+              <span>Sort By</span>
+            </button>
+
+            <button
+              onClick={() => { setShowMobileSort(false); setMobileSubView(null); setShowFilterPopover(s => !s); }}
+              aria-expanded={showFilterPopover}
+              aria-controls="filter-popover"
+              className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
+                <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M6 12h12M10 19h4" />
+              </svg>
+              <span>Filters</span>
+            </button>
+          </div>
+
+          {/* Mobile sort popover */}
+          {showMobileSort && (
+            <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-3 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#E8E0D8]">
+              <div className="text-sm font-semibold mb-2 text-[#2D2D2D]">Sort</div>
+              <div className="space-y-1">
+                <button
+                  onClick={() => { setSort("relevance"); setShowMobileSort(false); }}
+                  className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                >
+                  Relevance
+                </button>
+                <button
+                  onClick={() => { setSort("price-asc"); setShowMobileSort(false); }}
+                  className={`w-full text-left px-2 py-1 text-sm ${sort === "price-asc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                >
+                  Price: Low to High
+                </button>
+                <button
+                  onClick={() => { setSort("price-desc"); setShowMobileSort(false); }}
+                  className={`w-full text-left px-2 py-1 text-sm ${sort === "price-desc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
+                >
+                  Price: High to Low
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile filter popover */}
+          {showFilterPopover && (
+            <div id="filter-popover" className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-4 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#E8E0D8] max-h-[70vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  {mobileSubView && (
+                    <button onClick={() => setMobileSubView(null)} className="text-[#D2693F] text-sm font-medium">← Back</button>
+                  )}
+                  <div className="text-sm font-semibold text-[#2D2D2D]">{mobileSubView || 'Filters'}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { setFilter(null); setSort("relevance"); setSelectedSubcategory(null); setSubcategoryFilter(null); setMobileSubView(null); }}
+                    className="text-sm bg-[#F3EDE4] text-[#2D2D2D] px-2 py-1 cursor-pointer hover:bg-[#E0D0B8]"
+                  >
+                    Reset
+                  </button>
+                  <button onClick={() => { setShowFilterPopover(false); setMobileSubView(null); }} className="text-gray-500 text-sm cursor-pointer">Close</button>
+                </div>
+              </div>
+
+              {!mobileSubView ? (
+                <div className="space-y-1">
+                  <button
+                    onClick={() => { setFilter(null); setSelectedSubcategory(null); setSubcategoryFilter(null); setShowFilterPopover(false); }}
+                    className={`w-full text-left px-3 py-2 text-sm ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
+                  >
+                    All
+                  </button>
+
+                  {firestoreCategories.map(cat => {
+                    const hasSubs = (cat.subcategories || []).length > 0;
+                    const isActive = filter === cat.name;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          if (hasSubs) {
+                            setMobileSubView(cat.name);
+                            setFilter(cat.name);
+                            setSubcategoryFilter(null);
+                          } else {
+                            setFilter(cat.name);
+                            setSelectedSubcategory(cat.name);
+                            setSubcategoryFilter(null);
+                            setShowFilterPopover(false);
+                          }
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between ${isActive ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                      >
+                        <span>{cat.name}</span>
+                        {hasSubs && (
+                          <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+
+                  {categories.filter(c => c && !firestoreCategories.some(fc => fc.name === c)).map(c => (
+                    <button
+                      key={c}
+                      onClick={() => { setFilter(c); setSelectedSubcategory(c); setSubcategoryFilter(null); setShowFilterPopover(false); }}
+                      className={`w-full text-left px-3 py-2 text-sm ${filter === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {(() => {
+                    const cat = firestoreCategories.find(c => c.name === mobileSubView);
+                    const subs = (cat?.subcategories || []).sort((a: any, b: any) => a.order - b.order);
+                    return subs.map((sub: any) => (
+                      <button
+                        key={sub.name}
+                        onClick={() => { setSubcategoryFilter(sub.name); setShowFilterPopover(false); setMobileSubView(null); }}
+                        className={`w-full text-left px-3 py-2 text-sm ${subcategoryFilter === sub.name ? 'bg-[#C5A059] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
+                      >
+                        {sub.name}
+                      </button>
+                    ));
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="md:flex md:items-start md:gap-6">
@@ -165,150 +309,6 @@ function ShopContent() {
 
           {/* Main content area */}
           <div className="flex-1">
-            {/* Mobile bottom toolbar */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#F9F6F0] border-t border-[#E8E0D8] z-50">
-              <div className="max-w-6xl mx-auto flex divide-x divide-white px-0 py-0">
-                <button
-                  onClick={() => { setShowFilterPopover(false); setShowMobileSort(s => !s); }}
-                  className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
-                    <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M10 6h6M6 12h10M8 18h8" />
-                  </svg>
-                  <span>Sort By</span>
-                </button>
-
-                <button
-                  onClick={() => { setShowMobileSort(false); setMobileSubView(null); setShowFilterPopover(s => !s); }}
-                  aria-expanded={showFilterPopover}
-                  aria-controls="filter-popover"
-                  className="flex-1 flex items-center justify-center gap-2 text-sm bg-[#F9F6F0] text-[#2D2D2D] px-4 py-3 hover:bg-[#F9F6F0]"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4">
-                    <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M3 5h18M6 12h12M10 19h4" />
-                  </svg>
-                  <span>Filters</span>
-                </button>
-              </div>
-
-              {/* Mobile sort popover */}
-              {showMobileSort && (
-                <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-3 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8]">
-                  <div className="text-sm font-semibold mb-2 text-[#2D2D2D]">Sort</div>
-                  <div className="space-y-1">
-                    <button
-                      onClick={() => { setSort("relevance"); setShowMobileSort(false); }}
-                      className={`w-full text-left px-2 py-1 text-sm ${sort === "relevance" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
-                    >
-                      Relevance
-                    </button>
-                    <button
-                      onClick={() => { setSort("price-asc"); setShowMobileSort(false); }}
-                      className={`w-full text-left px-2 py-1 text-sm ${sort === "price-asc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
-                    >
-                      Price: Low to High
-                    </button>
-                    <button
-                      onClick={() => { setSort("price-desc"); setShowMobileSort(false); }}
-                      className={`w-full text-left px-2 py-1 text-sm ${sort === "price-desc" ? "bg-[#D2693F] text-white" : "text-[#2D2D2D] hover:bg-[#F9F6F0]"}`}
-                    >
-                      Price: High to Low
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Mobile filter popover */}
-              {showFilterPopover && (
-                <div id="filter-popover" className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-4 w-[90vw] sm:w-72 z-[9999] border border-[#E8E0D8] max-h-[70vh] overflow-y-auto">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {mobileSubView && (
-                        <button onClick={() => setMobileSubView(null)} className="text-[#D2693F] text-sm font-medium">← Back</button>
-                      )}
-                      <div className="text-sm font-semibold text-[#2D2D2D]">{mobileSubView || 'Filters'}</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => { setFilter(null); setSort("relevance"); setSelectedSubcategory(null); setSubcategoryFilter(null); setMobileSubView(null); }}
-                        className="text-sm bg-[#F3EDE4] text-[#2D2D2D] px-2 py-1 cursor-pointer hover:bg-[#E0D0B8]"
-                      >
-                        Reset
-                      </button>
-                      <button onClick={() => { setShowFilterPopover(false); setMobileSubView(null); }} className="text-gray-500 text-sm cursor-pointer">Close</button>
-                    </div>
-                  </div>
-
-                  {!mobileSubView ? (
-                    <div className="space-y-1">
-                      <button
-                        onClick={() => { setFilter(null); setSelectedSubcategory(null); setSubcategoryFilter(null); setShowFilterPopover(false); }}
-                        className={`w-full text-left px-3 py-2 text-sm ${filter === null ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F9F6F0]'}`}
-                      >
-                        All
-                      </button>
-
-                      {firestoreCategories.map(cat => {
-                        const hasSubs = (cat.subcategories || []).length > 0;
-                        const isActive = filter === cat.name;
-                        return (
-                          <button
-                            key={cat.id}
-                            onClick={() => {
-                              if (hasSubs) {
-                                setMobileSubView(cat.name);
-                                setFilter(cat.name);
-                                setSubcategoryFilter(null);
-                              } else {
-                                setFilter(cat.name);
-                                setSelectedSubcategory(cat.name);
-                                setSubcategoryFilter(null);
-                                setShowFilterPopover(false);
-                              }
-                            }}
-                            className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between ${isActive ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
-                          >
-                            <span>{cat.name}</span>
-                            {hasSubs && (
-                              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            )}
-                          </button>
-                        );
-                      })}
-
-                      {categories.filter(c => c && !firestoreCategories.some(fc => fc.name === c)).map(c => (
-                        <button
-                          key={c}
-                          onClick={() => { setFilter(c); setSelectedSubcategory(c); setSubcategoryFilter(null); setShowFilterPopover(false); }}
-                          className={`w-full text-left px-3 py-2 text-sm ${filter === c ? 'bg-[#D2693F] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
-                        >
-                          {c}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-1">
-                      {(() => {
-                        const cat = firestoreCategories.find(c => c.name === mobileSubView);
-                        const subs = (cat?.subcategories || []).sort((a: any, b: any) => a.order - b.order);
-                        return subs.map((sub: any) => (
-                          <button
-                            key={sub.name}
-                            onClick={() => { setSubcategoryFilter(sub.name); setShowFilterPopover(false); setMobileSubView(null); }}
-                            className={`w-full text-left px-3 py-2 text-sm ${subcategoryFilter === sub.name ? 'bg-[#C5A059] text-white' : 'text-[#2D2D2D] hover:bg-[#F3EDE4]'}`}
-                          >
-                            {sub.name}
-                          </button>
-                        ));
-                      })()}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
             {/* Desktop sort toolbar */}
             <div className="hidden md:flex items-center gap-4 mb-6 justify-end">
               <div className="relative">

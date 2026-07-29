@@ -1,11 +1,11 @@
-﻿"use client";
+"use client";
 import { useRouter } from "next/navigation";
 import { usePolicies } from "@/hooks/usePolicies";
 
-export default function AboutUsPage() {
+export default function ProductCarePage() {
   const router = useRouter();
   const { policies, loading } = usePolicies();
-  const page = policies.aboutUs;
+  const page = policies.productCare;
 
   return (
     <div className="px-4 py-10 md:px-10 md:py-14 text-[#2D2D2D] flex justify-center">
@@ -32,7 +32,7 @@ export default function AboutUsPage() {
           ))
         )}
         <section className="pt-2 border-t border-[#E8E0D8] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm md:text-base text-gray-800">
-          <p>Thank you for being a part of the Kria family.</p>
+          <p>Have questions about product care? We are here to help.</p>
           <button onClick={() => router.push("/faq")} className="px-4 py-2 border border-[#E8E0D8] bg-[#F9F6F0] text-[#D2693F] text-sm font-medium hover:bg-[#F9F6F0] cursor-pointer transition-colors">
             Contact &amp; Support
           </button>

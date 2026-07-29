@@ -65,6 +65,7 @@ export default function ProductPage() {
   const { openCart } = useCartSidebar();
   const [showSizeChart, setShowSizeChart] = useState(false);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
+  const [zoomLoaded, setZoomLoaded] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState("");
@@ -493,25 +494,57 @@ export default function ProductPage() {
           {/* IMAGE SECTION */}
           <div>
             <div className="relative w-full aspect-square overflow-hidden border border-[#E9E1D2] shadow-[0_2px_16px_rgba(45,32,20,0.06)] bg-white">
-                <ProductImage
-                  src={images[imageIndex] || "/placeholder.png"}
-                  srcMedium={
-                    imageIndex === 0 ? product.ImageUrl1Medium :
-                    imageIndex === 1 ? product.ImageUrl2Medium :
-                    product.ImageUrl3Medium
+              <div
+                className="absolute inset-0 z-10"
+                onMouseMove={(e) => {
+                  const el = e.currentTarget.parentElement!;
+                  const rect = el.getBoundingClientRect();
+                  const x = ((e.clientX - rect.left) / rect.width) * 100;
+                  const y = ((e.clientY - rect.top) / rect.height) * 100;
+                  const lens = el.querySelector(".magnifier-lens") as HTMLElement;
+                  if (lens) {
+                    lens.style.setProperty("--zoom-x", x + "%");
+                    lens.style.setProperty("--zoom-y", y + "%");
+                    lens.style.opacity = "1";
                   }
-                  srcThumb={
-                    imageIndex === 0 ? product.ImageUrl1Thumb :
-                    imageIndex === 1 ? product.ImageUrl2Thumb :
-                    product.ImageUrl3Thumb
+                }}
+                onMouseLeave={(e) => {
+                  const lens = e.currentTarget.parentElement!.querySelector(".magnifier-lens") as HTMLElement;
+                  if (lens) lens.style.opacity = "0";
+                }}
+                onClick={(e) => {
+                  if (('ontouchstart' in window) || navigator.maxTouchPoints > 0) {
+                    setZoomImage(images[imageIndex] || "/placeholder.png");
+                    setZoomLoaded(false);
                   }
-                  size="medium"
-                  alt={product.Description}
-                  priority
-                  className="w-full h-full cursor-zoom-in transition-transform duration-500 hover:scale-[1.03]"
-                  onClick={() => setZoomImage(images[imageIndex] || "/placeholder.png")}
-                />
-
+                }}
+              />
+              <ProductImage
+                src={images[imageIndex] || "/placeholder.png"}
+                srcMedium={
+                  imageIndex === 0 ? product.ImageUrl1Medium :
+                  imageIndex === 1 ? product.ImageUrl2Medium :
+                  product.ImageUrl3Medium
+                }
+                srcThumb={
+                  imageIndex === 0 ? product.ImageUrl1Thumb :
+                  imageIndex === 1 ? product.ImageUrl2Thumb :
+                  product.ImageUrl3Thumb
+                }
+                size="full"
+                alt={product.Description}
+                priority
+                className="w-full h-full"
+              />
+              <div
+                className="magnifier-lens absolute inset-0 z-20 pointer-events-none opacity-0 transition-opacity duration-150"
+                style={{
+                  backgroundImage: `url(${images[imageIndex]})`,
+                  backgroundSize: "250%",
+                  backgroundPosition: "var(--zoom-x, 50%) var(--zoom-y, 50%)",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
             </div>
 
             {/* THUMBNAIL STRIP */}
@@ -962,26 +995,32 @@ export default function ProductPage() {
           </div>
         </div>
       )}
+
       {zoomImage && (
         <div
           className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center px-4"
-          onClick={() => setZoomImage(null)}
+          onClick={() => { setZoomImage(null); setZoomLoaded(false); }}
         >
           <div
-            className="relative max-w-4xl w-full"
+            className="relative max-w-4xl w-full flex items-center justify-center min-h-[300px]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={() => setZoomImage(null)}
+              onClick={() => { setZoomImage(null); setZoomLoaded(false); }}
               className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white text-2xl font-bold z-10 transition-colors"
             >
               ✕
             </button>
 
+            {!zoomLoaded && (
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white animate-spin" />
+            )}
+
             <img
               src={zoomImage}
               alt="Zoomed product"
-              className="w-full max-h-[90vh] object-contain cursor-zoom-out"
+              onLoad={() => setZoomLoaded(true)}
+              className={`w-full max-h-[90vh] object-contain cursor-zoom-out transition-opacity duration-200 ${zoomLoaded ? "opacity-100" : "opacity-0 absolute"}`}
             />
           </div>
         </div>

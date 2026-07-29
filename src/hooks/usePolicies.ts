@@ -20,6 +20,12 @@ export type PoliciesData = {
   refundPolicy: PolicyPage;
   shippingPolicy: PolicyPage;
   tos: PolicyPage;
+  aboutUs: PolicyPage;
+  cancellationRefund: PolicyPage;
+  shippingReturn: PolicyPage;
+  faq: PolicyPage;
+  whatMakesKriaSpecial: PolicyPage;
+  productCare: PolicyPage;
 };
 
 const DEFAULT_POLICIES: PoliciesData = {
@@ -82,6 +88,72 @@ const DEFAULT_POLICIES: PoliciesData = {
       { heading: "Contact Information", body: "<p>Questions about the Terms &amp; Conditions should be sent to us at <a href='mailto:Kriastore@gmail.com' class='font-semibold underline'>Kriastore@gmail.com</a>.</p>" },
     ],
   },
+  aboutUs: {
+    title: "About Kria",
+    subtitle: "Learn more about our story, values, and the inspiration behind Kria's handcrafted artistry.",
+    sections: [
+      { heading: "Our Story", body: "<p>Kria is a premium handcrafted artistry brand dedicated to bringing traditional Indian craftsmanship to the modern world. We specialise in terracotta jewellery, artisanal home decor, and hand-painted silk sarees — each piece lovingly made by skilled artisans.</p><p>Our collections celebrate the beauty of handmade craft. Every product tells a story of heritage, skill, and passion — from the shaping of clay to the final brushstroke on silk.</p>" },
+      { heading: "Our Mission", body: "<p>At Kria, we believe in sustainable, conscious fashion. Our creations are not mass-produced; they are shaped by hand, carrying the warmth and individuality of the artisan who made them.</p><p>Kria is more than a brand — it is a celebration of Indian artistry, empowering artisans and bringing timeless handcrafted beauty into your life.</p>" },
+      { heading: "Craftsmanship", body: "<p>Every Kria product is a testament to the rich heritage of Indian craftsmanship. From the earthy tones of terracotta to the vibrant hues of hand-painted silk, our artisans pour their heart and soul into every creation.</p>" },
+      { heading: "Sustainability", body: "<p>We are committed to sustainable practices. By choosing handcrafted products, you support traditional art forms, reduce mass-production waste, and contribute to a more conscious way of living.</p>" },
+    ],
+  },
+  cancellationRefund: {
+    title: "Cancellation & Refund Policy",
+    subtitle: "Understand our guidelines for order cancellations and refunds.",
+    sections: [
+      { heading: "Order Cancellation", body: "<p>You may cancel your order within <strong>24 hours</strong> of placing it, as long as it has not yet been shipped. To cancel, please contact us at <a href='mailto:Kriastore@gmail.com' class='font-semibold underline'>Kriastore@gmail.com</a> with your order number.</p><p>Once the order has been shipped, it cannot be cancelled. In such cases, you may refer to our return policy once you receive the product.</p>" },
+      { heading: "Refunds", body: "<p>Refunds are processed for cancelled orders (within the cancellation window) and for returned items that meet our return policy criteria.</p><p>Once we receive and inspect your return, we will notify you of the approval status. If approved, refunds are processed to your original payment method within <strong>10 business days</strong>.</p>" },
+      { heading: "Refund Timeline", body: "<p>After approval, refunds typically take 5–10 business days to reflect in your account, depending on your bank or payment provider.</p><p>If more than 15 business days have passed since approval, please contact us at <a href='mailto:Kriastore@gmail.com' class='underline'>Kriastore@gmail.com</a>.</p>" },
+      { heading: "Non-Refundable Items", body: "<p>Certain items are non-refundable, including:</p><ul><li>Accessories (for hygiene reasons)</li><li>Custom or made-to-order items</li><li>Items returned without original packaging or tags</li></ul>" },
+    ],
+  },
+  shippingReturn: {
+    title: "Shipping & Return Policy",
+    subtitle: "Everything you need to know about shipping and returning your Kria orders.",
+    sections: [
+      { heading: "Shipping", body: "<p>We aim to deliver your orders quickly and safely across India and internationally.</p><p>Orders are dispatched within <strong>5–7 business days</strong>. Delivery within India takes 7–10 business days from dispatch. International timelines vary by destination (typically 10–21 business days).</p>" },
+      { heading: "Shipping Charges", body: "<p>We offer <strong>free shipping across India on orders above ₹1,000</strong>. A flat charge applies for orders below this amount.</p><p>International shipping charges are calculated at checkout based on destination and weight.</p>" },
+      { heading: "Return Window", body: "<p>We have a <strong>14-day return policy</strong> from the date of delivery. Items must be unworn, unused, with tags and original packaging.</p>" },
+      { heading: "How to Initiate a Return", body: "<p>To start a return, email us at <a href='mailto:Kriastore@gmail.com' class='font-semibold underline'>Kriastore@gmail.com</a> with your order number and reason. We will provide a return shipping label and instructions.</p>" },
+      { heading: "Damages & Issues", body: "<p>Please inspect your order upon delivery. If the item is defective, damaged, or incorrect, contact us immediately so we can resolve the issue.</p>" },
+    ],
+  },
+  faq: {
+    title: "Frequently Asked Questions",
+    subtitle: "Find answers to common questions about ordering, shipping, returns, and more.",
+    sections: [
+      { heading: "How do I place an order?", body: "<p>Simply browse our collections, add items to your cart, and proceed to checkout. You can place an order as a guest or create an account for a faster experience next time.</p>" },
+      { heading: "What payment methods do you accept?", body: "<p>We accept all major credit/debit cards, UPI (Google Pay, PhonePe, Paytm), net banking, and COD (Cash on Delivery) for eligible orders.</p>" },
+      { heading: "How long does delivery take?", body: "<p>Orders are dispatched within 5–7 business days. Domestic delivery takes 7–10 business days from dispatch. International delivery varies by destination (10–21 business days).</p>" },
+      { heading: "What is your return policy?", body: "<p>We offer a 14-day return policy from the date of delivery. Items must be unworn, unused, and in original packaging with tags. Please see our Return & Refund Policy for details.</p>" },
+      { heading: "How do I track my order?", body: "<p>Once your order is dispatched, you will receive a tracking link via email and/or SMS to track your shipment in real time.</p>" },
+      { heading: "Can I cancel my order?", body: "<p>Orders can be cancelled within 24 hours of placement, provided they have not been shipped. Please contact us immediately if you wish to cancel.</p>" },
+      { heading: "Do you ship internationally?", body: "<p>Yes, we ship to select international destinations. Shipping charges and timelines are calculated at checkout based on your location.</p>" },
+      { heading: "How can I contact Kria?", body: "<p>You can reach us via email at <a href='mailto:Kriastore@gmail.com' class='font-semibold underline'>Kriastore@gmail.com</a> or through our social media channels. We typically respond within 24 hours on business days.</p>" },
+    ],
+  },
+  whatMakesKriaSpecial: {
+    title: "What Makes Kria Special",
+    subtitle: "Discover the essence of Kria — where tradition meets timeless artistry.",
+    sections: [
+      { heading: "Handcrafted with Love", body: "<p>Every Kria product is meticulously handcrafted by skilled Indian artisans. No two pieces are exactly alike, making each creation truly one-of-a-kind.</p>" },
+      { heading: "Empowering Artisans", body: "<p>We work directly with artisan communities across India, providing fair wages and a platform for their incredible talent. Your purchase supports livelihoods and preserves traditional crafts.</p>" },
+      { heading: "Sustainable & Conscious", body: "<p>We believe in slow, conscious fashion. Our products are made using natural materials like terracotta clay and pure silk, with minimal environmental impact.</p>" },
+      { heading: "Rich Heritage", body: "<p>Each piece carries forward centuries of Indian artistic tradition — from the ancient art of terracotta sculpting to the delicate craft of hand-painting on silk.</p>" },
+      { heading: "Timeless Designs", body: "<p>Our designs blend traditional aesthetics with modern sensibilities, creating pieces that are both timeless and contemporary — perfect for any occasion.</p>" },
+    ],
+  },
+  productCare: {
+    title: "Product Care",
+    subtitle: "Tips and guidelines to keep your Kria products beautiful for years to come.",
+    sections: [
+      { heading: "Terracotta Jewellery Care", body: "<p>Terracotta is delicate and porous. Follow these tips to keep your jewellery looking its best:</p><ul><li><strong>Avoid water:</strong> Remove before bathing, swimming, or washing hands.</li><li><strong>Keep away from chemicals:</strong> Avoid perfumes, lotions, and harsh cleaning agents.</li><li><strong>Store carefully:</strong> Wrap in soft cloth and store in a jewellery box away from direct sunlight.</li><li><strong>Clean gently:</strong> Wipe with a dry, soft cloth. Do not use water or liquid cleaners.</li></ul>" },
+      { heading: "Hand-Painted Silk Saree Care", body: "<p>Our hand-painted silk sarees are works of art. Handle them with care:</p><ul><li><strong>Dry clean only:</strong> Always dry clean to preserve the colours and fabric.</li><li><strong>Store properly:</strong> Wrap in a muslin cloth and store in a cool, dry place away from sunlight.</li><li><strong>Avoid moisture:</strong> Keep away from damp areas to prevent colour bleeding or fabric damage.</li><li><strong>Iron carefully:</strong> Iron on low heat on the reverse side. Avoid direct heat on painted areas.</li></ul>" },
+      { heading: "Home Decor Care", body: "<p>Our artisanal home decor items require gentle care:</p><ul><li><strong>Dust regularly:</strong> Use a soft, dry cloth or a gentle duster.</li><li><strong>Avoid direct sunlight:</strong> Prolonged exposure may fade colours over time.</li><li><strong>Keep dry:</strong> Avoid contact with water or moisture.</li><li><strong>Handle with care:</strong> Many items are handcrafted and may be fragile.</li></ul>" },
+      { heading: "General Tips", body: "<p>To ensure the longevity of all Kria products:</p><ul><li>Keep away from sharp objects that may snag or scratch the surface.</li><li>Store in a cool, dry place away from direct heat and sunlight.</li><li>Handle with clean, dry hands.</li></ul><p>With proper care, your Kria products will remain beautiful for years to come.</p>" },
+    ],
+  },
 };
 
 export function usePolicies() {
@@ -93,7 +165,7 @@ export function usePolicies() {
     const ref = doc(db!, "settings", "policies");
     getDoc(ref).then((snap) => {
       if (snap.exists()) {
-        setPolicies(snap.data() as PoliciesData);
+        setPolicies({ ...DEFAULT_POLICIES, ...snap.data() } as PoliciesData);
       }
       setLoading(false);
     }).catch(() => setLoading(false));

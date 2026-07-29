@@ -1,6 +1,6 @@
 ﻿"use client";
 import Image from "next/image";
-import { useEffect, useState, Suspense } from "react";
+import { useRef, useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
@@ -23,6 +23,19 @@ function NavbarContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const setVar = () => {
+      document.documentElement.style.setProperty("--navbar-height", `${el.offsetHeight}px`);
+    };
+    setVar();
+    const ro = new ResizeObserver(setVar);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -181,7 +194,7 @@ function NavbarContent() {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-[100] backdrop-blur-md bg-white border-b border-[#E8E0D8]">
+      <header ref={headerRef} className="sticky top-0 z-[100] backdrop-blur-md bg-white border-b border-[#E8E0D8]">
         <div className="relative flex items-center justify-between px-4 sm:px-6 md:px-10 py-3 sm:py-4 text-white">
           <div className="flex w-full items-center justify-between relative min-h-[48px]">
             {/* Hamburger */}

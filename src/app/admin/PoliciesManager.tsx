@@ -9,6 +9,12 @@ const PAGE_KEYS: { key: keyof PoliciesData; label: string }[] = [
   { key: "refundPolicy", label: "Refund Policy" },
   { key: "shippingPolicy", label: "Shipping Policy" },
   { key: "tos", label: "Terms & Conditions" },
+  { key: "aboutUs", label: "About Us" },
+  { key: "cancellationRefund", label: "Cancellation & Refund" },
+  { key: "shippingReturn", label: "Shipping & Return" },
+  { key: "faq", label: "FAQs" },
+  { key: "whatMakesKriaSpecial", label: "What Makes Kria Special" },
+  { key: "productCare", label: "Product Care" },
 ];
 
 const INPUT_CLS = "w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all";
