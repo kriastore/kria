@@ -52,7 +52,7 @@ function CategoryCard({ cat }: { cat: Category }) {
       href={`/shop?category=${encodeURIComponent(cat.name)}`}
       className="group block overflow-hidden border border-[#E8E0D8]"
     >
-      <div className="relative aspect-square flex flex-col items-center justify-center p-4 sm:p-5" style={{ backgroundColor: cat.bgColor || '#F3EDE4' }}>
+      <div className="relative aspect-square flex flex-col items-center justify-center p-2 sm:p-3" style={{ backgroundColor: cat.bgColor || '#F3EDE4' }}>
         <KolamBorder>
           <span style={{ fontFamily: cat.mainTextFont || "'Great Vibes', cursive", wordBreak: 'keep-all' }} className={"text-[#211A12] tracking-wide font-bold leading-tight max-w-full " + (MAIN_TEXT_SIZES[cat.mainTextSize || 4] || MAIN_TEXT_SIZES[4])}>
             {cat.mainText || cat.name}
