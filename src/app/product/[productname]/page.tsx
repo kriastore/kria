@@ -488,7 +488,7 @@ export default function ProductPage() {
   return (
     <>
       {/* MAIN PRODUCT SECTION */}
-      <div className="min-h-screen bg-[#F9F6F0] text-black px-1 sm:px-8 lg:px-12 pt-1 sm:pt-6 pb-20">
+      <div className="min-h-screen bg-[#F9F6F0] text-black px-1 sm:px-8 lg:px-12 pt-1 sm:pt-6 pb-4 lg:pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16">
           {/* IMAGE SECTION */}
           <div>
@@ -860,41 +860,42 @@ export default function ProductPage() {
                 </div>
               </div>
 
-              {/* SIMILAR PRODUCTS */}
-              {similarProducts.length > 0 && (
-                <div className="mt-8 pt-6 border-t border-[#E0D0B8]">
-                  <h3 className="text-sm font-semibold text-[#211A12] tracking-wide mb-4">Similar Products</h3>
-                  <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1">
-                    {similarProducts.map((sp) => (
-                      <button
-                        key={sp.ID}
-                        type="button"
-                        onClick={() => router.push(`/product/${encodeURIComponent((sp as any).ProductName || sp.Description)}`)}
-                        className="flex-shrink-0 w-[140px] snap-start text-left group"
-                      >
-                        <div className="w-full aspect-square overflow-hidden border border-[#E9E1D2] mb-2">
-                          <ProductImage
-                            src={(sp as any).ImageUrl1}
-                            srcMedium={(sp as any).ImageUrl1Medium}
-                            srcThumb={(sp as any).ImageUrl1Thumb}
-                            size="thumb"
-                            alt={(sp as any).ProductName || sp.Description}
-                            className="w-full h-full group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                        <p className="text-xs text-[#2D2D2D] leading-snug line-clamp-2">{(sp as any).ProductName || sp.Description}</p>
-                        <PriceText
-                          amount={resolvePricing({ Price: sp.Price, OriginalPrice: (sp as any).OriginalPrice, DiscountPercent: sp.DiscountPercent }).selling}
-                          className="text-xs font-bold text-[#211A12] mt-0.5"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
+
+      {/* SIMILAR PRODUCTS */}
+      {similarProducts.length > 0 && (
+        <div className="mt-4 lg:mt-10 pt-6 pb-8 lg:pb-16 border-t border-[#E0D0B8] px-1 sm:px-8 lg:px-12">
+          <h3 className="text-sm lg:text-base font-semibold text-[#211A12] tracking-wide mb-4">Similar Products</h3>
+          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-1 px-1 lg:grid lg:grid-cols-4 lg:gap-5 lg:overflow-visible lg:pb-0 lg:mx-0 lg:px-0">
+            {similarProducts.map((sp) => (
+              <button
+                key={sp.ID}
+                type="button"
+                onClick={() => router.push(`/product/${encodeURIComponent((sp as any).ProductName || sp.Description)}`)}
+                className="flex-shrink-0 w-[140px] lg:w-auto snap-start text-left group"
+              >
+                <div className="w-full aspect-square overflow-hidden border border-[#E9E1D2] mb-2">
+                  <ProductImage
+                    src={(sp as any).ImageUrl1}
+                    srcMedium={(sp as any).ImageUrl1Medium}
+                    srcThumb={(sp as any).ImageUrl1Thumb}
+                    size="thumb"
+                    alt={(sp as any).ProductName || sp.Description}
+                    className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <p className="text-sm text-[#2D2D2D] leading-snug line-clamp-2">{(sp as any).ProductName || sp.Description}</p>
+                <PriceText
+                  amount={resolvePricing({ Price: sp.Price, OriginalPrice: (sp as any).OriginalPrice, DiscountPercent: sp.DiscountPercent }).selling}
+                  className="text-sm font-bold text-[#211A12] mt-1"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* STYLE IT WITH */}
       {relatedProducts.length > 0 && (

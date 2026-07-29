@@ -28,7 +28,8 @@ function NavbarContent() {
     if (!menuOpen) return;
     function handleClick(e: MouseEvent) {
       const menuBox = document.getElementById("hamburger-menu");
-      if (menuBox && !menuBox.contains(e.target as Node)) {
+      const hamburgerBtn = document.getElementById("hamburger-button");
+      if (menuBox && !menuBox.contains(e.target as Node) && !hamburgerBtn?.contains(e.target as Node)) {
         setMenuOpen(false);
       }
     }
@@ -186,6 +187,7 @@ function NavbarContent() {
             {/* Hamburger */}
             <div className="flex items-center h-full">
               <button
+                id="hamburger-button"
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="p-2 sm:p-2 md:p-2 hover:bg-[#F3EDE4] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="Menu"

@@ -540,22 +540,8 @@ export default function CartPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium">
-                    {qualifiesForFreeDelivery
-                      ? "Free"
-                      : <PriceText amount={shippingAmount} />}
-                  </span>
+                  <span className="font-medium">Calculated at checkout</span>
                 </div>
-                {freeDeliveryThreshold > 0 && amountUntilFreeDelivery > 0 && (
-                  <p className="text-xs text-center py-1.5 rounded bg-[#F9F6F0] text-[#9A6E50] font-medium">
-                    <PriceText amount={amountUntilFreeDelivery} /> away from free delivery
-                  </p>
-                )}
-                {qualifiesForFreeDelivery && (
-                  <p className="text-xs text-center py-1.5 rounded bg-emerald-50 text-emerald-700 font-medium">
-                    You qualify for free delivery!
-                  </p>
-                )}
                 <hr className="my-2" />
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Total</span>

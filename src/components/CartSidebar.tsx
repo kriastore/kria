@@ -660,15 +660,7 @@ export default function CartSidebar() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#9A6E50]">Shipping</span>
-                {qualifiesForFreeDelivery ? (
-                  <span className="text-emerald-600 text-xs font-medium">Free</span>
-                ) : (
-                  <span className="text-[#9A6E50] text-xs">
-                    {freeDeliveryThreshold > 0 && amountUntilFreeDelivery > 0
-                      ? `Rs.${amountUntilFreeDelivery.toLocaleString("en-IN")} away from free delivery`
-                      : "Calculated at checkout"}
-                  </span>
-                )}
+                <span className="text-[#9A6E50] text-xs">Calculated at checkout</span>
               </div>
               <div className="border-t border-[#E0D0B8] pt-2 flex items-center justify-between text-sm">
                 <span className="text-[#2D2D2D] font-semibold">Total</span>
