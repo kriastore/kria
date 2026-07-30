@@ -31,17 +31,19 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   doc.setTextColor(...darkBrown);
   doc.text("KRIA", 14, 18);
 
-  doc.setFontSize(11);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text("Handcrafted Artisanal Jewellery & Home Decor", 14, 25);
-  doc.text("Pune, Maharashtra, India", 14, 31);
-  doc.text("Email: hello@kria.in", 14, 37);
-  doc.text("Phone: +91 XXXXXXXXXX", 14, 43);
+  doc.text("Vittlraj Krithika", 14, 24);
+  doc.text("No 8, Thiruvalluvar Nagar main road, V.G.Rao nagar A sector,", 14, 30);
+  doc.text("Katpadi, Vellore, Tamilnadu - 632007", 14, 36);
+  doc.text("GSTIN: 33ATPPK2643B1ZZ", 14, 42);
+  doc.text("Email: support@kriastore.in", 14, 48);
+  doc.text("Phone: +91 98944 14445", 14, 54);
 
   doc.setDrawColor(...accent);
   doc.setLineWidth(0.5);
-  doc.line(14, 48, 196, 48);
+  doc.line(14, 59, 196, 59);
 
   // ===== INVOICE DETAILS =====
   const orderId = order.id || order.orderId || "";
@@ -53,21 +55,21 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.text(`Invoice No: KRIA-INV-${invoiceNo}`, 14, 56);
-  doc.text(`Order ID: KRIA-ORD-${orderId}`, 14, 62);
+  doc.text(`Invoice No: KRIA-INV-${invoiceNo}`, 14, 69);
+  doc.text(`Order ID: KRIA-ORD-${orderId}`, 14, 75);
   doc.text(
     `Order Date: ${createdAtDate.toLocaleDateString()}`,
     14,
-    68,
+    81,
   );
-  doc.text(`Payment Method: ${order.paymentMethod ?? "Razorpay"}`, 14, 74);
-  doc.text(`Payment Status: ${order.paymentStatus ?? "Paid"}`, 14, 80);
+  doc.text(`Payment Method: ${order.paymentMethod ?? "Razorpay"}`, 14, 87);
+  doc.text(`Payment Status: ${order.paymentStatus ?? "Paid"}`, 14, 93);
 
   // ===== BILLING DETAILS =====
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...darkBrown);
-  doc.text("Billed To", 14, 92);
+  doc.text("Billed To", 14, 105);
 
   const customer = order.customer || {};
   const stateCity = customer.stateCity ?? "";
@@ -76,15 +78,15 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text(`Name: ${customer.name ?? ""}`, 14, 98);
-  doc.text(`Email: ${customer.email ?? ""}`, 14, 104);
-  doc.text(`Phone: ${customer.phone ?? ""}`, 14, 110);
+  doc.text(`Name: ${customer.name ?? ""}`, 14, 111);
+  doc.text(`Email: ${customer.email ?? ""}`, 14, 117);
+  doc.text(`Phone: ${customer.phone ?? ""}`, 14, 123);
 
-  doc.text("Shipping Address:", 14, 118);
+  doc.text("Shipping Address:", 14, 131);
   doc.text(
     `${customer.address ?? ""}, ${stateCity} - ${pinCode}, India`,
     14,
-    124,
+    137,
   );
 
   // ===== CALCULATIONS =====
@@ -103,7 +105,7 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   // ===== ORDER TABLE =====
   autoTable(doc, {
-    startY: 136,
+    startY: 149,
     head: [["Item Name", "Qty", "Price", "Total"]],
     body: items.map((item: any) => {
       const basePrice = resolveSellingPrice(item);
@@ -162,14 +164,14 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   doc.setFontSize(10);
   doc.setTextColor(...darkBrown);
   doc.text(
-    "Easy returns within 7 days of delivery. Product must be unused and in original packaging.",
+    "Easy returns within 14 days of delivery. Product must be unused and in original packaging.",
     14,
     finalY + 64,
   );
 
   // ===== FOOTER =====
   doc.text(
-    "Thank you for shopping with Kria. For support, WhatsApp us at +91 XXXXXXXXXX.",
+    "Thank you for shopping with Kria. For support, WhatsApp us at +91 98944 14445.",
     14,
     finalY + 74,
   );
@@ -190,14 +192,12 @@ export async function POST(req: Request) {
     const pass = process.env.EMAIL_PASS;
     if (!user || !pass) return NextResponse.json({ error: "Email not configured" }, { status: 500 });
 
-    const allowInsecure = process.env.SMTP_ALLOW_INSECURE === "true";
     const transportOptions: any = {
-      host: "smtp.gmail.com",
+      host: "smtpout.secureserver.net",
       port: 465,
       secure: true,
       auth: { user, pass },
     };
-    if (allowInsecure) transportOptions.tls = { rejectUnauthorized: false };
 
     const transporter = nodemailer.createTransport(transportOptions);
 
@@ -303,6 +303,55 @@ export async function POST(req: Request) {
       attachments: [
         { filename: `KRIA_INVOICE_${orderId || order?.id}.pdf`, content: pdfBuffer },
       ],
+    });
+
+    // Send notification to support
+    const supportEmail = process.env.SUPPORT_EMAIL || "support@kriastore.in";
+    await transporter.sendMail({
+      from: `${senderName} <${user}>`,
+      to: supportEmail,
+      subject: `New Order Received - ${orderId || order?.id}`,
+      text:
+        `New order placed.\n\n` +
+        `Order: ${orderId || order?.id}\n` +
+        `Customer: ${order?.customer?.name || ""}\n` +
+        `Email: ${recipient}\n` +
+        `Phone: ${order?.customer?.phone || ""}\n` +
+        `Address: ${order?.customer?.address || ""}, ${order?.customer?.stateCity || ""} ${order?.customer?.pinCode || ""}\n\n` +
+        `Items:\n${plainItems}\n\n` +
+        `Grand Total: Rs. ${grandTotal}\n`,
+      html:
+        `<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; color: #2D2D2D;">` +
+        `<div style="background:#F3EDE4;padding:16px;border-radius:0;border:1px solid #E0D0B8;border-bottom:0;">` +
+        `<h2 style="margin:0;color:#2D2D2D;font-family:'Tenor Sans',serif;">New Order Received</h2>` +
+        `<p style="margin:4px 0 0 0;color:#9A6E50;">Order #${orderId || order?.id}</p>` +
+        `</div>` +
+        `<div style="border:1px solid #E0D0B8;border-top:0;padding:16px;border-radius:0;background:#F9F6F0;">` +
+        `<p><strong>Customer:</strong> ${order?.customer?.name || ""}</p>` +
+        `<p><strong>Email:</strong> ${recipient}</p>` +
+        `<p><strong>Phone:</strong> ${order?.customer?.phone || ""}</p>` +
+        `<p><strong>Address:</strong> ${order?.customer?.address || ""}, ${order?.customer?.stateCity || ""} ${order?.customer?.pinCode || ""}</p>` +
+        `<h3 style="margin-top:16px;">Order Summary</h3>` +
+        `<table style="border-collapse:collapse;width:100%;font-size:13px;background:#ffffff;border:1px solid #E0D0B8;">` +
+        `<thead><tr style="background:#F3EDE4;">` +
+        `<th style="padding:8px 6px;text-align:left;border-bottom:1px solid #E0D0B8;">Item</th>` +
+        `<th style="padding:8px 6px;text-align:center;border-bottom:1px solid #E0D0B8;">Qty</th>` +
+        `<th style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Total</th>` +
+        `</tr></thead><tbody>${
+          items.length
+            ? items.map((it: any, index: number) => {
+                const name = it.product?.ProductName || it.product?.Description || it.product?.Product || "Product";
+                const basePrice = resolveSellingPrice(it);
+                const customPrice = it.isCustomized && it.customPrice ? it.customPrice : 0;
+                const itemPrice = basePrice + customPrice;
+                const qty = it.Quantity || 0;
+                const lineTotal = itemPrice * qty;
+                return `<tr style="background:${index % 2 === 0 ? "#F9F6F0" : "#ffffff"};"><td style="padding:8px 6px;border-bottom:1px solid #E0D0B8;">${name}</td><td style="padding:8px 6px;text-align:center;border-bottom:1px solid #E0D0B8;">${qty}</td><td style="padding:8px 6px;text-align:right;border-bottom:1px solid #E0D0B8;">Rs. ${lineTotal}</td></tr>`;
+              }).join("")
+            : `<tr><td colspan="3" style="padding:8px 6px;text-align:center;">(No items)</td></tr>`
+        }</tbody></table>` +
+        `<p style="margin-top:12px;"><strong>Grand Total: Rs. ${grandTotal}</strong></p>` +
+        `</div></div>`,
     });
 
     return NextResponse.json({ ok: true });

@@ -18,10 +18,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email not configured" }, { status: 500 });
     }
 
-    const allowInsecure = process.env.SMTP_ALLOW_INSECURE === "true";
-
     const transportOptions: any = {
-      host: "smtp.gmail.com",
+      host: "smtpout.secureserver.net",
       port: 465,
       secure: true,
       auth: {
@@ -29,10 +27,6 @@ export async function POST(req: Request) {
         pass,
       },
     };
-
-    if (allowInsecure) {
-      transportOptions.tls = { rejectUnauthorized: false };
-    }
 
     const transporter = nodemailer.createTransport(transportOptions);
 

@@ -17,49 +17,51 @@ export function generateInvoice(order: any) {
   doc.setTextColor(...darkBrown);
   doc.text("KRIA", 14, 18);
 
-  doc.setFontSize(11);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text("Handcrafted Artisanal Jewellery & Home Decor", 14, 25);
-  doc.text("Pune, Maharashtra, India", 14, 31);
-  doc.text("Email: hello@kria.in", 14, 37);
-  doc.text("Phone: +91 XXXXXXXXXX", 14, 43);
+  doc.text("Vittlraj Krithika", 14, 24);
+  doc.text("No 8, Thiruvalluvar Nagar main road, V.G.Rao nagar A sector,", 14, 30);
+  doc.text("Katpadi, Vellore, Tamilnadu - 632007", 14, 36);
+  doc.text("GSTIN: 33ATPPK2643B1ZZ", 14, 42);
+  doc.text("Email: support@kriastore.in", 14, 48);
+  doc.text("Phone: +91 98944 14445", 14, 54);
 
   doc.setDrawColor(...accent);
   doc.setLineWidth(0.5);
-  doc.line(14, 48, 196, 48);
+  doc.line(14, 59, 196, 59);
 
   // ===== INVOICE DETAILS =====
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.text(`Invoice No: KRIA-INV-${order.invoiceNo ?? order.id}`, 14, 56);
-  doc.text(`Order ID: KRIA-ORD-${order.id}`, 14, 62);
+  doc.text(`Invoice No: KRIA-INV-${order.invoiceNo ?? order.id}`, 14, 69);
+  doc.text(`Order ID: KRIA-ORD-${order.id}`, 14, 75);
   doc.text(
     `Order Date: ${order.createdAt?.toDate?.().toLocaleDateString()}`,
     14,
-    68
+    81
   );
-  doc.text(`Payment Method: ${order.paymentMethod ?? "Razorpay"}`, 14, 74);
-  doc.text(`Payment Status: ${order.paymentStatus ?? "Paid"}`, 14, 80);
+  doc.text(`Payment Method: ${order.paymentMethod ?? "Razorpay"}`, 14, 87);
+  doc.text(`Payment Status: ${order.paymentStatus ?? "Paid"}`, 14, 93);
 
   // ===== BILLING DETAILS =====
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...darkBrown);
-  doc.text("Billed To", 14, 92);
+  doc.text("Billed To", 14, 105);
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text(`Name: ${order.customer?.name}`, 14, 98);
-  doc.text(`Email: ${order.customer?.email}`, 14, 104);
-  doc.text(`Phone: ${order.customer?.phone}`, 14, 110);
+  doc.text(`Name: ${order.customer?.name}`, 14, 111);
+  doc.text(`Email: ${order.customer?.email}`, 14, 117);
+  doc.text(`Phone: ${order.customer?.phone}`, 14, 123);
 
-  doc.text("Shipping Address:", 14, 118);
+  doc.text("Shipping Address:", 14, 131);
   doc.text(
     `${order.customer?.address}, ${order.customer?.stateCity ?? ""} - ${order.customer?.pinCode ?? ""}, India`,
     14,
-    124
+    137
   );
 
   // ===== CALCULATIONS =====
@@ -81,7 +83,7 @@ export function generateInvoice(order: any) {
 
   // ===== ORDER TABLE =====
   autoTable(doc, {
-    startY: 136,
+    startY: 149,
     head: [["Item Name", "Qty", "Price", "Total"]],
     body: order.items.map((item: any) => {
       const basePrice = resolvePricing({
@@ -143,14 +145,14 @@ export function generateInvoice(order: any) {
   doc.setFontSize(10);
   doc.setTextColor(...darkBrown);
   doc.text(
-    "Easy returns within 7 days of delivery. Product must be unused and in original packaging.",
+    "Easy returns within 14 days of delivery. Product must be unused and in original packaging.",
     14,
     finalY + 64
   );
 
   // ===== FOOTER =====
   doc.text(
-    "Thank you for shopping with Kria. For support, WhatsApp us at +91 XXXXXXXXXX.",
+    "Thank you for shopping with Kria. For support, WhatsApp us at +91 98944 14445.",
     14,
     finalY + 74
   );
