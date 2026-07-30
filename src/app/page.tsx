@@ -30,18 +30,31 @@ type Product = {
   SKU?: string;
 };
 
+function KolamFrameSVG({ size = 300 }: { size?: number }) {
+  return (
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <image
+        href="/images/kolam-border.svg"
+        x="0"
+        y="0"
+        width={size}
+        height={size}
+        preserveAspectRatio="xMidYMid slice"
+      />
+    </svg>
+  );
+}
+
 function KolamBorder({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={`w-full h-full flex flex-col items-center justify-center text-center p-1 sm:p-2 overflow-hidden ${className || ""}`}
-      style={{
-        borderImage: `url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 0l2 6 6 2-6 2-2 6-2-6-6-2 6-2z' fill='%23211A12' opacity='0.4'/%3E%3C/svg%3E") 4 round`,
-        borderWidth: "4px",
-        borderStyle: "solid",
-        borderColor: "transparent",
-      }}
-    >
-      {children}
+    <div className={`relative w-full h-full flex flex-col items-center justify-center text-center p-8 sm:p-9 overflow-hidden ${className || ""}`}>
+      <KolamFrameSVG size={300} />
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }
