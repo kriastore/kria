@@ -89,13 +89,13 @@ function ShopContent() {
 
   return (
     <div className="bg-[#F9F6F0] min-h-screen">
-      <main className="px-4 pt-4 md:pt-8 pb-8 max-w-6xl mx-auto">
+      <main className="px-4 pt-4 md:pt-8 pb-20 max-w-6xl mx-auto">
         <div className="mb-1 md:mb-4">
           <div className="text-sm text-gray-500">Showing {sorted.length} products</div>
         </div>
 
-        {/* Mobile top toolbar */}
-        <div className="md:hidden sticky top-0 z-40 w-full bg-[#F9F6F0] border-b border-[#E8E0D8]">
+        {/* Mobile bottom toolbar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#F9F6F0] border-t border-[#E8E0D8]">
           <div className="max-w-6xl mx-auto flex divide-x divide-white px-0 py-0">
             <button
               onClick={() => { setShowFilterPopover(false); setShowMobileSort(s => !s); }}
@@ -122,7 +122,7 @@ function ShopContent() {
 
           {/* Mobile sort popover */}
           {showMobileSort && (
-            <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-3 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#E8E0D8]">
+            <div className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-3 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#E8E0D8]">
               <div className="text-sm font-semibold mb-2 text-[#2D2D2D]">Sort</div>
               <div className="space-y-1">
                 <button
@@ -149,7 +149,7 @@ function ShopContent() {
 
           {/* Mobile filter popover */}
           {showFilterPopover && (
-            <div id="filter-popover" className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-4 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#E8E0D8] max-h-[70vh] overflow-y-auto">
+            <div id="filter-popover" className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 bg-[#F9F6F0] shadow-lg p-4 w-[calc(100vw-32px)] sm:w-72 z-[9999] border border-[#E8E0D8] max-h-[70vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {mobileSubView && (

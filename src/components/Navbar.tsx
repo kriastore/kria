@@ -181,7 +181,7 @@ function NavbarContent() {
 
               <div className="border-t border-[#E0D0B8] pt-4 mt-6">
                 <div className="flex space-x-4 px-4">
-                  <a href="#" className="text-[#2D2D2D] hover:text-[#D2693F] transition-colors" aria-label="Instagram">
+                  <a href="https://www.instagram.com/kria_handcrafted_homedecor?igsh=MTBiZTRnYTNhZjhvNg%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="text-[#2D2D2D] hover:text-[#D2693F] transition-colors" aria-label="Instagram">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5A4.25 4.25 0 0 0 20.5 16.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 3.25a5.25 5.25 0 1 1 0 10.5a5.25 5.25 0 0 1 0-10.5zm0 1.5a3.75 3.75 0 1 0 0 7.5a3.75 3.75 0 0 0 0-7.5zm5.25.75a1 1 0 1 1-2 0a1 1 0 0 1 2 0z" />
                     </svg>

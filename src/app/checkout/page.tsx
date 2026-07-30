@@ -16,6 +16,8 @@ import {
   deleteDoc,
   doc as firestoreDoc,
   updateDoc,
+  orderBy,
+  limit,
 } from "firebase/firestore";
 import { resolvePricing } from "@/utils/pricing";
 import { calculateShipping, type ShippingResult } from "@/utils/shipping";
@@ -331,6 +333,7 @@ function CheckoutContent() {
   const [discountCodeStatus, setDiscountCodeStatus] = useState<"idle" | "valid" | "invalid" | "checking">("idle");
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const emailInitializedRef = useRef(false);
+  const autoFilledRef = useRef(false);
   const [shippingInfo, setShippingInfo] = useState<ShippingResult>({
     available: true,
     charge: 0,
@@ -342,9 +345,36 @@ function CheckoutContent() {
 
   useEffect(() => {
     if (user?.email && !emailInitializedRef.current) {
-      setCustomerDetails((prev) => ({ ...prev, email: user.email || "" }));
+      setCustomerDetails((prev) => ({
+        ...prev,
+        email: user.email || "",
+        name: user.displayName || prev.name,
+        phone: user.phoneNumber?.replace("+91", "") || prev.phone,
+      }));
       emailInitializedRef.current = true;
     }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || autoFilledRef.current) return;
+    const addrQuery = query(
+      collection(db!, "users", user.uid, "addresses"),
+      orderBy("createdAt", "desc"),
+      limit(1)
+    );
+    getDocs(addrQuery).then((snap) => {
+      if (snap.empty) return;
+      const data = snap.docs[0].data();
+      setCustomerDetails((prev) => ({
+        ...prev,
+        name: data.name || prev.name,
+        phone: data.phone || prev.phone,
+        address: data.address || prev.address,
+        pinCode: data.pinCode || prev.pinCode,
+        stateCity: data.stateCity || prev.stateCity,
+      }));
+      autoFilledRef.current = true;
+    }).catch(() => {});
   }, [user]);
 
   useEffect(() => {
@@ -652,6 +682,13 @@ function CheckoutContent() {
           setOrderDetails({ ...finalOrderData, orderId: orderRef.id });
           setOrderStatus("success");
 
+          if (user?.uid) {
+            addDoc(collection(db!, "users", user.uid, "addresses"), {
+              ...customerDetails,
+              createdAt: serverTimestamp(),
+            }).catch(() => {});
+          }
+
           try {
             await Promise.all(
               items.map(async (item) => {
@@ -926,13 +963,19 @@ function CheckoutContent() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column — Form */}
           <div className="flex-1 min-w-0">
-            <section className="mb-6">
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              autoComplete="on"
+              className="mb-6"
+            >
               <h2 className="text-lg font-bold mb-4" style={{ fontFamily: "Tenor Sans, serif" }}>Shipping Details</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Full Name</label>
                   <input
                     type="text"
+                    name="name"
+                    autoComplete="name"
                     value={customerDetails.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
@@ -947,6 +990,8 @@ function CheckoutContent() {
                   <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Email</label>
                   <input
                     type="email"
+                    name="email"
+                    autoComplete="email"
                     value={customerDetails.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
@@ -968,6 +1013,8 @@ function CheckoutContent() {
                     </span>
                     <input
                       type="tel"
+                      name="tel"
+                      autoComplete="tel-national"
                       value={customerDetails.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                       className="w-full px-4 py-3 text-sm rounded-r-lg outline-none transition-colors"
@@ -999,6 +1046,8 @@ function CheckoutContent() {
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>Address</label>
                   <textarea
+                    name="address"
+                    autoComplete="street-address"
                     value={customerDetails.address}
                     onChange={(e) => handleInputChange("address", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors resize-none"
@@ -1014,6 +1063,8 @@ function CheckoutContent() {
                   <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style={{ color: "#9A6E50" }}>PIN Code</label>
                   <input
                     type="text"
+                    name="postal-code"
+                    autoComplete="postal-code"
                     value={customerDetails.pinCode}
                     onChange={(e) => handleInputChange("pinCode", e.target.value)}
                     onBlur={(e) => { e.currentTarget.style.borderColor = "#E0D0B8"; lookupPincodeAuto(customerDetails.pinCode); }}
@@ -1031,6 +1082,8 @@ function CheckoutContent() {
                   </label>
                   <input
                     type="text"
+                    name="address-level2"
+                    autoComplete="address-level2"
                     value={customerDetails.stateCity}
                     onChange={(e) => handleInputChange("stateCity", e.target.value)}
                     className="w-full px-4 py-3 text-sm rounded-lg outline-none transition-colors"
@@ -1045,7 +1098,7 @@ function CheckoutContent() {
                   )}
                 </div>
               </div>
-            </section>
+            </form>
           </div>
 
           {/* Right Column — Order Summary (sticky on desktop) */}
