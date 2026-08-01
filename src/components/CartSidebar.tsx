@@ -668,6 +668,9 @@ export default function CartSidebar() {
                   <PriceText amount={total} />
                 </span>
               </div>
+              <p className="text-[11px] text-[#9A6E50]">
+                Prices include GST (CGST 1.5% + SGST 1.5%). Shipping calculated at checkout.
+              </p>
             </div>
 
             <button

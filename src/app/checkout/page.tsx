@@ -20,6 +20,15 @@ import {
   limit,
 } from "firebase/firestore";
 import { resolvePricing } from "@/utils/pricing";
+import {
+  splitInclusiveGst,
+  PRODUCT_GST_RATE,
+  PRODUCT_CGST_RATE,
+  PRODUCT_SGST_RATE,
+  SHIPPING_GST_RATE,
+  SHIPPING_CGST_RATE,
+  SHIPPING_SGST_RATE,
+} from "@/utils/gst";
 import { calculateShipping, type ShippingResult } from "@/utils/shipping";
 import { useDeliverySettings } from "@/hooks/useDeliverySettings";
 import { useCartSidebar } from "@/context/CartSidebarContext";
@@ -479,6 +488,9 @@ function CheckoutContent() {
   const discountedTotal = grandTotal - discountAmount;
   const finalTotal = discountedTotal + shippingInfo.charge;
 
+  const productGst = splitInclusiveGst(discountedTotal, PRODUCT_GST_RATE);
+  const shippingGstSplit = splitInclusiveGst(shippingInfo.charge, SHIPPING_GST_RATE);
+
   // Calculate shipping when pincode or cart changes
   useEffect(() => {
     const isIntl = customerDetails.country !== "India";
@@ -653,7 +665,19 @@ function CheckoutContent() {
       discountCode: discountCodeStatus === "valid" ? discountCode : "",
       discountPercent: discountCodeStatus === "valid" ? discountPercent : 0,
       discountAmount: discountCodeStatus === "valid" ? discountAmount : 0,
+      taxableValue: productGst.taxable,
+      gstRate: PRODUCT_GST_RATE,
+      cgstRate: PRODUCT_CGST_RATE,
+      sgstRate: PRODUCT_SGST_RATE,
+      cgst: productGst.cgst,
+      sgst: productGst.sgst,
+      gst: productGst.gst,
+      tax: productGst.gst + shippingGstSplit.gst,
       shippingCharge: shippingInfo.charge,
+      shippingTaxable: shippingGstSplit.taxable,
+      shippingGst: shippingGstSplit.gst,
+      shippingCgst: shippingGstSplit.cgst,
+      shippingSgst: shippingGstSplit.sgst,
       shippingZone: shippingInfo.zone,
       courierPartner: shippingInfo.courierPartner,
       estimatedDelivery: shippingInfo.estimatedDays,
@@ -755,7 +779,19 @@ function CheckoutContent() {
               status: "placed",
               total: finalTotal,
               subtotal: grandTotal,
+              taxableValue: productGst.taxable,
+              gstRate: PRODUCT_GST_RATE,
+              cgstRate: PRODUCT_CGST_RATE,
+              sgstRate: PRODUCT_SGST_RATE,
+              cgst: productGst.cgst,
+              sgst: productGst.sgst,
+              gst: productGst.gst,
+              tax: productGst.gst + shippingGstSplit.gst,
               shippingCharge: shippingInfo.charge,
+              shippingTaxable: shippingGstSplit.taxable,
+              shippingGst: shippingGstSplit.gst,
+              shippingCgst: shippingGstSplit.cgst,
+              shippingSgst: shippingGstSplit.sgst,
               shippingZone: shippingInfo.zone,
               courierPartner: shippingInfo.courierPartner,
               estimatedDelivery: shippingInfo.estimatedDays,
@@ -1195,10 +1231,25 @@ function CheckoutContent() {
                       {customerDetails.country !== "India" && <span className="ml-1">· International</span>}
                     </p>
                   )}
+                  <div className="flex items-center justify-between text-sm">
+                    <span style={{ color: "#9A6E50" }}>Taxable Value</span>
+                    <span className="font-medium"><PriceText amount={productGst.taxable} /></span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span style={{ color: "#9A6E50" }}>CGST ({PRODUCT_CGST_RATE}%)</span>
+                    <span className="font-medium"><PriceText amount={productGst.cgst} /></span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span style={{ color: "#9A6E50" }}>SGST ({PRODUCT_SGST_RATE}%)</span>
+                    <span className="font-medium"><PriceText amount={productGst.sgst} /></span>
+                  </div>
                   <div className="flex items-center justify-between pt-2 mt-2" style={{ borderTop: "1px solid #E0D0B8" }}>
                     <span className="text-base font-bold">Total</span>
                     <span className="text-lg font-bold"><PriceText amount={finalTotal} /></span>
                   </div>
+                  <p className="text-[11px] pt-1" style={{ color: "#9A6E50" }}>
+                    Prices include GST (CGST {PRODUCT_CGST_RATE}% + SGST {PRODUCT_SGST_RATE}%). Shipping includes freight tax.
+                  </p>
                 </div>
               </div>
 

@@ -20,6 +20,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useCartSidebar } from "@/context/CartSidebarContext";
 import { generateInvoice } from "@/utils/generateInvoice";
+import { orderGstBreakdown } from "@/utils/gst";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 import { resolvePricing } from "@/utils/pricing";
@@ -267,6 +268,8 @@ export default function OrdersPage() {
                   ? Math.round((discountAmount / normalTotal) * 100)
                   : 0;
 
+              const gst = orderGstBreakdown(order);
+
               return (
                 <div
                   key={order.id}
@@ -409,10 +412,24 @@ export default function OrdersPage() {
                       </div>
                     )}
 
+                    <div className="flex justify-between text-sm" style={{ color: "#9A6E50" }}>
+                      <span>CGST ({gst.cgstRate}%)</span>
+                      <PriceText amount={gst.cgst} />
+                    </div>
+
+                    <div className="flex justify-between text-sm" style={{ color: "#9A6E50" }}>
+                      <span>SGST ({gst.sgstRate}%)</span>
+                      <PriceText amount={gst.sgst} />
+                    </div>
+
                     <div className="flex justify-between items-center font-semibold text-lg">
                       <span>Total</span>
                       <PriceText amount={order.total} />
                     </div>
+
+                    <p className="text-xs" style={{ color: "#9A6E50" }}>
+                      Prices include GST (CGST {gst.cgstRate}% + SGST {gst.sgstRate}%).
+                    </p>
                   </div>
 
                   {/* Actions */}

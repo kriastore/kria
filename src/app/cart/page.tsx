@@ -549,6 +549,9 @@ export default function CartPage() {
                     <PriceText amount={total} />
                   </span>
                 </div>
+                <p className="text-[11px] text-gray-400">
+                  Prices include GST (CGST 1.5% + SGST 1.5%). Shipping calculated at checkout.
+                </p>
               </div>
             </section>
 

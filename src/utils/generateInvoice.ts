@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { resolvePricing } from "@/utils/pricing";
+import { orderGstBreakdown } from "@/utils/gst";
 
 export function generateInvoice(order: any) {
   const doc = new jsPDF();
@@ -77,9 +78,10 @@ export function generateInvoice(order: any) {
   }, 0);
 
   const shipping = order.shippingCharge ?? 0;
-  const tax = order.tax ?? 0;
-  const discount = order.discount ?? 0;
+  const discount = order.discountAmount ?? order.discount ?? 0;
   const grandTotal = order.total;
+
+  const gst = orderGstBreakdown(order);
 
   // ===== ORDER TABLE =====
   autoTable(doc, {
@@ -113,48 +115,65 @@ export function generateInvoice(order: any) {
 
   const finalY = (doc as any).lastAutoTable.finalY || 150;
 
-  // ===== PRICE BREAKDOWN =====
+  // ===== PRICE BREAKDOWN (GST split) =====
+  let y = finalY + 10;
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.text(`Subtotal: Rs. ${subtotal}`, 14, finalY + 10);
-  doc.text(
-    `Shipping: Rs. ${shipping} ${shipping === 0 ? "(Free)" : ""}`,
-    14,
-    finalY + 16
-  );
-  doc.text(`Tax: Rs. ${tax}`, 14, finalY + 22);
+  doc.setFont("helvetica", "normal");
+
+  doc.text(`Subtotal: Rs. ${subtotal}`, 14, y);
+  y += 6;
 
   if (discount > 0) {
-    doc.text(`Discount: -Rs. ${discount}`, 14, finalY + 28);
+    doc.text(`Discount: -Rs. ${discount}`, 14, y);
+    y += 6;
   }
 
+  doc.text(`Taxable Value: Rs. ${gst.taxableValue}`, 14, y);
+  y += 6;
+  doc.text(`CGST @ ${gst.cgstRate}%: Rs. ${gst.cgst}`, 14, y);
+  y += 6;
+  doc.text(`SGST @ ${gst.sgstRate}%: Rs. ${gst.sgst}`, 14, y);
+  y += 6;
+
+  doc.text(
+    `Shipping: Rs. ${shipping} ${shipping === 0 ? "(Free)" : `(incl. CGST ${gst.shippingCgst} + SGST ${gst.shippingSgst})`}`,
+    14,
+    y
+  );
+  y += 6;
+
   doc.setFont("helvetica", "bold");
-  doc.text(`Grand Total: Rs. ${grandTotal}`, 14, finalY + 36);
+  doc.text(`Grand Total: Rs. ${grandTotal}`, 14, y);
 
   // ===== DELIVERY INFO =====
+  y += 12;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text("Estimated Delivery: 2–4 working days", 14, finalY + 48);
+  doc.text("Estimated Delivery: 2–4 working days", 14, y);
+  y += 6;
   doc.text(
     `Courier Partner: ${order.courierPartner ?? "DTDC"}`,
     14,
-    finalY + 54
+    y
   );
 
   // ===== RETURN POLICY =====
+  y += 10;
   doc.setFontSize(10);
   doc.setTextColor(...darkBrown);
   doc.text(
     "Easy returns within 14 days of delivery. Product must be unused and in original packaging.",
     14,
-    finalY + 64
+    y
   );
 
   // ===== FOOTER =====
+  y += 10;
   doc.text(
     "Thank you for shopping with Kria. For support, WhatsApp us at +91 98944 14445.",
     14,
-    finalY + 74
+    y
   );
 
   // ===== SAVE =====

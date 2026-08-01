@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { orderGstBreakdown } from "@/utils/gst";
 
 function resolveSellingPrice(item: any): number {
   const price = item.product?.Price || 0;
@@ -99,9 +100,10 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   }, 0);
 
   const shipping = order.shippingCharge ?? 0;
-  const tax = order.tax ?? 0;
-  const discount = order.discount ?? 0;
-  const grandTotal = order.total ?? subtotal - discount + shipping + tax;
+  const discount = order.discountAmount ?? order.discount ?? 0;
+  const grandTotal = order.total ?? subtotal - discount + shipping;
+
+  const gst = orderGstBreakdown(order);
 
   // ===== ORDER TABLE =====
   autoTable(doc, {
@@ -132,48 +134,65 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   const finalY = (doc as any).lastAutoTable?.finalY || 150;
 
-  // ===== PRICE BREAKDOWN =====
+  // ===== PRICE BREAKDOWN (GST split) =====
+  let y = finalY + 10;
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.text(`Subtotal: Rs. ${subtotal}`, 14, finalY + 10);
-  doc.text(
-    `Shipping: Rs. ${shipping} ${shipping === 0 ? "(Free)" : ""}`,
-    14,
-    finalY + 16,
-  );
-  doc.text(`Tax: Rs. ${tax}`, 14, finalY + 22);
+  doc.setFont("helvetica", "normal");
+
+  doc.text(`Subtotal: Rs. ${subtotal}`, 14, y);
+  y += 6;
 
   if (discount > 0) {
-    doc.text(`Discount: -Rs. ${discount}`, 14, finalY + 28);
+    doc.text(`Discount: -Rs. ${discount}`, 14, y);
+    y += 6;
   }
 
+  doc.text(`Taxable Value: Rs. ${gst.taxableValue}`, 14, y);
+  y += 6;
+  doc.text(`CGST @ ${gst.cgstRate}%: Rs. ${gst.cgst}`, 14, y);
+  y += 6;
+  doc.text(`SGST @ ${gst.sgstRate}%: Rs. ${gst.sgst}`, 14, y);
+  y += 6;
+
+  doc.text(
+    `Shipping: Rs. ${shipping} ${shipping === 0 ? "(Free)" : `(incl. CGST ${gst.shippingCgst} + SGST ${gst.shippingSgst})`}`,
+    14,
+    y
+  );
+  y += 6;
+
   doc.setFont("helvetica", "bold");
-  doc.text(`Grand Total: Rs. ${grandTotal}`, 14, finalY + 36);
+  doc.text(`Grand Total: Rs. ${grandTotal}`, 14, y);
 
   // ===== DELIVERY INFO =====
+  y += 12;
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text("Estimated Delivery: 2-4 working days", 14, finalY + 48);
+  doc.text("Estimated Delivery: 2-4 working days", 14, y);
+  y += 6;
   doc.text(
     `Courier Partner: ${order.courierPartner ?? "DTDC"}`,
     14,
-    finalY + 54,
+    y,
   );
 
   // ===== RETURN POLICY =====
+  y += 10;
   doc.setFontSize(10);
   doc.setTextColor(...darkBrown);
   doc.text(
     "Easy returns within 14 days of delivery. Product must be unused and in original packaging.",
     14,
-    finalY + 64,
+    y,
   );
 
   // ===== FOOTER =====
+  y += 10;
   doc.text(
     "Thank you for shopping with Kria. For support, WhatsApp us at +91 98944 14445.",
     14,
-    finalY + 74,
+    y,
   );
 
   const arrayBuffer = doc.output("arraybuffer");
@@ -213,9 +232,9 @@ export async function POST(req: Request) {
       return sum + (basePrice + customPrice) * (it.Quantity || 0);
     }, 0);
     const shipping = order.shippingCharge ?? 0;
-    const tax = order.tax ?? 0;
-    const discount = order.discount ?? 0;
-    const grandTotal = order.total ?? subtotal - discount + shipping + tax;
+    const discount = order.discountAmount ?? order.discount ?? 0;
+    const grandTotal = order.total ?? subtotal - discount + shipping;
+    const gst = orderGstBreakdown(order);
 
     const plainItems = items
       .map((it: any) => {
@@ -238,9 +257,11 @@ export async function POST(req: Request) {
         `Order: ${orderId || order?.id}\n\n` +
         `Items (Name | Qty | Price | Total):\n${plainItems}\n\n` +
         `Subtotal: Rs. ${subtotal}\n` +
-        `Shipping: Rs. ${shipping}${shipping === 0 ? " (Free)" : ""}\n` +
-        `Tax: Rs. ${tax}\n` +
         (discount > 0 ? `Discount: -Rs. ${discount}\n` : "") +
+        `Taxable Value: Rs. ${gst.taxableValue}\n` +
+        `CGST @ ${gst.cgstRate}%: Rs. ${gst.cgst}\n` +
+        `SGST @ ${gst.sgstRate}%: Rs. ${gst.sgst}\n` +
+        `Shipping: Rs. ${shipping}${shipping === 0 ? " (Free)" : ` (incl. CGST ${gst.shippingCgst} + SGST ${gst.shippingSgst})`}\n` +
         `Grand Total: Rs. ${grandTotal}\n\n` +
         `Your invoice is attached as a PDF.`,
       html:
@@ -289,11 +310,13 @@ export async function POST(req: Request) {
         `</table>` +
         `<p style="margin-top:12px;">` +
         `Subtotal: <strong>Rs. ${subtotal}</strong><br/>` +
-        `Shipping: <strong>Rs. ${shipping}${shipping === 0 ? " (Free)" : ""}</strong><br/>` +
-        `Tax: <strong>Rs. ${tax}</strong><br/>` +
         (discount > 0
           ? `Discount: <strong>-Rs. ${discount}</strong><br/>`
           : "") +
+        `Taxable Value: <strong>Rs. ${gst.taxableValue}</strong><br/>` +
+        `CGST @ ${gst.cgstRate}%: <strong>Rs. ${gst.cgst}</strong><br/>` +
+        `SGST @ ${gst.sgstRate}%: <strong>Rs. ${gst.sgst}</strong><br/>` +
+        `Shipping: <strong>Rs. ${shipping}${shipping === 0 ? " (Free)" : ` (incl. CGST ${gst.shippingCgst} + SGST ${gst.shippingSgst})`}</strong><br/>` +
         `Grand Total: <strong>Rs. ${grandTotal}</strong>` +
         `</p>` +
         `<p style="margin-top:12px;">Your invoice PDF is attached to this email.</p>` +
