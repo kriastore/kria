@@ -82,6 +82,63 @@ export async function generateImageVariants(file: File): Promise<ImageVariants> 
   return { thumb, medium, full };
 }
 
+export type ReviewImageResult = {
+  url: string;
+  thumbUrl: string;
+};
+
+export async function uploadReviewImage(
+  file: File,
+  reviewId: string,
+  onProgress?: (fraction: number) => void
+): Promise<ReviewImageResult> {
+  const { ref, uploadBytesResumable, getDownloadURL } = await import("firebase/storage");
+  const { storage } = await import("@/firebase");
+
+  onProgress?.(0.05);
+  const variants = await generateImageVariants(file);
+  onProgress?.(0.4);
+
+  const basePath = `reviews/${reviewId}`;
+  const fullRef = ref(storage, `${basePath}.webp`);
+  const thumbRef = ref(storage, `${basePath}-thumb.webp`);
+
+  let fullProgress = 0;
+  let thumbProgress = 0;
+  const report = () => {
+    onProgress?.(0.4 + 0.6 * ((fullProgress + thumbProgress) / 2));
+  };
+
+  const upload = (key: "full" | "thumb", storageRef: any, blob: Blob) =>
+    new Promise((resolve, reject) => {
+      const task = uploadBytesResumable(storageRef, blob, { contentType: "image/webp" });
+      task.on(
+        "state_changed",
+        (snap) => {
+          const fraction = snap.totalBytes ? snap.bytesTransferred / snap.totalBytes : 1;
+          if (key === "full") fullProgress = fraction;
+          else thumbProgress = fraction;
+          report();
+        },
+        reject,
+        () => resolve(undefined)
+      );
+    });
+
+  await Promise.all([
+    upload("full", fullRef, variants.full),
+    upload("thumb", thumbRef, variants.thumb),
+  ]);
+  onProgress?.(1);
+
+  const [url, thumbUrl] = await Promise.all([
+    getDownloadURL(fullRef),
+    getDownloadURL(thumbRef),
+  ]);
+
+  return { url, thumbUrl };
+}
+
 export type UploadResult = {
   url: string;
   mediumUrl: string;
