@@ -29,6 +29,89 @@ function ReviewThumb({ review }: { review: Review }) {
   );
 }
 
+function MoveButtons({
+  index,
+  total,
+  onMove,
+}: {
+  index: number;
+  total: number;
+  onMove: (index: number, dir: "up" | "down") => void;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <button
+        onClick={() => onMove(index, "up")}
+        disabled={index === 0}
+        className="p-1 sm:p-0 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+        title="Move up"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+        </svg>
+      </button>
+      <button
+        onClick={() => onMove(index, "down")}
+        disabled={index === total - 1}
+        className="p-1 sm:p-0 text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
+        title="Move down"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+function DeleteButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+      title="Remove review"
+    >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  );
+}
+
+function PhotoButtons({
+  index,
+  uploading,
+  hasImage,
+  onPick,
+  onRemove,
+}: {
+  index: number;
+  uploading: boolean;
+  hasImage: boolean;
+  onPick: (index: number) => void;
+  onRemove: (index: number) => void;
+}) {
+  return (
+    <>
+      <button
+        onClick={() => onPick(index)}
+        disabled={uploading}
+        className="text-[11px] px-3 py-1.5 sm:px-2 sm:py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-[#D2693F] hover:text-[#D2693F] transition-colors whitespace-nowrap disabled:opacity-50"
+      >
+        {uploading ? "Uploading…" : hasImage ? "Change Photo" : "Add Photo"}
+      </button>
+      {hasImage && (
+        <button
+          onClick={() => onRemove(index)}
+          className="text-[11px] text-red-400 hover:text-red-600 transition-colors"
+        >
+          Remove
+        </button>
+      )}
+    </>
+  );
+}
+
 export default function ReviewsManager() {
   const { reviews, loading, saveReviews } = useReviews();
   const [draft, setDraft] = useState<Review[]>([]);
@@ -186,50 +269,35 @@ export default function ReviewsManager() {
             {draft.map((review, index) => (
               <div
                 key={index}
-                className="border border-gray-200 rounded-xl p-4 flex gap-3 sm:gap-4"
+                className="border border-gray-200 rounded-xl p-4 flex flex-col gap-3 sm:flex-row sm:gap-4"
               >
-                <div className="flex flex-col items-center gap-1">
-                  <button
-                    onClick={() => moveItem(index, "up")}
-                    disabled={index === 0}
-                    className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Move up"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => moveItem(index, "down")}
-                    disabled={index === draft.length - 1}
-                    className="text-gray-400 hover:text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Move down"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="flex flex-col items-center gap-2">
+                {/* Mobile: header row with arrows + thumb + delete */}
+                <div className="flex items-center gap-2 sm:hidden">
+                  <MoveButtons index={index} total={draft.length} onMove={moveItem} />
                   <ReviewThumb review={review} />
-                  <button
-                    onClick={() => openImagePicker(index)}
-                    disabled={uploadingIndex === index}
-                    className="text-[11px] px-2 py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-[#D2693F] hover:text-[#D2693F] transition-colors whitespace-nowrap disabled:opacity-50"
-                  >
-                    {uploadingIndex === index ? "Uploading…" : review.image ? "Change Photo" : "Add Photo"}
-                  </button>
-                  {review.image && (
-                    <button
-                      onClick={() => removeImage(index)}
-                      className="text-[11px] text-red-400 hover:text-red-600 transition-colors"
-                    >
-                      Remove
-                    </button>
-                  )}
+                  <div className="ml-auto">
+                    <DeleteButton onClick={() => removeItem(index)} />
+                  </div>
                 </div>
 
+                {/* Desktop: arrows */}
+                <div className="hidden sm:block">
+                  <MoveButtons index={index} total={draft.length} onMove={moveItem} />
+                </div>
+
+                {/* Desktop: thumb + photo controls */}
+                <div className="hidden sm:flex sm:flex-col sm:items-center sm:gap-2">
+                  <ReviewThumb review={review} />
+                  <PhotoButtons
+                    index={index}
+                    uploading={uploadingIndex === index}
+                    hasImage={!!review.image}
+                    onPick={openImagePicker}
+                    onRemove={removeImage}
+                  />
+                </div>
+
+                {/* Fields */}
                 <div className="flex-1 min-w-0 space-y-2">
                   <input
                     type="text"
@@ -245,17 +313,22 @@ export default function ReviewsManager() {
                     rows={3}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059]/40 focus:border-[#C5A059] transition-all resize-none"
                   />
+                  {/* Mobile: photo controls */}
+                  <div className="flex flex-wrap items-center gap-2 sm:hidden">
+                    <PhotoButtons
+                      index={index}
+                      uploading={uploadingIndex === index}
+                      hasImage={!!review.image}
+                      onPick={openImagePicker}
+                      onRemove={removeImage}
+                    />
+                  </div>
                 </div>
 
-                <button
-                  onClick={() => removeItem(index)}
-                  className="self-start p-2 text-gray-400 hover:text-red-500 transition-colors"
-                  title="Remove review"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                {/* Desktop: delete */}
+                <div className="hidden sm:flex self-start">
+                  <DeleteButton onClick={() => removeItem(index)} />
+                </div>
               </div>
             ))}
           </div>
