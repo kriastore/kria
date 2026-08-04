@@ -31,10 +31,10 @@ export default function Footer() {
               Learn
             </h4>
             <ul className="space-y-2 text-sm">
+              <li><a href="/faq" className="hover:underline">FAQs</a></li>
               <li><a href="/about-us" className="hover:underline">About Us</a></li>
               <li><a href="/what-makes-kria-special" className="hover:underline">What Makes Kria Special</a></li>
               <li><a href="/product-care" className="hover:underline">Product Care</a></li>
-              <li><a href="/faq" className="hover:underline">FAQs</a></li>
             </ul>
           </div>
           {/* Contact */}
