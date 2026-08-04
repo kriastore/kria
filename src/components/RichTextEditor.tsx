@@ -20,7 +20,6 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
   const [linkUrl, setLinkUrl] = useState("");
   const [isPreview, setIsPreview] = useState(false);
 
-  // Keep editor in sync when switching sections/pages, without clobbering an in-progress edit
   useEffect(() => {
     const el = editorRef.current;
     if (el && document.activeElement !== el && el.innerHTML !== value) {
@@ -28,8 +27,6 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
     }
   }, [value]);
 
-  // Remember the selection inside the editor so toolbar taps (which would normally
-  // steal focus) can still apply formatting where the user selected.
   const saveSelection = useCallback(() => {
     const el = editorRef.current;
     const sel = window.getSelection();
@@ -52,12 +49,13 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
 
   const exec = useCallback(
     (command: string, val?: string) => {
+      if (!savedRangeRef.current) saveSelection();
       restoreSelection();
       document.execCommand(command, false, val);
+      savedRangeRef.current = null;
       if (editorRef.current) onChange(editorRef.current.innerHTML);
-      restoreSelection();
     },
-    [onChange, restoreSelection]
+    [onChange, restoreSelection, saveSelection]
   );
 
   const runFormat = useCallback(
@@ -66,6 +64,32 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
       exec(command, val);
     },
     [exec]
+  );
+
+  const insertBullet = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      const el = editorRef.current;
+      if (!el) return;
+      el.focus();
+
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+
+      const range = sel.getRangeAt(0);
+      if (!el.contains(range.commonAncestorContainer)) return;
+
+      range.deleteContents();
+      range.insertNode(document.createTextNode("\u2022\u00A0"));
+
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      onChange(el.innerHTML);
+      savedRangeRef.current = null;
+    },
+    [onChange]
   );
 
   const handleInput = useCallback(() => {
@@ -132,7 +156,7 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
             type="button"
             title="Bullet List"
             className={BTN_CLS}
-            onPointerDown={runFormat("insertUnorderedList")}
+            onPointerDown={insertBullet}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /><circle cx="2" cy="6" r="1" fill="currentColor" stroke="none" /><circle cx="2" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="2" cy="18" r="1" fill="currentColor" stroke="none" /></svg>
           </button>
