@@ -128,6 +128,14 @@ export default function RichTextEditor({ value, onChange, minHeight = 180 }: Ric
           >
             <em>I</em>
           </button>
+          <button
+            type="button"
+            title="Bullet List"
+            className={BTN_CLS}
+            onPointerDown={runFormat("insertUnorderedList")}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /><circle cx="2" cy="6" r="1" fill="currentColor" stroke="none" /><circle cx="2" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="2" cy="18" r="1" fill="currentColor" stroke="none" /></svg>
+          </button>
           <span className="w-px h-5 bg-gray-300 mx-1" />
           <button
             type="button"

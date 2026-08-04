@@ -44,8 +44,16 @@ export default function Footer() {
             </h4>
 
             <ul className="space-y-2 text-sm">
-              <li>📞 {info.phone}</li>
-              <li>✉️ {info.email}</li>
+              <li>
+                <a href={`https://wa.me/${info.phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                  📞 {info.phone}
+                </a>
+              </li>
+              <li>
+                <a href={`mailto:${info.email}`} className="hover:underline">
+                  ✉️ {info.email}
+                </a>
+              </li>
               <li>
                 📍
                 <span className="whitespace-pre-line">{info.address}</span>

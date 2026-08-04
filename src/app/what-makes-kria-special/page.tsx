@@ -31,12 +31,7 @@ export default function WhatMakesKriaSpecialPage() {
             </section>
           ))
         )}
-        <section className="pt-2 border-t border-[#E8E0D8] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm md:text-base text-gray-800">
-          <p>Want to know more about what makes Kria special? We would love to hear from you.</p>
-          <button onClick={() => router.push("/faq")} className="px-4 py-2 border border-[#E8E0D8] bg-[#F9F6F0] text-[#D2693F] text-sm font-medium hover:bg-[#F9F6F0] cursor-pointer transition-colors">
-            Contact &amp; Support
-          </button>
-        </section>
+
       </div>
     </div>
   );

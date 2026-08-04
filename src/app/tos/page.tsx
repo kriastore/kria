@@ -38,12 +38,7 @@ export default function TermsAndConditionsPage() {
           ))
         )}
 
-        <button
-          onClick={() => router.push("/faq")}
-          className="px-4 py-2 border border-[#E8E0D8] bg-[#F9F6F0] text-[#D2693F] text-sm font-medium hover:bg-[#F9F6F0] cursor-pointer transition-colors"
-        >
-          Contact &amp; Support
-        </button>
+
       </div>
     </div>
   );
