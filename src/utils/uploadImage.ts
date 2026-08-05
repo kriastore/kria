@@ -9,7 +9,7 @@ const VARIANT_MAX_WIDTH: Record<ImageVariant, number> = {
 const VARIANT_QUALITY: Record<ImageVariant, number> = {
   thumb: 0.8,
   medium: 0.82,
-  full: 1.0,
+  full: 0.92,
 };
 
 export async function convertToWebP(file: File, quality = 0.82): Promise<File> {

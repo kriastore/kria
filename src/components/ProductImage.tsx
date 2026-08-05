@@ -10,6 +10,8 @@ interface ProductImageProps {
   srcMedium?: string;
   srcThumb?: string;
   size?: ProductImageSize;
+  sizes?: string;
+  quality?: number;
   fallback?: string;
   alt?: string;
   className?: string;
@@ -41,6 +43,8 @@ export default function ProductImage({
   srcMedium,
   srcThumb,
   size = "full",
+  sizes,
+  quality,
   fallback = FALLBACK,
   alt = "",
   className,
@@ -69,7 +73,8 @@ export default function ProductImage({
           src={resolveUrl()}
           alt={alt}
           fill
-          sizes={SIZE_DEFAULTS[size]}
+          sizes={sizes || SIZE_DEFAULTS[size]}
+          quality={quality}
           priority={priority}
           className={OBJECT_CLASS[size]}
           onError={onError}
@@ -85,7 +90,8 @@ export default function ProductImage({
         alt={alt}
         width={width}
         height={height}
-        sizes={SIZE_DEFAULTS[size]}
+        sizes={sizes || SIZE_DEFAULTS[size]}
+        quality={quality}
         priority={priority}
         className=""
         onClick={onClick}

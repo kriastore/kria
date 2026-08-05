@@ -227,7 +227,7 @@ export default function ProductPage() {
     fetchSimilar();
   }, [product]);
 
-  // Preload adjacent gallery images
+  // Preload adjacent gallery images (medium variant to keep payload small)
   useEffect(() => {
     if (!product) return;
     const imgs = [
@@ -235,19 +235,26 @@ export default function ProductPage() {
       product.ImageUrl2,
       product.ImageUrl3,
     ].filter(Boolean) as string[];
+    const meds = [
+      product.ImageUrl1Medium,
+      product.ImageUrl2Medium,
+      product.ImageUrl3Medium,
+    ];
     if (imgs.length <= 1) return;
-    const preload = (url?: string) => {
+    const preload = (idx: number) => {
+      const url = imgs[idx];
       if (!url || url.startsWith("/")) return;
+      const href = meds[idx] || url;
       const link = document.createElement("link");
       link.rel = "preload";
       link.as = "image";
-      link.href = url;
+      link.href = href;
       document.head.appendChild(link);
     };
     const nextIdx = (imageIndex + 1) % imgs.length;
     const prevIdx = (imageIndex - 1 + imgs.length) % imgs.length;
-    preload(imgs[nextIdx]);
-    if (nextIdx !== prevIdx) preload(imgs[prevIdx]);
+    preload(nextIdx);
+    if (nextIdx !== prevIdx) preload(prevIdx);
   }, [imageIndex, product]);
 
   if (loading) {
@@ -519,12 +526,14 @@ export default function ProductPage() {
                   }
                 }}
               />
-              <img
+              <ProductImage
                 src={images[imageIndex] || "/placeholder.png"}
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                size="full"
+                quality={90}
                 alt={product.Description}
-                loading="eager"
-                decoding="async"
-                className="w-full h-full object-contain"
+                priority={imageIndex === 0}
+                className="w-full h-full"
               />
               <div
                 className="magnifier-lens absolute inset-0 z-20 pointer-events-none opacity-0 transition-opacity duration-150"
