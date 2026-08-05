@@ -9,6 +9,7 @@ import { useCartSidebar } from "@/context/CartSidebarContext";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useCategories } from "@/hooks/useCategories";
 import SearchOverlay from "@/components/SearchOverlay";
 
 function NavbarContent() {
@@ -18,6 +19,7 @@ function NavbarContent() {
   const { totalItems, pulse } = useCart();
   const { user, loading } = useAuth();
   const { isAdmin } = useAdmin(user);
+  const { categories } = useCategories();
   const { openCart } = useCartSidebar();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -106,7 +108,10 @@ function NavbarContent() {
             <div className="space-y-2 sm:space-y-4">
               {[
                 { href: "/", label: "Home" },
-                { href: "/shop", label: "Shop" },
+                ...categories.map((c) => ({
+                  href: `/shop?category=${encodeURIComponent(c.name)}`,
+                  label: c.name,
+                })),
                 { href: "/faq", label: "Contact Us" },
               ].map((item) => (
                 <Link
