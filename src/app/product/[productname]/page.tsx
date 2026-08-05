@@ -519,22 +519,12 @@ export default function ProductPage() {
                   }
                 }}
               />
-              <ProductImage
+              <img
                 src={images[imageIndex] || "/placeholder.png"}
-                srcMedium={
-                  imageIndex === 0 ? product.ImageUrl1Medium :
-                  imageIndex === 1 ? product.ImageUrl2Medium :
-                  product.ImageUrl3Medium
-                }
-                srcThumb={
-                  imageIndex === 0 ? product.ImageUrl1Thumb :
-                  imageIndex === 1 ? product.ImageUrl2Thumb :
-                  product.ImageUrl3Thumb
-                }
-                size="full"
                 alt={product.Description}
-                priority
-                className="w-full h-full"
+                loading="eager"
+                decoding="async"
+                className="w-full h-full object-contain"
               />
               <div
                 className="magnifier-lens absolute inset-0 z-20 pointer-events-none opacity-0 transition-opacity duration-150"
