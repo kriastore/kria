@@ -25,6 +25,7 @@ function NavbarContent() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -106,27 +107,93 @@ function NavbarContent() {
           </div>
           <nav className="p-4 sm:p-6 overflow-y-auto" style={{ height: "calc(100% - 65px)" }}>
             <div className="space-y-2 sm:space-y-4">
-              {[
-                { href: "/", label: "Home" },
-                ...categories.map((c) => ({
-                  href: `/shop?category=${encodeURIComponent(c.name)}`,
-                  label: c.name,
-                })),
-                { href: "/faq", label: "Contact Us" },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block py-3 px-4 text-base sm:text-lg text-[#2D2D2D] hover:bg-[#F3EDE4] transition-colors min-h-[48px] flex items-center"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setMenuOpen(false);
-                    window.location.href = item.href;
-                  }}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              <Link
+                href="/"
+                className="block py-3 px-4 text-base sm:text-lg text-[#2D2D2D] hover:bg-[#F3EDE4] transition-colors min-h-[48px] flex items-center"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMenuOpen(false);
+                  window.location.href = "/";
+                }}
+              >
+                Home
+              </Link>
+
+              {categories.map((cat) => {
+                const subs = (cat.subcategories || []).sort((a, b) => a.order - b.order);
+                const hasSubs = subs.length > 0;
+                const isOpen = openCategory === cat.id;
+                return (
+                  <div key={cat.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!hasSubs) {
+                          setMenuOpen(false);
+                          window.location.href = `/shop?category=${encodeURIComponent(cat.name)}`;
+                          return;
+                        }
+                        setOpenCategory(isOpen ? null : cat.id);
+                      }}
+                      className="w-full flex items-center justify-between py-3 px-4 text-base sm:text-lg text-[#2D2D2D] hover:bg-[#F3EDE4] transition-colors min-h-[48px] text-left"
+                      aria-expanded={isOpen}
+                    >
+                      <span>{cat.name}</span>
+                      {hasSubs && (
+                        <svg
+                          className={`w-4 h-4 text-[#9A6E50] transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
+                    </button>
+                    {isOpen && hasSubs && (
+                      <div className="pb-1">
+                        <Link
+                          href={`/shop?category=${encodeURIComponent(cat.name)}`}
+                          className="block py-3 px-4 pl-8 text-base sm:text-lg font-medium text-[#D2693F] hover:bg-[#F3EDE4] transition-colors min-h-[44px] flex items-center"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setMenuOpen(false);
+                            window.location.href = `/shop?category=${encodeURIComponent(cat.name)}`;
+                          }}
+                        >
+                          Shop All {cat.name}
+                        </Link>
+                        {subs.map((sub) => (
+                          <Link
+                            key={sub.name}
+                            href={`/shop?category=${encodeURIComponent(cat.name)}&subcategory=${encodeURIComponent(sub.name)}`}
+                            className="block py-3 px-4 pl-8 text-base sm:text-lg text-[#2D2D2D] hover:bg-[#F3EDE4] transition-colors min-h-[44px] flex items-center"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setMenuOpen(false);
+                              window.location.href = `/shop?category=${encodeURIComponent(cat.name)}&subcategory=${encodeURIComponent(sub.name)}`;
+                            }}
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              <Link
+                href="/faq"
+                className="block py-3 px-4 text-base sm:text-lg text-[#2D2D2D] hover:bg-[#F3EDE4] transition-colors min-h-[48px] flex items-center"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMenuOpen(false);
+                  window.location.href = "/faq";
+                }}
+              >
+                Contact Us
+              </Link>
 
               <div className="border-t border-[#E0D0B8] pt-4 mt-6">
                 {[
