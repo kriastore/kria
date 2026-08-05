@@ -109,17 +109,28 @@ export default function ImageEditor({ file, onApply, onCancel }: ImageEditorProp
   };
 
   const handleApply = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const img = imgRef.current;
+    if (!img) return;
 
-    const outSize = 1200;
+    const outSize = Math.min(1600, Math.max(img.width, img.height));
     const out = document.createElement("canvas");
     out.width = outSize;
     out.height = outSize;
     const ctx = out.getContext("2d");
     if (!ctx) return;
 
-    ctx.drawImage(canvas, 0, 0, outSize, outSize);
+    const scale = outSize / CANVAS_SIZE;
+    ctx.save();
+    ctx.translate(outSize / 2, outSize / 2);
+    ctx.rotate((rotation * Math.PI) / 180);
+
+    const baseScale = Math.min(outSize / img.width, outSize / img.height);
+    const totalScale = baseScale * zoom;
+    const w = img.width * totalScale;
+    const h = img.height * totalScale;
+
+    ctx.drawImage(img, -w / 2 + offset.x * scale, -h / 2 + offset.y * scale, w, h);
+    ctx.restore();
 
     out.toBlob((blob) => {
       if (blob) {
@@ -128,7 +139,7 @@ export default function ImageEditor({ file, onApply, onCancel }: ImageEditorProp
         });
         onApply(f);
       }
-    }, "image/webp", 0.92);
+    }, "image/webp", 1.0);
   };
 
   const reset = () => {
