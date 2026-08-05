@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     if (data[0]?.Status === "Success" && data[0]?.PostOffice?.length > 0) {
       const po = data[0].PostOffice[0];
       return NextResponse.json({
-        city: po.Name || po.District || "",
+        city: po.District || po.Name || "",
         state: po.State || "",
         district: po.District || "",
       });

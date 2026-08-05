@@ -193,7 +193,7 @@ export async function validatePincode(pincode: string, country?: string): Promis
       const po = data[0].PostOffice[0];
       return {
         pincode,
-        city: po.Name || "",
+        city: po.District || po.Name || "",
         state: po.State || "",
         district: po.District || "",
         available: true,
