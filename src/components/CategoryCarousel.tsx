@@ -5,6 +5,7 @@ import Link from "next/link";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 import { resolvePricing } from "@/utils/pricing";
+import { getProductSlug } from "@/utils/productSlug";
 
 type Product = {
   ID: number;
@@ -70,7 +71,7 @@ export default function CategoryCarousel({
           {visible.map(p => (
             <Link
               key={p.ID}
-              href={`/product/${encodeURIComponent((p as any).ProductName || p.Description)}`}
+              href={`/product/${encodeURIComponent(getProductSlug(p))}`}
               className="border border-[#E8E0D8] bg-white p-4 font-bold hover:shadow-lg hover:border-[#C5A059] transition text-[#2D2D2D]"
             >
               <div className="aspect-square border border-[#E8E0D8] mb-3 overflow-hidden">

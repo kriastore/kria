@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCategories } from "@/hooks/useCategories";
 import { resolvePricing } from "@/utils/pricing";
+import { getProductSlug } from "@/utils/productSlug";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 
@@ -373,7 +374,7 @@ function ShopContent() {
                 const savePct = pr.discount > 0 ? pr.discount : null;
                 const isNew = (p as any).createdAt && (Date.now() - (p as any).createdAt.toDate()) < 30 * 24 * 60 * 60 * 1000;
                 return (
-                <Link key={p.ID} href={`/product/${encodeURIComponent(p.ProductName)}`} className="block relative p-0 font-light hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer overflow-hidden group">
+                <Link key={p.ID} href={`/product/${encodeURIComponent(getProductSlug(p))}`} className="block relative p-0 font-light hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer overflow-hidden group">
                   {isNew && (
                     <span className="absolute top-3 right-3 bg-[#D2693F] text-white text-[10px] font-bold px-2 py-0.5 z-10 uppercase tracking-wider">New</span>
                   )}

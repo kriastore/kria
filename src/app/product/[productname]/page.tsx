@@ -20,6 +20,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useCartSidebar } from "@/context/CartSidebarContext";
 import { resolvePricing } from "@/utils/pricing";
+import { getProductSlug, parseProductSlug } from "@/utils/productSlug";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 import Image from "next/image";
@@ -85,14 +86,34 @@ export default function ProductPage() {
     const fetchProduct = async () => {
       if (!productname || !db) return;
 
-      const q = query(
-        collection(db!, "inventory"),
-        where("ProductName", "==", decodeURIComponent(productname as string))
-      );
+      const raw = decodeURIComponent(productname as string);
+      const { name, sku } = parseProductSlug(raw);
 
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        const data = snap.docs[0].data() as Product;
+      const bySku = async () => {
+        if (!sku) return null;
+        const snap = await getDocs(
+          query(collection(db!, "inventory"), where("SKU", "==", sku))
+        );
+        if (snap.empty) return null;
+        const match = snap.docs
+          .map((d) => d.data() as Product)
+          .find((p) => (p.ProductName || p.Description) === name);
+        return match ?? (snap.docs[0].data() as Product);
+      };
+
+      const byName = async (productName: string) => {
+        const snap = await getDocs(
+          query(collection(db!, "inventory"), where("ProductName", "==", productName))
+        );
+        return snap.empty ? null : snap.docs[0].data() as Product;
+      };
+
+      const data =
+        (await bySku()) ??
+        (await byName(name)) ??
+        (await byName(raw));
+
+      if (data) {
         setProduct(data);
         const sizes = data.Sizes || [];
         const colors = data.Colors || [];
@@ -905,7 +926,7 @@ export default function ProductPage() {
               <button
                 key={sp.ID}
                 type="button"
-                onClick={() => router.push(`/product/${encodeURIComponent((sp as any).ProductName || sp.Description)}`)}
+                onClick={() => router.push(`/product/${encodeURIComponent(getProductSlug(sp))}`)}
                 className="flex-shrink-0 w-[140px] lg:w-auto snap-start text-left group"
               >
                 <div className="w-full aspect-square overflow-hidden border border-[#E9E1D2] mb-2">
@@ -944,7 +965,7 @@ export default function ProductPage() {
               <div key={rp.ID} className="flex-shrink-0 w-1/2 sm:w-auto snap-start text-black transition px-1">
                 <button
                   type="button"
-                  onClick={() => router.push(`/product/${encodeURIComponent((rp as any).ProductName || rp.Description)}`)}
+                  onClick={() => router.push(`/product/${encodeURIComponent(getProductSlug(rp))}`)}
                   className="cursor-pointer block w-full overflow-hidden border border-[#EFE9DC] shadow-[0_1px_8px_rgba(45,32,20,0.05)] hover:shadow-[0_6px_18px_rgba(45,32,20,0.12)] hover:-translate-y-0.5 transition-all duration-300"
                   aria-label={`View ${(rp as any).ProductName || rp.Description}`}
                 >

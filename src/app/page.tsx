@@ -9,6 +9,7 @@ import ReviewCarousel from "@/components/ReviewCarousel";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 import { resolvePricing } from "@/utils/pricing";
+import { getProductSlug } from "@/utils/productSlug";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 
@@ -68,7 +69,7 @@ function ProductCard({ product }: { product: Product }) {
   const isNew = p.createdAt && (Date.now() - p.createdAt.toDate()) < 30 * 24 * 60 * 60 * 1000;
   return (
     <Link
-      href={`/product/${encodeURIComponent(p.ProductName || p.Description)}`}
+      href={`/product/${encodeURIComponent(getProductSlug(p))}`}
       className="flex flex-col items-center group"
     >
       <div className="aspect-square border border-[#E8E0D8] mb-2.5 sm:mb-3.5 overflow-hidden w-full bg-white relative shadow-[0_1px_6px_rgba(45,32,20,0.04)] group-hover:shadow-[0_8px_20px_rgba(45,32,20,0.14)] group-hover:border-[#D2693F]/40 transition-all duration-300">
@@ -460,7 +461,7 @@ export default function Home() {
                 return (
                 <Link
                   key={p.ID}
-                  href={`/product/${encodeURIComponent(p.ProductName || p.Description)}`}
+                  href={`/product/${encodeURIComponent(getProductSlug(p))}`}
                   className="flex flex-col items-center group"
                 >
                   <div className="aspect-square border border-[#E8E0D8] mb-2.5 sm:mb-3.5 overflow-hidden w-full bg-white relative shadow-[0_1px_6px_rgba(45,32,20,0.04)] group-hover:shadow-[0_8px_20px_rgba(45,32,20,0.14)] group-hover:border-[#D2693F]/40 transition-all duration-300">

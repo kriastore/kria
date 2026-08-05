@@ -5,6 +5,7 @@ import Image from "next/image";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 import { resolvePricing } from "@/utils/pricing";
+import { getProductSlug } from "@/utils/productSlug";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -438,9 +439,7 @@ export default function CartPage() {
                       <div className="w-16 h-16 border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0 bg-white">
                         <Link
                           href={`/product/${encodeURIComponent(
-                            String(
-                              prod?.ProductName || prod?.Description || prod?.Product || key
-                            )
+                            getProductSlug(prod)
                           )}`}
                           className="block w-full h-full relative"
                         >

@@ -7,6 +7,7 @@ import { collection, query, getDocs } from "firebase/firestore";
 import ProductImage from "@/components/ProductImage";
 import PriceText from "@/components/PriceText";
 import { resolvePricing } from "@/utils/pricing";
+import { getProductSlug } from "@/utils/productSlug";
 
 interface Product {
   id?: string;
@@ -227,7 +228,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                   OriginalPrice: product.OriginalPrice,
                   DiscountPercent: product.DiscountPercent,
                 });
-                const slug = encodeURIComponent(productName(product));
+                const slug = encodeURIComponent(getProductSlug(product));
 
                 return (
                   <Link
