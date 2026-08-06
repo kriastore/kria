@@ -165,35 +165,13 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   doc.setFont("helvetica", "bold");
   doc.text(`Grand Total: Rs. ${grandTotal}`, 14, y);
 
-  // ===== DELIVERY INFO =====
-  y += 12;
-  doc.setFont("helvetica", "normal");
-  doc.setTextColor(...darkBrown);
-  doc.text("Estimated Delivery: 2-4 working days", 14, y);
-  y += 6;
-  doc.text(
-    `Courier Partner: ${order.courierPartner ?? "DTDC"}`,
-    14,
-    y,
-  );
-
-  // ===== RETURN POLICY =====
-  y += 10;
-  doc.setFontSize(10);
-  doc.setTextColor(...darkBrown);
-  doc.text(
-    "Easy returns within 14 days of delivery. Product must be unused and in original packaging.",
-    14,
-    y,
-  );
-
   // ===== FOOTER =====
-  y += 10;
-  doc.text(
-    "Thank you for shopping with Kria. For support, WhatsApp us at +91 98944 14445.",
-    14,
-    y,
-  );
+  y += 12;
+  doc.text("Thank you for shopping with KRIA.", 14, y);
+  y += 6;
+  doc.text("Keep supporting India handmade products.", 14, y);
+  y += 6;
+  doc.text("For support, WhatsApp us at +91 9894414445", 14, y);
 
   const arrayBuffer = doc.output("arraybuffer");
   return Buffer.from(arrayBuffer);
