@@ -1,8 +1,17 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { orderGstBreakdown } from "@/utils/gst";
+
+const tenorSansBase64 = readFileSync(
+  join(process.cwd(), "public", "fonts", "TenorSans-Regular.ttf")
+).toString("base64");
+const logoBase64 = readFileSync(
+  join(process.cwd(), "public", "navbarlogo.png")
+).toString("base64");
 
 function resolveSellingPrice(item: any): number {
   const price = item.product?.Price || 0;
@@ -20,6 +29,9 @@ function resolveSellingPrice(item: any): number {
 
 async function generatePdfBuffer(order: any): Promise<Buffer> {
   const doc = new jsPDF();
+  doc.addFileToVFS("TenorSans-Regular.ttf", tenorSansBase64);
+  doc.addFont("TenorSans-Regular.ttf", "TenorSans", "normal");
+  doc.setFont("TenorSans", "normal");
 
   // Brand colors
   const darkBrown: [number, number, number] = [45, 45, 45];
@@ -27,24 +39,20 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   const lightBg: [number, number, number] = [243, 237, 228];
 
   // ===== HEADER / BRAND =====
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(...darkBrown);
-  doc.text("KRIA", 14, 18);
+  doc.addImage(logoBase64, "PNG", 82.5, 6, 45, 45);
 
   doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text("Vittlraj Krithika", 14, 24);
-  doc.text("No 8, Thiruvalluvar Nagar main road, V.G.Rao nagar A sector,", 14, 30);
-  doc.text("Katpadi, Vellore, Tamilnadu - 632007", 14, 36);
-  doc.text("GSTIN: 33ATPPK2643B1ZZ", 14, 42);
-  doc.text("Email: support@kriastore.in", 14, 48);
-  doc.text("Phone: +91 98944 14445", 14, 54);
+  doc.text("Vittlraj Krithika", 14, 56);
+  doc.text("No 8, Thiruvalluvar Nagar main road, V.G.Rao nagar A sector,", 14, 62);
+  doc.text("Katpadi, Vellore, Tamilnadu - 632007", 14, 68);
+  doc.text("GSTIN: 33ATPPK2643B1ZZ", 14, 74);
+  doc.text("Email: support@kriastore.in", 14, 80);
+  doc.text("Phone: +91 98944 14445", 14, 86);
 
   doc.setDrawColor(...accent);
   doc.setLineWidth(0.5);
-  doc.line(14, 59, 196, 59);
+  doc.line(14, 91, 196, 91);
 
   // ===== INVOICE DETAILS =====
   const orderId = order.id || order.orderId || "";
@@ -56,38 +64,36 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.text(`Invoice No: KRIA-INV-${invoiceNo}`, 14, 69);
-  doc.text(`Order ID: KRIA-ORD-${orderId}`, 14, 75);
+  doc.text(`Invoice No: KRIA-INV-${invoiceNo}`, 14, 99);
+  doc.text(`Order ID: KRIA-ORD-${orderId}`, 14, 105);
   doc.text(
     `Order Date: ${createdAtDate.toLocaleDateString()}`,
     14,
-    81,
+    111,
   );
-  doc.text(`Payment Method: ${order.paymentMethod ?? "Razorpay"}`, 14, 87);
-  doc.text(`Payment Status: ${order.paymentStatus ?? "Paid"}`, 14, 93);
+  doc.text(`Payment Method: ${order.paymentMethod ?? "Razorpay"}`, 14, 117);
+  doc.text(`Payment Status: ${order.paymentStatus ?? "Paid"}`, 14, 123);
 
   // ===== BILLING DETAILS =====
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
   doc.setTextColor(...darkBrown);
-  doc.text("Billed To", 14, 105);
+  doc.text("Billed To", 14, 133);
 
   const customer = order.customer || {};
   const stateCity = customer.stateCity ?? "";
   const pinCode = customer.pinCode ?? "";
 
   doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text(`Name: ${customer.name ?? ""}`, 14, 111);
-  doc.text(`Email: ${customer.email ?? ""}`, 14, 117);
-  doc.text(`Phone: ${customer.phone ?? ""}`, 14, 123);
+  doc.text(`Name: ${customer.name ?? ""}`, 14, 139);
+  doc.text(`Email: ${customer.email ?? ""}`, 14, 145);
+  doc.text(`Phone: ${customer.phone ?? ""}`, 14, 151);
 
-  doc.text("Shipping Address:", 14, 131);
+  doc.text("Shipping Address:", 14, 159);
   doc.text(
     `${customer.address ?? ""}, ${stateCity} - ${pinCode}, India`,
     14,
-    137,
+    165,
   );
 
   // ===== CALCULATIONS =====
@@ -107,7 +113,7 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
 
   // ===== ORDER TABLE =====
   autoTable(doc, {
-    startY: 149,
+    startY: 173,
     head: [["Item Name", "Qty", "Price", "Total"]],
     body: items.map((item: any) => {
       const basePrice = resolveSellingPrice(item);
@@ -124,21 +130,22 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
         `Rs. ${itemTotal}`,
       ];
     }),
-    styles: { fontSize: 10, textColor: darkBrown },
+    styles: { fontSize: 10, textColor: darkBrown, font: "TenorSans" },
     headStyles: {
       fillColor: lightBg,
       textColor: darkBrown,
+      fontStyle: "normal",
     },
     alternateRowStyles: { fillColor: [249, 246, 240] },
   });
 
-  const finalY = (doc as any).lastAutoTable?.finalY || 150;
+  const finalY = (doc as any).lastAutoTable?.finalY || 173;
 
   // ===== PRICE BREAKDOWN (GST split) =====
   let y = finalY + 10;
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("TenorSans", "normal");
 
   doc.text(`Subtotal: Rs. ${subtotal}`, 14, y);
   y += 6;
@@ -162,7 +169,6 @@ async function generatePdfBuffer(order: any): Promise<Buffer> {
   );
   y += 6;
 
-  doc.setFont("helvetica", "bold");
   doc.text(`Grand Total: Rs. ${grandTotal}`, 14, y);
 
   // ===== FOOTER =====

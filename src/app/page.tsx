@@ -296,7 +296,7 @@ export default function Home() {
             KRIA
           </h1>
           <p className="mt-3 sm:mt-4 text-xs sm:text-sm md:text-base text-[#9A6E50] tracking-[0.25em] sm:tracking-[0.3em] uppercase">
-            Premium Handcrafted Artistry
+            Indian Handmade Artifacts
           </p>
           <Link
             href="/shop"
@@ -515,6 +515,16 @@ export default function Home() {
       </div>
 
       <ReviewCarousel />
+
+      {/* Handmade tag */}
+      <div className="w-full bg-[#F9F6F0] pb-10 sm:pb-14">
+        <p
+          className="text-center text-[#9A6E50] text-sm sm:text-base italic tracking-[0.15em]"
+          style={{ fontFamily: "'Tenor Sans', sans-serif" }}
+        >
+          Handmade with love
+        </p>
+      </div>
     </>
   );
 }

@@ -3,9 +3,32 @@ import autoTable from "jspdf-autotable";
 import { resolvePricing } from "@/utils/pricing";
 import { orderGstBreakdown } from "@/utils/gst";
 
-export function generateInvoice(order: any) {
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+async function loadFontAndLogo(doc: jsPDF) {
+  const [fontRes, logoRes] = await Promise.all([
+    fetch("/fonts/TenorSans-Regular.ttf"),
+    fetch("/navbarlogo.png"),
+  ]);
+  const fontBase64 = arrayBufferToBase64(await fontRes.arrayBuffer());
+  const logoBase64 = arrayBufferToBase64(await logoRes.arrayBuffer());
+  doc.addFileToVFS("TenorSans-Regular.ttf", fontBase64);
+  doc.addFont("TenorSans-Regular.ttf", "TenorSans", "normal");
+  doc.setFont("TenorSans", "normal");
+  return logoBase64;
+}
+
+export async function generateInvoice(order: any) {
   const doc = new jsPDF();
-  const generatedAt = new Date();
+  const logoBase64 = await loadFontAndLogo(doc);
 
   // Brand colors
   const darkBrown: [number, number, number] = [45, 45, 45];
@@ -13,56 +36,50 @@ export function generateInvoice(order: any) {
   const lightBg: [number, number, number] = [243, 237, 228];
 
   // ===== HEADER / BRAND =====
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(...darkBrown);
-  doc.text("KRIA", 14, 18);
+  doc.addImage(logoBase64, "PNG", 82.5, 6, 45, 45);
 
   doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text("Vittlraj Krithika", 14, 24);
-  doc.text("No 8, Thiruvalluvar Nagar main road, V.G.Rao nagar A sector,", 14, 30);
-  doc.text("Katpadi, Vellore, Tamilnadu - 632007", 14, 36);
-  doc.text("GSTIN: 33ATPPK2643B1ZZ", 14, 42);
-  doc.text("Email: support@kriastore.in", 14, 48);
-  doc.text("Phone: +91 98944 14445", 14, 54);
+  doc.text("Vittlraj Krithika", 14, 56);
+  doc.text("No 8, Thiruvalluvar Nagar main road, V.G.Rao nagar A sector,", 14, 62);
+  doc.text("Katpadi, Vellore, Tamilnadu - 632007", 14, 68);
+  doc.text("GSTIN: 33ATPPK2643B1ZZ", 14, 74);
+  doc.text("Email: support@kriastore.in", 14, 80);
+  doc.text("Phone: +91 98944 14445", 14, 86);
 
   doc.setDrawColor(...accent);
   doc.setLineWidth(0.5);
-  doc.line(14, 59, 196, 59);
+  doc.line(14, 91, 196, 91);
 
   // ===== INVOICE DETAILS =====
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.text(`Invoice No: KRIA-INV-${order.invoiceNo ?? order.id}`, 14, 69);
-  doc.text(`Order ID: KRIA-ORD-${order.id}`, 14, 75);
+  doc.text(`Invoice No: KRIA-INV-${order.invoiceNo ?? order.id}`, 14, 99);
+  doc.text(`Order ID: KRIA-ORD-${order.id}`, 14, 105);
   doc.text(
     `Order Date: ${order.createdAt?.toDate?.().toLocaleDateString()}`,
     14,
-    81
+    111
   );
-  doc.text(`Payment Method: ${order.paymentMethod ?? "Razorpay"}`, 14, 87);
-  doc.text(`Payment Status: ${order.paymentStatus ?? "Paid"}`, 14, 93);
+  doc.text(`Payment Method: ${order.paymentMethod ?? "Razorpay"}`, 14, 117);
+  doc.text(`Payment Status: ${order.paymentStatus ?? "Paid"}`, 14, 123);
 
   // ===== BILLING DETAILS =====
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
   doc.setTextColor(...darkBrown);
-  doc.text("Billed To", 14, 105);
+  doc.text("Billed To", 14, 133);
 
   doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
   doc.setTextColor(...darkBrown);
-  doc.text(`Name: ${order.customer?.name}`, 14, 111);
-  doc.text(`Email: ${order.customer?.email}`, 14, 117);
-  doc.text(`Phone: ${order.customer?.phone}`, 14, 123);
+  doc.text(`Name: ${order.customer?.name}`, 14, 139);
+  doc.text(`Email: ${order.customer?.email}`, 14, 145);
+  doc.text(`Phone: ${order.customer?.phone}`, 14, 151);
 
-  doc.text("Shipping Address:", 14, 131);
+  doc.text("Shipping Address:", 14, 159);
   doc.text(
     `${order.customer?.address}, ${order.customer?.stateCity ?? ""} - ${order.customer?.pinCode ?? ""}, India`,
     14,
-    137
+    165
   );
 
   // ===== CALCULATIONS =====
@@ -85,7 +102,7 @@ export function generateInvoice(order: any) {
 
   // ===== ORDER TABLE =====
   autoTable(doc, {
-    startY: 149,
+    startY: 173,
     head: [["Item Name", "Qty", "Price", "Total"]],
     body: order.items.map((item: any) => {
       const basePrice = resolvePricing({
@@ -105,21 +122,22 @@ export function generateInvoice(order: any) {
         `Rs. ${itemTotal}`,
       ];
     }),
-    styles: { fontSize: 10, textColor: darkBrown },
+    styles: { fontSize: 10, textColor: darkBrown, font: "TenorSans" },
     headStyles: {
       fillColor: lightBg,
       textColor: darkBrown,
+      fontStyle: "normal",
     },
     alternateRowStyles: { fillColor: [249, 246, 240] },
   });
 
-  const finalY = (doc as any).lastAutoTable.finalY || 150;
+  const finalY = (doc as any).lastAutoTable.finalY || 173;
 
   // ===== PRICE BREAKDOWN (GST split) =====
   let y = finalY + 10;
   doc.setFontSize(11);
   doc.setTextColor(...darkBrown);
-  doc.setFont("helvetica", "normal");
+  doc.setFont("TenorSans", "normal");
 
   doc.text(`Subtotal: Rs. ${subtotal}`, 14, y);
   y += 6;
@@ -143,7 +161,6 @@ export function generateInvoice(order: any) {
   );
   y += 6;
 
-  doc.setFont("helvetica", "bold");
   doc.text(`Grand Total: Rs. ${grandTotal}`, 14, y);
 
   // ===== FOOTER =====
