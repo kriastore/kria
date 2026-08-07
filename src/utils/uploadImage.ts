@@ -1,13 +1,13 @@
 export type ImageVariant = "thumb" | "medium" | "full";
 
 const VARIANT_MAX_WIDTH: Record<ImageVariant, number> = {
-  thumb: 300,
+  thumb: 512,
   medium: 800,
   full: 1600,
 };
 
 const VARIANT_QUALITY: Record<ImageVariant, number> = {
-  thumb: 0.8,
+  thumb: 0.85,
   medium: 0.82,
   full: 0.92,
 };
