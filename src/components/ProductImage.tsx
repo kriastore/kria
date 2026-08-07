@@ -64,13 +64,9 @@ export default function ProductImage({
     return src || fallback;
   };
 
-  const thumbBackground = size !== "thumb" && srcThumb
-    ? { backgroundImage: `url(${srcThumb})`, backgroundSize: "cover" as const, backgroundPosition: "center" as const }
-    : undefined;
-
   if (fill) {
     return (
-      <div className={`relative ${className || ""}`} onClick={onClick} style={thumbBackground}>
+      <div className={`relative ${className || ""}`} onClick={onClick}>
         <Image
           src={resolveUrl()}
           alt={alt}
@@ -86,7 +82,7 @@ export default function ProductImage({
   }
 
   return (
-    <div className={`relative inline-block ${className || ""}`} onClick={onClick} style={thumbBackground}>
+    <div className={`relative inline-block ${className || ""}`} onClick={onClick}>
       <Image
         src={resolveUrl()}
         alt={alt}
