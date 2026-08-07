@@ -784,7 +784,7 @@ export default function InventoryTable() {
                     className="w-full h-full"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute top-2.5 right-2.5 flex gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2.5 right-2.5 flex gap-1.5 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 transition-opacity">
                     <button onClick={(e) => { e.stopPropagation(); openEditModal(it); }} aria-label="Edit item" className="rounded-lg px-3 py-1.5 text-xs font-medium text-white bg-white/20 backdrop-blur-sm hover:bg-white/30 border border-white/20 transition-colors">Edit</button>
                     <button onClick={(e) => { e.stopPropagation(); handleDelete(it.id); }} aria-label="Delete item" className="rounded-lg px-3 py-1.5 text-xs font-medium text-white bg-red-500/80 backdrop-blur-sm hover:bg-red-500 transition-colors">Delete</button>
                   </div>
