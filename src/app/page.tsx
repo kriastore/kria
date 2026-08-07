@@ -80,7 +80,10 @@ function ProductCard({ product }: { product: Product }) {
           src={p.ImageUrl1}
           srcMedium={(p as any).ImageUrl1Medium}
           srcThumb={(p as any).ImageUrl1Thumb}
-          size="thumb"
+          size="medium"
+          objectFit="cover"
+          quality={90}
+          sizes="(min-width: 768px) 25vw, 45vw"
           alt={p.Description}
           className="w-full h-full group-hover:scale-105 transition-transform duration-500"
         />
@@ -472,7 +475,10 @@ export default function Home() {
                       src={p.ImageUrl1}
                       srcMedium={(p as any).ImageUrl1Medium}
                       srcThumb={(p as any).ImageUrl1Thumb}
-                      size="thumb"
+                      size="medium"
+                      objectFit="cover"
+                      quality={90}
+                      sizes="(min-width: 768px) 25vw, 45vw"
                       alt={p.Description}
                       className="w-full h-full group-hover:scale-105 transition-transform duration-500"
                     />

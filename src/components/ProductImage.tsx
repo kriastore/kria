@@ -10,6 +10,7 @@ interface ProductImageProps {
   srcMedium?: string;
   srcThumb?: string;
   size?: ProductImageSize;
+  objectFit?: "cover" | "contain";
   sizes?: string;
   quality?: number;
   fallback?: string;
@@ -43,6 +44,7 @@ export default function ProductImage({
   srcMedium,
   srcThumb,
   size = "full",
+  objectFit,
   sizes,
   quality,
   fallback = FALLBACK,
@@ -62,13 +64,9 @@ export default function ProductImage({
     return src || fallback;
   };
 
-  const thumbBackground = size !== "thumb" && srcThumb
-    ? { backgroundImage: `url(${srcThumb})`, backgroundSize: "cover" as const, backgroundPosition: "center" as const }
-    : undefined;
-
   if (fill) {
     return (
-      <div className={`relative ${className || ""}`} onClick={onClick} style={thumbBackground}>
+      <div className={`relative ${className || ""}`} onClick={onClick}>
         <Image
           src={resolveUrl()}
           alt={alt}
@@ -76,7 +74,7 @@ export default function ProductImage({
           sizes={sizes || SIZE_DEFAULTS[size]}
           quality={quality}
           priority={priority}
-          className={OBJECT_CLASS[size]}
+          className={objectFit || OBJECT_CLASS[size]}
           onError={onError}
         />
       </div>
@@ -84,7 +82,7 @@ export default function ProductImage({
   }
 
   return (
-    <div className={`relative inline-block ${className || ""}`} onClick={onClick} style={thumbBackground}>
+    <div className={`relative inline-block ${className || ""}`} onClick={onClick}>
       <Image
         src={resolveUrl()}
         alt={alt}

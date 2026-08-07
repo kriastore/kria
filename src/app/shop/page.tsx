@@ -388,12 +388,15 @@ function ShopContent() {
                   )}
                   {savePct && !soldOut && (null)}
                   {p.StockType === "made_to_order" && (null)}
-                  <div className="w-full overflow-hidden aspect-[4/5] bg-[#F9F6F0]">
+                  <div className="w-full overflow-hidden aspect-square bg-[#F9F6F0]">
                     <ProductImage
                       src={p.ImageUrl1}
                       srcMedium={(p as any).ImageUrl1Medium}
                       srcThumb={(p as any).ImageUrl1Thumb}
-                      size="thumb"
+                      size="medium"
+                      objectFit="cover"
+                      quality={90}
+                      sizes="(min-width: 768px) 25vw, 45vw"
                       alt={p.ProductName}
                       className="w-full h-full group-hover:scale-105 transition-transform duration-500"
                     />
