@@ -10,6 +10,7 @@ interface ProductImageProps {
   srcMedium?: string;
   srcThumb?: string;
   size?: ProductImageSize;
+  objectFit?: "cover" | "contain";
   sizes?: string;
   quality?: number;
   fallback?: string;
@@ -43,6 +44,7 @@ export default function ProductImage({
   srcMedium,
   srcThumb,
   size = "full",
+  objectFit,
   sizes,
   quality,
   fallback = FALLBACK,
@@ -76,7 +78,7 @@ export default function ProductImage({
           sizes={sizes || SIZE_DEFAULTS[size]}
           quality={quality}
           priority={priority}
-          className={OBJECT_CLASS[size]}
+          className={objectFit || OBJECT_CLASS[size]}
           onError={onError}
         />
       </div>

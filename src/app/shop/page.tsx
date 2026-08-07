@@ -394,6 +394,7 @@ function ShopContent() {
                       srcMedium={(p as any).ImageUrl1Medium}
                       srcThumb={(p as any).ImageUrl1Thumb}
                       size="medium"
+                      objectFit="cover"
                       quality={90}
                       alt={p.ProductName}
                       className="w-full h-full group-hover:scale-105 transition-transform duration-500"
