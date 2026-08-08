@@ -773,7 +773,7 @@ export default function ProductPage() {
                   <button
                     onClick={() => handleAddToCart(1)}
                     className="flex items-center justify-center flex-1 text-[#2D2D2D] hover:bg-[#F3EDE4] active:scale-90 transition-all duration-100 disabled:opacity-40 disabled:hover:bg-transparent"
-                    disabled={!isMadeToOrder && availableStock > 0 && cartQuantity >= availableStock}
+                    disabled={!isMadeToOrder && availableStock <= 0}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

@@ -64,6 +64,7 @@ type InventoryItem = {
    StockL?: number;
    StockXL?: number;
   VariantStock?: Record<string, number>;
+  StockType?: string;
   _docId?: string;
 };
 
@@ -235,6 +236,8 @@ export default function CartPage() {
   // Ensure all cart items are within available stock.
   // If any are not, silently remove them from the cart.
   function resolveItemStock(prod: InventoryItem, item: CartItem): number | undefined {
+    // Made-to-order products have unlimited stock
+    if (prod.StockType === "made_to_order") return Infinity;
     if (prod.VariantStock && item.Color && item.Size) {
       const key = `${item.Color}|${item.Size}`;
       if (typeof prod.VariantStock[key] === "number") return prod.VariantStock[key];

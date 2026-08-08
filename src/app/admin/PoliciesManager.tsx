@@ -27,8 +27,16 @@ export default function PoliciesManager() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (policies && !draft) setDraft({ ...policies });
-  }, [policies]);
+    if (!loading && policies && !draft) setDraft({ ...policies });
+  }, [loading, policies, draft]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const page = draft?.[activePage];
   if (!page) return null;
@@ -74,14 +82,6 @@ export default function PoliciesManager() {
       setTimeout(() => setMessage(null), 3000);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-[#D2693F] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
